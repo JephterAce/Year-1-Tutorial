@@ -14,7 +14,8 @@ app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 
 DEMO_CATALOGUE = [
-    {"subject": "Mathematics", "title": "Quadratic equations", "term": "First term", "class_level": "SS2", "demo": True},
+    {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "General Mathematics", "title": "Quadratic equations", "term": "First term", "class_level": "SS2", "demo": True},
     {"subject": "Biology", "title": "Cell structure and organisation", "term": "First term", "class_level": "SS2", "demo": True},
     {"subject": "Chemistry", "title": "Atomic structure", "term": "First term", "class_level": "SS2", "demo": True},
     {"subject": "Physics", "title": "Motion and linear kinematics", "term": "First term", "class_level": "SS2", "demo": True},

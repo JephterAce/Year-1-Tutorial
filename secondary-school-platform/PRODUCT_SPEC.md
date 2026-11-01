@@ -4,7 +4,14 @@
 A clear, welcoming, low-bandwidth learning environment for Nigerian senior secondary learners in SS1–SS3. A learner should be able to find a topic, understand what is included, pay safely, listen, practise and continue later.
 
 ## Catalogue
-Class × subject × term × topic. Initial subjects are Mathematics, Further Mathematics, Biology, Chemistry and Physics. The 45 class/subject/term combinations are catalogue containers, not a claim that every school follows the same topic order. Verify each sequence against the current NERDC curriculum and representative school schemes before publication.
+Class × subject × term × topic. Initial subjects are English Language, General Mathematics, Further Mathematics, Biology, Chemistry and Physics. The 54 class/subject/term combinations are catalogue containers, not a claim that every school follows the same topic order.
+
+### Revised NERDC subject structure
+- Core/compulsory subjects included here: English Language and General Mathematics.
+- Science-field subjects included here: Biology, Chemistry, Physics and Further Mathematics.
+- The revised national senior-secondary structure retains 8–9 subjects, including five core/compulsory subjects. This six-subject platform scope is not a complete school timetable: it does not include the other core subjects (one trade subject, Citizenship and Heritage Studies and Digital Technologies) or every optional field.
+- Use separate revised SSS1, SSS2 and SSS3 curriculum sources. Never copy topic sequences between classes.
+- Verify each topic against the revised NERDC curriculum. Term placement must be supported by a current school scheme or explicit official term allocation; otherwise mark it pending.
 
 ## Student journey
 1. Select class and create an account.

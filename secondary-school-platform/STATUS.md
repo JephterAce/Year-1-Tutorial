@@ -26,7 +26,7 @@ Last updated: 2026-11-01
 - Flask health and catalogue endpoints, PostgreSQL repository and environment-variable example.
 - API/database configuration unit tests and GitHub Actions workflow.
 - Responsive student and admin interface prototypes.
-- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping; student UI contract tests protect the six subject tiles, dashboard count and pending-mapping labels; admin UI contract tests protect the workspace sections and Channel-only manual announcement workflow.
+- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping; student UI contract tests protect the six subject tiles, dashboard count, pending-mapping labels, escaped catalogue rendering and correct preview record identity; admin UI contract tests protect workspace sections and the Channel-only manual announcement workflow.
 
 ## Not yet implemented
 - Provisioned PostgreSQL database and application of migrations.
@@ -42,7 +42,7 @@ Last updated: 2026-11-01
 ## Testing and CI
 - Historical GitHub Actions run `41342284699` passed.
 - Historical run `41344517426` passed after the main six-subject groundwork.
-- Later commits were not covered by those historical runs. The latest admin UI and UI contract test additions require the next CI run to complete successfully before this expanded test suite is considered verified.
+- Later commits were not covered by those historical runs. The latest student rendering-safety and preview-identity tests require the next CI run to complete successfully before this expanded test suite is considered verified.
 
 ## Safety and release status
 The student and admin interfaces remain prototypes. The API does not yet handle production accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy university bot has been changed or deployed.

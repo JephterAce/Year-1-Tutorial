@@ -1,11 +1,12 @@
-"""Server-side policy helpers for timed assessments.
+"""Server-side timing policy for Learnwise timed assessments.
 
-The API must use these values to calculate authoritative attempt deadlines.
-The browser countdown is display-only.
+The browser countdown is display-only. The API must calculate and enforce
+attempt deadlines from this policy.
 """
 from dataclasses import dataclass
 
-SECONDS_PER_QUESTION = 36
+DEFAULT_SECONDS_PER_QUESTION = 36
+QUESTION_TIME_OVERRIDES = {10: 7 * 60}
 MIN_QUESTIONS_PER_ATTEMPT = 1
 MAX_QUESTIONS_PER_ATTEMPT = 100
 
@@ -31,7 +32,11 @@ class TestTiming:
 
 
 def calculate_test_timing(question_count: int) -> TestTiming:
-    """Calculate 36 seconds per question; reject bools and invalid counts."""
+    """Calculate the approved time, rejecting booleans and invalid counts.
+
+    Ten-question tests receive the explicitly approved seven-minute allowance.
+    All other counts use the standard 36-seconds-per-question rule.
+    """
     if isinstance(question_count, bool) or not isinstance(question_count, int):
         raise ValueError("Question count must be a whole number.")
     if not MIN_QUESTIONS_PER_ATTEMPT <= question_count <= MAX_QUESTIONS_PER_ATTEMPT:
@@ -39,7 +44,7 @@ def calculate_test_timing(question_count: int) -> TestTiming:
             f"Question count must be between {MIN_QUESTIONS_PER_ATTEMPT} "
             f"and {MAX_QUESTIONS_PER_ATTEMPT}."
         )
-    return TestTiming(
-        question_count=question_count,
-        time_limit_seconds=question_count * SECONDS_PER_QUESTION,
+    seconds = QUESTION_TIME_OVERRIDES.get(
+        question_count, question_count * DEFAULT_SECONDS_PER_QUESTION
     )
+    return TestTiming(question_count=question_count, time_limit_seconds=seconds)

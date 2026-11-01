@@ -26,7 +26,7 @@ Last updated: 2026-11-01
 - Flask health and catalogue endpoints, PostgreSQL repository and environment-variable example.
 - API/database configuration unit tests and GitHub Actions workflow.
 - Responsive student and admin interface prototypes.
-- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term placements; API tests assert the exact six-subject scope and pending term status.
+- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping.
 
 ## Not yet implemented
 - Provisioned PostgreSQL database and application of migrations.

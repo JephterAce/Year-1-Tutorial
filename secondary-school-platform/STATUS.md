@@ -99,3 +99,5 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `backend/test_identity_policy.py covering password hashing/verification, input bounds, email/username validation and token/session digest behaviour.
 - These are tested identity primitives, not a working registration/login service. No account endpoint, email delivery, session cookie, CSRF protection, rate limiter or database identity transaction is claimed complete.
 - No dependencies beyond the existing Flask/Werkzeug stack were added. Database migrations remain unapplied; deployment and production credentials remain owner-controlled.
+
+- Latest branch head after the identity-policy increment: `73789c10375f25afb1ef91b1a4add69a18ca5fa1`. The workflow-run lookup did not return a run for this push, so the new identity tests are awaiting a confirmed CI result; do not report them as passed yet.

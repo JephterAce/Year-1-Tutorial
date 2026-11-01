@@ -118,3 +118,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added SMTP and recipient variables to `backend/.env.example`; actual SMTP credentials must be entered privately as deployment secrets.
 - IMPORTANT: this is notification infrastructure only. It is not yet called by a Paystack webhook. No live payment is being processed and no test email has been sent. Paystack signature/transaction verification, idempotent payment recording, durable outbox/retries and production SMTP configuration are still required before alerts are operational.
 - ChatGPT's installed Gmail connector is separate from Learnwise's backend email sender. It can be used by ChatGPT to work with Gmail, but it does not grant the Learnwise server permission to send mail from that mailbox.
+
+
+## Payment notification validation and migration documentation follow-up
+- CI run `41351936842` on the previous head found one real validation gap: the alert builder accepted any three-letter currency, while the Learnwise product is currently NGN-only.
+- Corrected `payment_notifications.py` to reject non-NGN currency values rather than treating a three-letter string as a valid currency.
+- Corrected `backend/README.md` so the database setup sequence includes all five canonical migrations (001–005).
+- The correction commits are `1be522b` (NGN validation) and `37d5a4e` (migration instructions). A fresh CI run is required; do not report the correction as passing until GitHub Actions confirms it.
+- Payment alerts remain infrastructure only. No Paystack webhook, transaction verification, durable outbox, SMTP secrets, live email or live payment flow has been enabled.

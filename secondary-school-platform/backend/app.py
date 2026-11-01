@@ -14,12 +14,12 @@ app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 
 DEMO_CATALOGUE = [
-    {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "General Mathematics", "title": "Quadratic equations", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "Biology", "title": "Cell structure and organisation", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "Chemistry", "title": "Atomic structure", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "Physics", "title": "Motion and linear kinematics", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "Further Mathematics", "title": "Functions and mappings", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "demo": True},
+    {"subject": "General Mathematics", "title": "Quadratic equations", "term": "Term allocation pending", "demo": True},
+    {"subject": "Biology", "title": "Cell structure and organisation", "term": "Term allocation pending", "demo": True},
+    {"subject": "Chemistry", "title": "Atomic structure", "term": "Term allocation pending", "demo": True},
+    {"subject": "Physics", "title": "Motion and linear kinematics", "term": "Term allocation pending", "demo": True},
+    {"subject": "Further Mathematics", "title": "Functions and mappings", "term": "Term allocation pending", "demo": True},
 ]
 
 
@@ -61,8 +61,7 @@ def catalogue():
 
     if not os.environ.get("DATABASE_URL"):
         items = DEMO_CATALOGUE
-        if class_level:
-            items = [x for x in items if x["class_level"] == class_level]
+        # Demo topics are deliberately not assigned to a class; class mapping requires curriculum verification.
         if subject_slug:
             items = [x for x in items if x["subject"].lower().replace(" ", "-") == subject_slug]
         if search:

@@ -92,3 +92,10 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `backend/test_export_policy.py`: covers invalid scopes/filters, date-range limits, duplicate filter normalisation and exclusion of password hashes/answer keys.
 - These are policy primitives only. They do not provide authentication, admin authorisation, database queries, object storage, download URLs or a live export endpoint.
 - GitHub Actions workflow runs Python unittest discovery from `secondary-school-platform/backend`; a new run is expected after these commits. Do not claim tests passed until the run completes.
+
+
+## Identity-security engineering increment
+- Added `backend/identity_policy.py with bounded password validation and salted scrypt password hashing (Werkzeug), email normalisation, username validation, high-entropy one-time token generation with SHA-256 storage digests, and session-ID hashing.
+- Added `backend/test_identity_policy.py covering password hashing/verification, input bounds, email/username validation and token/session digest behaviour.
+- These are tested identity primitives, not a working registration/login service. No account endpoint, email delivery, session cookie, CSRF protection, rate limiter or database identity transaction is claimed complete.
+- No dependencies beyond the existing Flask/Werkzeug stack were added. Database migrations remain unapplied; deployment and production credentials remain owner-controlled.

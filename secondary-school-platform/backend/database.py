@@ -159,3 +159,21 @@ def fulfil_verified_payment(reference, verified_transaction):
             (payment["id"], dedupe_key, Jsonb(email_payload)),
         )
     return {"status": "successful", "reference": reference, "notification": "queued"}
+
+
+def get_pending_paystack_order(reference):
+    """Return the expected amount for a server-created Learnwise payment reference."""
+    with connection() as conn:
+        row = conn.execute(
+            """
+            SELECT provider_reference, amount_kobo, currency, status
+            FROM payment_transactions
+            WHERE provider='paystack' AND provider_reference=%s
+            """,
+            (reference,),
+        ).fetchone()
+    if not row or row["status"] not in ("initialized", "pending", "successful"):
+        raise ValueError("No eligible Learnwise order matches this payment reference")
+    if row["currency"] != "NGN" or row["amount_kobo"] <= 0:
+        raise ValueError("Learnwise order has invalid payment terms")
+    return {"reference": row["provider_reference"], "amount_kobo": row["amount_kobo"]}

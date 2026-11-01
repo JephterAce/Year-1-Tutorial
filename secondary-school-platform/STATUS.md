@@ -134,3 +134,14 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - This is a security helper only, not a live webhook route. It does not call Paystack's transaction verification API, compare against a server-side order, persist events/payments, grant entitlements, or enqueue/send email. The payload alone must never authorise fulfilment.
 - Updated backend README with the exact remaining verification and durable-outbox requirements. No Paystack credentials or live service settings have been added.
 - CI confirmed success for the NGN validation and migration-documentation fixes: runs `41352701010` and `41352703175`. The status-documentation update also passed in run `41352709320`. Webhook helper/test CI is queued or running; wait for a completed run before calling it verified.
+
+
+## Paystack verified fulfilment milestone (development only)
+- Added `paystack_verification.py`: server-to-server verification through Paystack's transaction verification endpoint using a server-held secret; validates provider success, exact reference, exact expected kobo amount and NGN currency.
+- Added `payments.py`: webhook orchestration authenticates the signed `charge.success` payload, finds the server-created Learnwise order, checks the amount, verifies the transaction directly with Paystack, then calls one atomic database fulfilment operation.
+- Added `database.py` operations to look up an eligible pending order and atomically lock/check it, record success, grant the topic entitlement, record an idempotent webhook event, and enqueue an owner alert.
+- Added migration `006_payment_notification_outbox.sql` for durable notification queue rows with dedupe keys, retry states and scheduling indexes.
+- Added `POST /api/v1/webhooks/paystack`; invalid signatures return 400 and transient processing/database errors return 503 so the provider can retry. Added route and service tests.
+- Corrected README setup to list all six migrations in order (001–006).
+- The outbox delivery worker, retry/dead-letter execution, student authentication, secure server-side order creation, payment reconciliation operations and production deployment remain unfinished. The endpoint must not be advertised as production-ready or connected to live Paystack until those controls are implemented and reviewed.
+- No real Paystack secret, SMTP credential, database connection, checkout, test email or production migration has been configured or executed.

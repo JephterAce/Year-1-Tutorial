@@ -32,11 +32,7 @@ class TestTiming:
 
 
 def calculate_test_timing(question_count: int) -> TestTiming:
-    """Calculate the approved time, rejecting booleans and invalid counts.
-
-    Ten-question tests receive the explicitly approved seven-minute allowance.
-    All other counts use the standard 36-seconds-per-question rule.
-    """
+    """Calculate approved time; ten questions receive the seven-minute exception."""
     if isinstance(question_count, bool) or not isinstance(question_count, int):
         raise ValueError("Question count must be a whole number.")
     if not MIN_QUESTIONS_PER_ATTEMPT <= question_count <= MAX_QUESTIONS_PER_ATTEMPT:

@@ -43,3 +43,23 @@ CREATE INDEX IF NOT EXISTS topics_term_mapping_idx
 
 -- No curriculum topics are inserted here: content must be captured and verified
 -- from the class-specific official source before publication.
+
+-- Seed only the six approved product-scope subjects; no lesson topics are seeded.
+INSERT INTO subjects (slug,name,description,sort_order,is_active,offering_group,curriculum_version)
+VALUES
+ ('english-language','English Language','Core/compulsory senior-secondary subject',10,true,'core_compulsory','NERDC Revised SSEC 2025'),
+ ('general-mathematics','General Mathematics','Core/compulsory senior-secondary subject',20,true,'core_compulsory','NERDC Revised SSEC 2025'),
+ ('further-mathematics','Further Mathematics','Science field subject',30,true,'science','NERDC Revised SSEC 2025'),
+ ('biology','Biology','Science field subject',40,true,'science','NERDC Revised SSEC 2025'),
+ ('chemistry','Chemistry','Science field subject',50,true,'science','NERDC Revised SSEC 2025'),
+ ('physics','Physics','Science field subject',60,true,'science','NERDC Revised SSEC 2025')
+ON CONFLICT (slug) DO UPDATE SET
+ name=EXCLUDED.name,
+ description=EXCLUDED.description,
+ sort_order=EXCLUDED.sort_order,
+ offering_group=EXCLUDED.offering_group,
+ curriculum_version=EXCLUDED.curriculum_version;
+
+INSERT INTO terms (term_number,label)
+VALUES (1,'First term'),(2,'Second term'),(3,'Third term')
+ON CONFLICT (term_number) DO UPDATE SET label=EXCLUDED.label;

@@ -37,3 +37,9 @@ This API currently exposes health and a public list of published catalogue topic
 The backend includes `payment_notifications.py`, which sends a minimal owner notification to `PAYMENT_ALERT_RECIPIENT` (default: `emmanuelbjephter@gmail.com`) through a configured SMTP relay using TLS. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` and optionally `SMTP_FROM` as deployment secrets. Do not commit credentials or paste them into chat.
 
 This mailer is deliberately not connected to a public checkout redirect. A future Paystack webhook handler must first verify the webhook signature, fetch/verify the transaction server-side, confirm amount/currency/reference and idempotently record the successful payment, then enqueue the alert. A mail failure must not reverse a valid payment or duplicate fulfilment; use a durable retry/outbox worker. Live payment/webhook processing and SMTP delivery are not enabled yet.
+
+
+## Paystack webhook security primitives (not a live integration)
+`paystack_webhooks.py` verifies the HMAC-SHA512 signature against the exact raw request body and validates the minimum shape of a `charge.success` event. Its tests use synthetic payloads only.
+
+This helper is not a payment endpoint and must not grant access or trigger email. Before fulfilment, the future service must fetch the transaction from Paystack using a server-held secret, compare the verified reference/amount/currency against a pending server-created order, atomically record the payment and entitlement with unique idempotency constraints, and enqueue an owner email in a durable outbox. Do not trust the webhook payload alone. No Paystack secret, checkout, live webhook route, entitlement grant or live email is configured.

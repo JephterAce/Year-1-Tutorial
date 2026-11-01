@@ -15,11 +15,11 @@ app.config["JSON_SORT_KEYS"] = False
 
 DEMO_CATALOGUE = [
     {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
-    {"subject": "General Mathematics", "title": "Quadratic equations", "term": "First term", "class_level": "SS2", "demo": True},
-    {"subject": "Biology", "title": "Cell structure and organisation", "term": "First term", "class_level": "SS2", "demo": True},
-    {"subject": "Chemistry", "title": "Atomic structure", "term": "First term", "class_level": "SS2", "demo": True},
-    {"subject": "Physics", "title": "Motion and linear kinematics", "term": "First term", "class_level": "SS2", "demo": True},
-    {"subject": "Further Mathematics", "title": "Functions and mappings", "term": "First term", "class_level": "SS2", "demo": True},
+    {"subject": "General Mathematics", "title": "Quadratic equations", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "Biology", "title": "Cell structure and organisation", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "Chemistry", "title": "Atomic structure", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "Physics", "title": "Motion and linear kinematics", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
+    {"subject": "Further Mathematics", "title": "Functions and mappings", "term": "Term allocation pending", "class_level": "SS2", "demo": True},
 ]
 
 

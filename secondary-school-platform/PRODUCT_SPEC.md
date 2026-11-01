@@ -21,8 +21,10 @@ Class × subject × term × topic. Initial subjects are English Language, Genera
 5. Verify payment server-side with Paystack.
 6. Grant the exact topic entitlement only after verified payment.
 7. Listen in an authenticated player; resume progress and access included notes/quizzes.
-8. Optionally link Telegram for reminders and service notifications.
-9. Review progress, quiz attempts and receipts.
+8. Receive automatically graded objective assessment results, explanations and in-app/email notifications without waiting for owner marking.
+9. Review progress, quiz attempts, results and receipts.
+10. Manage a personal learner profile with display name, username, verified email, class, optional profile photo and short bio. Profile is private by default.
+11. Telegram is a broadcast-only Channel for announcements and lesson releases; no student bot or group is in scope.
 
 ## Content model
 Each topic may include teacher narration, two-presenter podcast, transcript, notes, worked examples, worksheet and quiz. Workflow: source material → learning objectives → script → subject review → voice production → technical pronunciation QA → mastering → approval → publication. Maths/science QA must cover equations, units, symbols, chemical notation and factual accuracy. Generate once and reuse; do not regenerate audio per playback.
@@ -41,3 +43,7 @@ Learners may be minors. Minimise collected data; define retention/deletion, guar
 
 ## Launch gates
 Curriculum reviewed; subject experts approve scripts/audio; payment duplicate/underpayment/refund tests pass; student entitlement isolation passes; audio storage remains private; backup/restore tested; accessibility/mobile/low-bandwidth QA passes; privacy notice, terms, refund policy and support contact are published.
+
+
+## Student profiles and independent assessment
+See [AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md](AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md) for the detailed account, privacy, automated grading, notification, integrity and acceptance requirements. Objective question types are graded server-side and results are released automatically. Long-form/essay answers are excluded from automatic high-stakes grading until a separately validated and appealable system exists.

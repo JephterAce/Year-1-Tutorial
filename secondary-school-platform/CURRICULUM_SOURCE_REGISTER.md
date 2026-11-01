@@ -14,7 +14,7 @@ Last checked: 2026-11-01
 
 3. NERDC revised curriculum approved-subject notice:
    https://nerdc.gov.ng/content_manager/Basic%20and%20Senior%20Secondary%20Education%20Curriculum%20Offerings.pdf
-   The published senior-secondary offering identifies General Mathematics as a core compulsory subject and lists Biology, Chemistry, Physics and Further Mathematics under Science.
+   The published senior-secondary offering identifies English Language and General Mathematics among the five core/compulsory subjects, and lists Biology, Chemistry, Physics and Further Mathematics under Science. The other three core subjects are one trade subject, Citizenship and Heritage Studies, and Digital Technologies. This product is not a complete school subject package.
 
 4. NERDC approved-subject notice (alternate official-hosted copy):
    https://nerdc.org.ng/eCurriculum/Doc/NERDC-approved-subjects-notice.pdf
@@ -22,7 +22,8 @@ Last checked: 2026-11-01
 ## Scope selected for the first release
 
 - Classes: SS1, SS2, SS3.
-- Subjects: General Mathematics, Further Mathematics, Biology, Chemistry and Physics.
+- Subjects: English Language, General Mathematics, Further Mathematics, Biology, Chemistry and Physics.
+- NERDC groups: English Language and General Mathematics are core/compulsory; Biology, Chemistry, Physics and Further Mathematics are in the Science field.
 - Term labels in our product: First, Second and Third term.
 - Pricing floor: NGN 1,000 per topic. The production database stores NGN amounts in kobo; a minimum of 100,000 kobo represents NGN 1,000.
 
@@ -59,12 +60,24 @@ For every class and subject:
 - Record school-specific scheme variants where necessary instead of overwriting the national curriculum mapping.
 - Do not ingest or republish copyrighted textbook pages or paid school materials without permission. Use official curriculum outcomes and create original explanations, examples, diagrams and audio.
 
+## Revised curriculum structure confirmed
+
+The Federal Ministry of Education press release dated 3 September 2025 states that the revised senior-secondary structure takes effect in the 2025/26 academic year and retains 8–9 subjects, with five core/compulsory subjects. These include English Language and General Mathematics; the other core subjects are one trade subject, Citizenship and Heritage Studies and Digital Technologies. The Science field includes Biology, Chemistry, Physics and Further Mathematics.
+
+NERDC provides separate revised SSS1, SSS2 and SSS3 curriculum links. The e-Curriculum browser offers class selection and lists all six requested subjects. Its browse page is dynamic; a visible sample topic sequence must not be treated as a complete class-by-class term scheme.
+
 ## Initial evidence captured
 
 - NERDC's SSEC landing page links separate portals for SSS1, SSS2 and SSS3.
-- The official approved-subject notice lists General Mathematics as compulsory and Biology, Chemistry, Physics and Further Mathematics within Science.
+- The official approved-subject notice lists English Language and General Mathematics among the core/compulsory subjects and Biology, Chemistry, Physics and Further Mathematics within Science.
 - The NERDC e-Curriculum browse portal lists the selected subjects and exposes class-specific topic/content browsing.
 
 ## Outstanding research work
 
-The full topic-by-topic capture for all 15 class/subject combinations and verified term allocation for each school scheme is not complete. No curriculum content should be marked approved or published solely on the basis of this register.
+The full topic-by-topic capture for all 18 class/subject combinations and verified term allocation for each school scheme is not complete. No curriculum content should be marked approved or published solely on the basis of this register.
+
+
+## Current official evidence URLs
+- Federal Ministry of Education press release (3 September 2025): https://nerdc.gov.ng/content_manager/pdf_files/Press%20Release%20On%20New%20FG%20Curriculum.pdf
+- NERDC revised SSEC landing page: https://www.nerdc.gov.ng/content_manager/new_senior_curriculum_home.html
+- NERDC e-Curriculum browse page: https://nerdc.org.ng/CurriculumView.aspx

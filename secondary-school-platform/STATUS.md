@@ -7,8 +7,8 @@ Last updated: 2026-11-01
 - Product overview, product specification and staged build/release roadmap.
 - NERDC curriculum source register, scope definitions and mandatory curriculum/term-allocation validation rules.
 - Initial PostgreSQL relational schema plus two follow-up migrations: baseline hardening/webhook event ledger and identity-token/admin credential schema. Migrations are authored but have NOT been applied to a live database.
-- Responsive student portal UI prototype at `frontend/index.html`.
-- Admin workspace UI prototype at `admin/index.html`.
+- Responsive student portal UI prototype at `frontend/index.html`, updated to display all six requested subjects and pending term allocations.
+- Admin workspace UI prototype at `admin/index.html`, updated to show the six-subject scope.
 - Flask API with health endpoint and catalogue endpoint.
 - PostgreSQL repository layer that reads published topics when a dedicated `DATABASE_URL` is configured; otherwise the API explicitly serves demo catalogue data.
 - Query filters for class, subject, term and search, with invalid class/term validation.
@@ -19,13 +19,13 @@ Last updated: 2026-11-01
 
 ## Not yet implemented
 - Provisioned PostgreSQL database, applied migrations, seeded approved curriculum catalogue or production student records.
-- Complete topic-by-topic NERDC capture for all 15 class/subject combinations and school-specific term mapping.
+- Complete topic-by-topic NERDC capture for all 18 class/subject combinations and school-specific term mapping.
 - Student registration/login, email delivery for verification/reset, password reset flows, session revocation endpoints or admin authorisation.
 - Paystack checkout, server verification, webhook processing, refunds or entitlement fulfilment.
 - Private audio storage, signed media delivery or playback.
 - Telegram bot/account linking/notifications.
 - AI voice generation, lesson scripts or editorial approval workflow.
-- Automated baseline test suite and CI job passed (run 41342284699). The subsequent curriculum documentation and migration 002 were committed after that run and still need a fresh CI run. Security review, database integration tests, backup/restore and deployment remain outstanding.
+- Automated baseline test suite and CI job passed in run 41342284699. The six-subject UI/API changes, curriculum documentation and migrations 002–003 were committed after that run and still need a fresh CI run. Security review, database integration tests, backup/restore and deployment remain outstanding.
 - Production domain, privacy/terms/refund policy and support process.
 
 ## Safety statement

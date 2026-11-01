@@ -109,3 +109,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Moved the export migration into the ordered `backend/migrations/005_student_data_exports.sql` path and removed the misplaced root-level copy. Updated backend setup instructions to apply migrations 001–005 in order.
 - Migration SQL and tests still require CI execution and a later real PostgreSQL migration rehearsal before any production use.
 - Latest schema correction commits include `755f288` (migration 004), `cce8b62` (migration contract tests), `1158896` (canonical migration 005 path), `3c549e2` (remove misplaced copy), and `b4e0c2d` (migration setup instructions).
+
+
+## Owner payment email notification requirement
+- Owner alert destination is set to `emmanuelbjephter@gmail.com` by default through `PAYMENT_ALERT_RECIPIENT`.
+- Added `backend/payment_notifications.py` with a minimal payment summary email builder and SMTP-over-TLS delivery. It fails closed if the mail relay is not configured and does not embed credentials.
+- Added `backend/test_payment_notifications.py` for recipient, payment-summary validation, SMTP TLS path and missing-provider behaviour.
+- Added SMTP and recipient variables to `backend/.env.example`; actual SMTP credentials must be entered privately as deployment secrets.
+- IMPORTANT: this is notification infrastructure only. It is not yet called by a Paystack webhook. No live payment is being processed and no test email has been sent. Paystack signature/transaction verification, idempotent payment recording, durable outbox/retries and production SMTP configuration are still required before alerts are operational.
+- ChatGPT's installed Gmail connector is separate from Learnwise's backend email sender. It can be used by ChatGPT to work with Gmail, but it does not grant the Learnwise server permission to send mail from that mailbox.

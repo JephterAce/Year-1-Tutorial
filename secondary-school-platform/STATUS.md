@@ -151,3 +151,10 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `payment_outbox.py` with database-backed claim/lease using `FOR UPDATE SKIP LOCKED`, SMTP delivery outside the webhook request, stale-lease recovery, capped exponential retries (30 seconds to 1 hour), and dead-letter after eight failed attempts.
 - Added unit tests for retry backoff bounds and attempt validation. Worker execution is not scheduled in a hosting environment; operators must configure and monitor a supervised worker before real payments.
 - The webhook/outbox system remains development-only until CI passes on the latest branch head, server-side order creation and student identity are complete, and production configuration is reviewed.
+
+
+## Student identity/session foundation (schema only)
+- Added migration `007_student_sessions_and_rate_limits.sql`: server-side student sessions store only session and CSRF-token hashes, with expiry/revocation tracking; database-backed auth rate-limit buckets; and case-insensitive unique student email.
+- Updated backend setup documentation to apply migrations 001–007 in order.
+- Existing identity policy helpers support normalized email, username validation, scrypt password hashes, one-time token hashes and session-ID hashing.
+- No registration/login/verification/reset route is active yet. No session cookies are issued. Auth service, CSRF enforcement, rate-limit operations, email verification delivery and account recovery remain to be implemented and tested before payment order creation can be enabled.

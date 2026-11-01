@@ -26,7 +26,7 @@ Last updated: 2026-11-01
 - Flask health and catalogue endpoints, PostgreSQL repository and environment-variable example.
 - API/database configuration unit tests and GitHub Actions workflow.
 - Responsive student and admin interface prototypes.
-- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping.
+- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping; student UI contract tests protect the six subject tiles, dashboard count and pending-mapping labels.
 
 ## Not yet implemented
 - Provisioned PostgreSQL database and application of migrations.
@@ -42,7 +42,7 @@ Last updated: 2026-11-01
 ## Testing and CI
 - Historical GitHub Actions run `41342284699` passed.
 - Historical run `41344517426` passed after the main six-subject groundwork.
-- Later commits were not covered by those historical runs. A fresh run must be verified against the latest branch head after the latest demo-catalogue and test changes before claiming the current state passes CI.
+- Later commits were not covered by those historical runs. The UI contract tests are a new addition and require the next CI run to complete successfully before this latest test suite is considered verified.
 
 ## Safety and release status
 The student and admin interfaces remain prototypes. The API does not yet handle production accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy university bot has been changed or deployed.

@@ -5,7 +5,8 @@ Last updated: 2026-11-01
 ## Verified present in this development branch
 - GitHub write access confirmed; isolated development branch created.
 - Product overview, product specification and staged build/release roadmap.
-- Initial PostgreSQL relational schema and a follow-up hardening migration (auth fields, UUID defaults, indexes and webhook-event ledger); migrations are authored but have NOT been applied to a live database.
+- NERDC curriculum source register, scope definitions and mandatory curriculum/term-allocation validation rules.
+- Initial PostgreSQL relational schema plus two follow-up migrations: baseline hardening/webhook event ledger and identity-token/admin credential schema. Migrations are authored but have NOT been applied to a live database.
 - Responsive student portal UI prototype at `frontend/index.html`.
 - Admin workspace UI prototype at `admin/index.html`.
 - Flask API with health endpoint and catalogue endpoint.
@@ -18,12 +19,13 @@ Last updated: 2026-11-01
 
 ## Not yet implemented
 - Provisioned PostgreSQL database, applied migrations, seeded approved curriculum catalogue or production student records.
-- Student registration/login, email verification, password reset, session revocation or admin authorisation.
+- Complete topic-by-topic NERDC capture for all 15 class/subject combinations and school-specific term mapping.
+- Student registration/login, email delivery for verification/reset, password reset flows, session revocation endpoints or admin authorisation.
 - Paystack checkout, server verification, webhook processing, refunds or entitlement fulfilment.
 - Private audio storage, signed media delivery or playback.
 - Telegram bot/account linking/notifications.
 - AI voice generation, lesson scripts or editorial approval workflow.
-- Automated baseline test suite and CI job are passing. Security review, database integration tests, backup/restore and deployment remain outstanding.
+- Automated baseline test suite and CI job passed (run 41342284699). The subsequent curriculum documentation and migration 002 were committed after that run and still need a fresh CI run. Security review, database integration tests, backup/restore and deployment remain outstanding.
 - Production domain, privacy/terms/refund policy and support process.
 
 ## Safety statement

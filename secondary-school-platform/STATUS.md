@@ -12,7 +12,7 @@ Last updated: 2026-11-01
 - PostgreSQL repository layer that reads published topics when a dedicated `DATABASE_URL` is configured; otherwise the API explicitly serves demo catalogue data.
 - Query filters for class, subject, term and search, with invalid class/term validation.
 - Environment-variable example and setup guidance; no real credentials stored in Git.
-- API and database-configuration unit tests authored; they have NOT yet been executed.
+- API and database-configuration unit tests executed successfully in GitHub Actions (run 41342284699; `api-tests` job completed successfully).
 - Git ignore rules for secrets, databases, dependencies and generated media.
 - All new work is confined to `secondary-school-platform/` on the development branch.
 
@@ -23,7 +23,7 @@ Last updated: 2026-11-01
 - Private audio storage, signed media delivery or playback.
 - Telegram bot/account linking/notifications.
 - AI voice generation, lesson scripts or editorial approval workflow.
-- Executed automated test suite, CI, security review, backup/restore or deployment.
+- Automated baseline test suite and CI job are passing. Security review, database integration tests, backup/restore and deployment remain outstanding.
 - Production domain, privacy/terms/refund policy and support process.
 
 ## Safety statement

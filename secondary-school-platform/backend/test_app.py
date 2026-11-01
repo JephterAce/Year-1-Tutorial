@@ -23,6 +23,10 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(payload["is_demo"])
         self.assertGreaterEqual(len(payload["items"]), 1)
+        subjects = {item["subject"] for item in payload["items"]}
+        self.assertIn("English Language", subjects)
+        self.assertIn("General Mathematics", subjects)
+        self.assertIn("Further Mathematics", subjects)
 
     def test_invalid_class_rejected(self):
         response = self.client.get("/api/v1/catalogue?class=Year7")

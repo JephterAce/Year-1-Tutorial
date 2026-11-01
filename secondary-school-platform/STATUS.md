@@ -8,7 +8,7 @@ Last updated: 2026-11-01
 - Product scope: SS1–SS3 and six subjects — English Language, General Mathematics, Further Mathematics, Biology, Chemistry and Physics.
 - Student portal prototype at `frontend/index.html`; dashboard now displays six subjects. Sample topics are illustrative only and are not assigned to verified class-specific sequences or terms.
 - Catalogue term filter now reflects the actual data state: term allocation pending verification. It does not imply verified First/Second/Third Term placement.
-- Admin workspace at `admin/index.html` remains a static design preview.
+- Admin workspace at `admin/index.html` is now an interactive local prototype with working section navigation, curriculum coverage view, lesson brief preview, audio-library state, Channel announcement composer/copy workflow, and locked student/payment operations. It is still not connected to authentication or a database.
 - Flask API, PostgreSQL repository, schema and three authored migrations are present. Migrations have NOT been applied to a live database.
 - API demo mode is used without a dedicated `DATABASE_URL`; no production database or real student records are connected.
 - Curriculum source register records official NERDC links and validation rules. Full topic-by-topic mapping for all 18 class-subject combinations remains outstanding.
@@ -26,7 +26,7 @@ Last updated: 2026-11-01
 - Flask health and catalogue endpoints, PostgreSQL repository and environment-variable example.
 - API/database configuration unit tests and GitHub Actions workflow.
 - Responsive student and admin interface prototypes.
-- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping; student UI contract tests protect the six subject tiles, dashboard count and pending-mapping labels.
+- Latest catalogue integrity corrections committed: student dashboard subject count 5 → 6; term filter matches pending term-allocation metadata; student and API demo catalogues no longer assign unverified First Term or SS2 class placements; cards explicitly show class mapping pending; API tests assert the exact six-subject scope and pending class/term mapping; student UI contract tests protect the six subject tiles, dashboard count and pending-mapping labels; admin UI contract tests protect the workspace sections and Channel-only manual announcement workflow.
 
 ## Not yet implemented
 - Provisioned PostgreSQL database and application of migrations.
@@ -42,7 +42,7 @@ Last updated: 2026-11-01
 ## Testing and CI
 - Historical GitHub Actions run `41342284699` passed.
 - Historical run `41344517426` passed after the main six-subject groundwork.
-- Later commits were not covered by those historical runs. The UI contract tests are a new addition and require the next CI run to complete successfully before this latest test suite is considered verified.
+- Later commits were not covered by those historical runs. The latest admin UI and UI contract test additions require the next CI run to complete successfully before this expanded test suite is considered verified.
 
 ## Safety and release status
 The student and admin interfaces remain prototypes. The API does not yet handle production accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy university bot has been changed or deployed.

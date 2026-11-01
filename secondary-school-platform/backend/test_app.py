@@ -77,6 +77,14 @@ class StudentUiContractTests(unittest.TestCase):
         ):
             self.assertEqual(html.count(f"<h3>{subject}</h3>"), 1)
 
+    def test_student_catalogue_escapes_content_and_preserves_preview_record(self):
+        frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
+        html = frontend.read_text(encoding="utf-8")
+        self.assertIn("function escapeHTML(value)", html)
+        self.assertIn("escapeHTML(x[1])", html)
+        self.assertIn("escapeHTML(x[2])", html)
+        self.assertIn("topics.indexOf(x)", html)
+
     def test_admin_workspace_has_working_preview_sections(self):
         admin = Path(__file__).resolve().parents[1] / "admin" / "index.html"
         html = admin.read_text(encoding="utf-8")

@@ -21,7 +21,7 @@ class PaymentOrchestrationTests(unittest.TestCase):
         self.addCleanup(self.env.stop)
 
     @patch("database.fulfil_verified_payment")
-    @patch("paystack_verification.verify_paystack_transaction")
+    @patch("payments.verify_paystack_transaction")
     @patch("database.get_pending_paystack_order")
     def test_requires_order_then_remote_verification_then_atomic_fulfilment(self, order, verify, fulfil):
         order.return_value = {"reference": "LW-1", "amount_kobo": 100000}
@@ -49,7 +49,7 @@ class PaymentOrchestrationTests(unittest.TestCase):
         order.assert_not_called()
 
     @patch("database.fulfil_verified_payment")
-    @patch("paystack_verification.verify_paystack_transaction")
+    @patch("payments.verify_paystack_transaction")
     @patch("database.get_pending_paystack_order")
     def test_rejects_order_amount_mismatch_before_remote_verification(self, order, verify, fulfil):
         order.return_value = {"reference": "LW-1", "amount_kobo": 99999}

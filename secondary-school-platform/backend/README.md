@@ -27,8 +27,11 @@ Copy `.env.example` to a local `.env` and set a dedicated PostgreSQL connection 
 3. Apply `migrations/001_platform_hardening.sql`.
 4. Apply `migrations/002_identity_security.sql`.
 5. Apply `migrations/003_nerdc_curriculum_metadata.sql`.
-6. Configure the application connection using a least-privilege database role and TLS.
-7. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
+6. Apply `migrations/004_student_profiles_and_assessments.sql`.
+7. Apply `migrations/005_student_data_exports.sql`.
+8. Apply `migrations/006_payment_notification_outbox.sql`.
+9. Configure the application connection using a least-privilege database role and TLS.
+10. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
 
 ## Current security boundary
 This API currently exposes health and a public list of published catalogue topics only. It does not yet provide student registration/login, admin authorisation, payment processing, webhook handling, entitlement checks, or protected audio delivery. Do not add secrets to source control or connect live payments until these controls and their tests are implemented.
@@ -43,3 +46,9 @@ This mailer is deliberately not connected to a public checkout redirect. A futur
 `paystack_webhooks.py` verifies the HMAC-SHA512 signature against the exact raw request body and validates the minimum shape of a `charge.success` event. Its tests use synthetic payloads only.
 
 This helper is not a payment endpoint and must not grant access or trigger email. Before fulfilment, the future service must fetch the transaction from Paystack using a server-held secret, compare the verified reference/amount/currency against a pending server-created order, atomically record the payment and entitlement with unique idempotency constraints, and enqueue an owner email in a durable outbox. Do not trust the webhook payload alone. No Paystack secret, checkout, live webhook route, entitlement grant or live email is configured.
+
+
+## Paystack callback and verified fulfilment (development only)
+The backend now exposes `POST /api/v1/webhooks/paystack`. It authenticates the exact raw request body using `x-paystack-signature`, requires a matching server-created `payment_transactions` order, fetches the transaction from Paystack's verification API, compares reference/amount/NGN currency/status, and atomically records payment success, entitlement and an owner-email outbox row. Duplicate callbacks use deterministic idempotency keys. A processing/database failure returns a retryable 503; an invalid signature returns 400.
+
+The outbox is durable, but an email delivery worker and retry/dead-letter scheduler are not yet implemented. Therefore this callback queues an alert but does not send one. Do not configure live Paystack callbacks or accept real payments until student authentication, trusted order creation, operational monitoring, outbox worker/retries and deployment controls are complete. The migration must be applied only to a dedicated Learnwise database after migrations 001–005.

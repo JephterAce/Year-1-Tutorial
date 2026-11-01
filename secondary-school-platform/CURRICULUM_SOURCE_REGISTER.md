@@ -7,6 +7,9 @@ Last checked: 2026-11-01
 1. NERDC New Revised Senior Secondary Education Curriculum (SSEC) landing page:
    https://nerdc.gov.ng/content_manager/new_senior_curriculum_home.html
    The page links separately to SSS 1, SSS 2 and SSS 3 curriculum portals. Treat each class as its own source; do not assume the same topic order or content across classes.
+   - SSS 1: https://lmis.nerdcportals.com.ng/sss_1
+   - SSS 2: https://lmis.nerdcportals.com.ng/sss_2
+   - SSS 3: https://lmis.nerdcportals.com.ng/sss_3
 
 2. NERDC e-Curriculum browse portal:
    https://www.nerdc.org.ng/CurriculumView.aspx
@@ -74,7 +77,7 @@ NERDC provides separate revised SSS1, SSS2 and SSS3 curriculum links. The e-Curr
 
 ## Outstanding research work
 
-The full topic-by-topic capture for all 18 class/subject combinations and verified term allocation for each school scheme is not complete. No curriculum content should be marked approved or published solely on the basis of this register.
+The full topic-by-topic capture for all 18 class/subject combinations and verified term allocation for each school scheme is not complete. Automated retrieval of the linked SSEC detail pages returned access errors in this research session, so the links are recorded for authorised manual/teacher access rather than pretending the topics have been captured. No curriculum content should be marked approved or published solely on the basis of this register.
 
 
 ## Current official evidence URLs

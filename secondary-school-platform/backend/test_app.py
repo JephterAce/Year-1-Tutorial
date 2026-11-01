@@ -85,6 +85,19 @@ class StudentUiContractTests(unittest.TestCase):
         self.assertIn("escapeHTML(x[2])", html)
         self.assertIn("topics.indexOf(x)", html)
 
+    def test_student_profile_and_assessment_experience_is_present(self):
+        frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
+        html = frontend.read_text(encoding="utf-8")
+        for page in ("assessments", "profile"):
+            self.assertIn(f'id="{page}"', html)
+            self.assertIn(f'data-page="{page}"', html)
+        for field in ("profileName", "profileUsername", "profileEmail", "profileClass", "profileBio", "profilePhoto", "profileVisibility"):
+            self.assertIn(f'id="{field}"', html)
+        self.assertIn("Private profile by default", html)
+        self.assertIn("Preview only:", html)
+        self.assertIn("automatically by the server", html)
+        self.assertIn("separate permission", html)
+
     def test_admin_workspace_has_working_preview_sections(self):
         admin = Path(__file__).resolve().parents[1] / "admin" / "index.html"
         html = admin.read_text(encoding="utf-8")

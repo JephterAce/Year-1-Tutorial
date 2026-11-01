@@ -85,3 +85,10 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Architecture decision: one immutable student UUID per learner, shared PostgreSQL with strict row-level ownership checks and indexed student foreign keys; no separate physical database per learner by default.
 - Export APIs, permission model, background worker, private object storage, short-lived download links and automated tests are NOT yet implemented. Migration 005 has NOT been applied to any database.
 - Corrected assessment time display for sub-minute tests (e.g. one question displays 36s rather than 0m 36s). The 10-question = 7-minute exception remains unchanged.
+
+
+## Export-policy engineering increment
+- Added `backend/export_policy.py`: validates individual/bulk export scope, UUID target, CSV/JSON format, SS1–SS3 filters, subject slugs and bounded date ranges; applies explicit field allowlists.
+- Added `backend/test_export_policy.py`: covers invalid scopes/filters, date-range limits, duplicate filter normalisation and exclusion of password hashes/answer keys.
+- These are policy primitives only. They do not provide authentication, admin authorisation, database queries, object storage, download URLs or a live export endpoint.
+- GitHub Actions workflow runs Python unittest discovery from `secondary-school-platform/backend`; a new run is expected after these commits. Do not claim tests passed until the run completes.

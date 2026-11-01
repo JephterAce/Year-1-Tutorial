@@ -7,16 +7,16 @@ Applies to Learnwise SS1–SS3 assessments across the six selected subjects.
 
 Every assessment session is time-limited. Before starting, the student selects the number of questions from the range the assessment author has made available. The server validates the selection and calculates the time limit; the browser must never be the authority for the deadline.
 
-**Default rate: 36 seconds per question (0.6 minutes).**
-Formula: `time_limit_seconds = question_count * 36`.
-Display the result as minutes and seconds, rounding only for display. Examples:
+**Standard rate: 36 seconds per question, with one owner-approved exception: 10 questions receive 7 minutes.**
+Formula: `time_limit_seconds = question_count * 36`, except `question_count = 10`, which receives 420 seconds.
+Display the result as minutes and seconds. Examples:
 - 5 questions = 3 minutes
-- 10 questions = 6 minutes
+- 10 questions = 7 minutes (explicit exception)
 - 20 questions = 12 minutes
 - 50 questions = 30 minutes
 - 100 questions = 60 minutes
 
-The previously suggested 10 questions = 7 minutes conflicts with the other examples and is not part of this default formula. If the owner later chooses a different rate, change the single server-side policy setting and publish the new rule before students use it. Do not silently vary the rate by subject or question type.
+This preserves the examples you supplied while implementing your explicit instruction that a 10-question test lasts 7 minutes. The exception is centralised in the server-side timing policy, not hard-coded into the student interface. Do not silently vary timing by subject or question type.
 
 The student chooses a count, not an arbitrary time. The server returns the selected count, time limit, assessment rules/version, and a signed/opaque attempt identifier. The countdown starts only after the student has read the briefing and explicitly agreed, then presses **Start test**. The deadline is stored server-side and cannot be extended by refreshing, changing the device clock, editing browser code, or reopening a tab.
 
@@ -26,7 +26,7 @@ Assessment authors configure allowed question-count choices, question pool, pass
 
 Before **every** test, show a dedicated briefing screen, not a small dismissible tooltip. It must state:
 - subject, assessment title, class, selected question count, and calculated time;
-- the exact 36-seconds-per-question rule and a worked calculation;
+- the standard 36-seconds-per-question rule, the 10-question/7-minute exception, and a worked calculation;
 - when the timer starts and that it continues while the student changes tabs or loses focus;
 - that expiry submits the answers saved by the server automatically;
 - whether unanswered questions receive zero and whether negative marking applies;

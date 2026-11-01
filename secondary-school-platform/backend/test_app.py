@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from app import app
@@ -58,6 +59,33 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/does-not-exist")
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.get_json()["error"], "not_found")
+
+
+class StudentUiContractTests(unittest.TestCase):
+    def test_student_dashboard_shows_exact_six_subjects(self):
+        frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
+        html = frontend.read_text(encoding="utf-8")
+        self.assertIn('<small>Subjects available</small><strong>6</strong>', html)
+        self.assertNotIn('<small>Subjects available</small><strong>5</strong>', html)
+        for subject in (
+            "English Language",
+            "General Mathematics",
+            "Further Mathematics",
+            "Biology",
+            "Chemistry",
+            "Physics",
+        ):
+            self.assertEqual(html.count(f"<h3>{subject}</h3>"), 1)
+
+    def test_student_catalogue_does_not_invent_class_or_term_mapping(self):
+        frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
+        html = frontend.read_text(encoding="utf-8")
+        self.assertIn("Class mapping pending", html)
+        self.assertIn("Term allocation pending", html)
+        self.assertIn('<option value="Term allocation pending">Term allocation pending</option>', html)
+        self.assertNotIn("<option>First term</option>", html)
+        self.assertNotIn("<option>Second term</option>", html)
+        self.assertNotIn("<option>Third term</option>", html)
 
 
 class DatabaseConfigTests(unittest.TestCase):

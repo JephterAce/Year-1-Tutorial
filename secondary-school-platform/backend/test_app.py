@@ -36,6 +36,15 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(len(payload["items"]), 6)
         self.assertTrue(all(item["demo"] is True for item in payload["items"]))
         self.assertTrue(all(item["term"] == "Term allocation pending" for item in payload["items"]))
+        self.assertTrue(all("class_level" not in item for item in payload["items"]))
+
+    def test_demo_catalogue_does_not_claim_class_mapping(self):
+        with patch.dict(os.environ, {}, clear=True):
+            response = self.client.get("/api/v1/catalogue?class=SS1")
+        payload = response.get_json()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(payload["items"]), 6)
+        self.assertTrue(all("class_level" not in item for item in payload["items"]))
 
     def test_invalid_class_rejected(self):
         response = self.client.get("/api/v1/catalogue?class=Year7")

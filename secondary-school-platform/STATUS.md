@@ -158,3 +158,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Updated backend setup documentation to apply migrations 001–007 in order.
 - Existing identity policy helpers support normalized email, username validation, scrypt password hashes, one-time token hashes and session-ID hashing.
 - No registration/login/verification/reset route is active yet. No session cookies are issued. Auth service, CSRF enforcement, rate-limit operations, email verification delivery and account recovery remain to be implemented and tested before payment order creation can be enabled.
+
+
+## Verification checkpoint — 2026-11-01
+
+- Current branch head: `0b5a70417844bfe78b5450b4a9d42cd6535c6885`.
+- GitHub Actions run `41354575020` for this exact head completed successfully. Its API test job and all reported steps passed.
+- The branch remains isolated from `main`; draft PR #1 is open, unmerged and still marked draft.
+- This CI result verifies the automated suite on the current branch head; it does not validate a live PostgreSQL migration, production configuration, SMTP delivery, Paystack checkout or a deployed service.
+- The next engineering milestone remains a complete, tested student identity service (registration, email verification, login/logout, session rotation/revocation, CSRF enforcement, rate limiting and password recovery). The existing identity helpers and migration 007 are groundwork only; no account endpoints or session cookies are active.

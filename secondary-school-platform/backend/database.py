@@ -48,7 +48,7 @@ def list_published_topics(class_level=None, subject_slug=None, term_number=None,
         clauses.append("(t.title ILIKE %s OR COALESCE(t.summary, '') ILIKE %s)")
         params.extend([f"%{search}%", f"%{search}%"])
     query = """
-        SELECT t.id, t.class_level, s.slug AS subject_slug, s.name AS subject,
+        SELECT t.id, t.class_level, s.slug AS subject_slug, s.name AS subject, s.offering_group,
                tr.term_number, tr.label AS term, t.slug, t.title, t.summary,
                t.learning_objectives, t.price_kobo, t.currency, t.estimated_minutes
         FROM topics t

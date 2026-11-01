@@ -2,24 +2,27 @@
 
 Last updated: 2026-11-01
 
-## Verified complete in this branch
-- GitHub write access confirmed and isolated development branch created.
-- Project overview and product requirements documented.
-- Initial PostgreSQL relational schema added.
-- Student portal responsive static UI prototype added at `frontend/index.html`.
-- Admin workspace static UI prototype added at `admin/index.html`.
-- Git ignore rules added for secrets, databases, dependencies and generated media.
-- Build/release roadmap added.
+## Verified present in this development branch
+- GitHub write access confirmed; isolated branch created.
+- Project overview, product specification and staged roadmap.
+- Initial PostgreSQL relational schema.
+- Responsive student portal UI prototype at `frontend/index.html`.
+- Admin workspace UI prototype at `admin/index.html`.
+- Flask API starter with health and demo-catalogue endpoints.
+- Three API smoke tests authored (not yet executed in a deployment/runtime environment).
+- Dependency manifest and local API setup instructions.
+- Git ignore rules for secrets, databases, dependencies and generated media.
+- Eight commits ahead of `main`; all changes are under `secondary-school-platform/`.
 
 ## Not yet implemented
-- API/backend, authentication, authorisation or database deployment.
+- Authentication, authorisation, database connectivity/migrations or persistent student records.
 - Real curriculum/topic data or reviewed lesson content.
-- Paystack checkout, webhook verification or entitlement fulfilment.
+- Paystack checkout, webhook verification, refunds or entitlement fulfilment.
 - Private audio storage, signed media delivery or playback.
 - Telegram bot/account linking/notifications.
 - AI voice generation or editorial workflow.
-- Automated test suite, CI, security review, backup/restore or deployment.
+- Executed automated test suite, CI, security review, backup/restore or deployment.
 - Production domain, privacy/terms/refund policy and support process.
 
 ## Safety statement
-Both HTML interfaces are design prototypes. They use illustrative content and do not accept payments or handle real student data. No live service has been changed or deployed.
+The student and admin interfaces are prototypes. The API returns demo catalogue data only. Nothing here accepts payments, handles real student data or serves paid audio. No live service or legacy bot has been changed or deployed.

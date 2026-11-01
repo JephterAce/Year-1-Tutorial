@@ -53,7 +53,7 @@ Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy uni
 ## New requirements accepted: independent assessment and learner profiles
 
 - Product requirement: students should independently register, learn, submit assessments, receive calculated scores and feedback, and see results without routine owner marking or one-to-one owner contact.
-- Added `migrations/004_student_profiles_and_assessments.sql` with learner profile metadata, explicit consent records, assessment definitions/questions/attempts/answers, and notification records.
+- Added `backend/migrations/004_student_profiles_and_assessments.sql` with learner profile metadata, explicit consent records, versioned assessment definitions/questions/attempts/answers, integrity events and notification records. This migration file was missing from the repository despite being referenced here; it has now been created and its schema contract tests added.
 - Added `AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md` defining automated objective grading, result release, notifications, attempt integrity, student data minimisation and privacy requirements.
 - Updated product journey to include learner profiles and automatic assessment results.
 - Student frontend prototype now includes profile editing preview (display name, username, email, class, optional photo, bio, private-by-default visibility), assessment history and automated-results explanation.
@@ -81,7 +81,7 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 ## Student data isolation and extraction requirement
 
 - Added `STUDENT_DATA_EXPORT_AND_ISOLATION_SPEC.md` defining per-student ownership boundaries, individual extraction, authorised class/subject/bulk extraction, privacy-safe fields, secure storage, auditability, expiry and acceptance tests.
-- Added migration `005_student_data_exports.sql` for export-job metadata and lifecycle audit events. It stores export metadata only; exported learner records remain in secured production storage, never in Git.
+- Added `backend/migrations/005_student_data_exports.sql` for export-job metadata and lifecycle audit events. The previously misplaced root-level copy has been removed so the ordered backend migration directory is canonical. It stores export metadata only; exported learner records remain in secured production storage, never in Git.
 - Architecture decision: one immutable student UUID per learner, shared PostgreSQL with strict row-level ownership checks and indexed student foreign keys; no separate physical database per learner by default.
 - Export APIs, permission model, background worker, private object storage, short-lived download links and automated tests are NOT yet implemented. Migration 005 has NOT been applied to any database.
 - Corrected assessment time display for sub-minute tests (e.g. one question displays 36s rather than 0m 36s). The 10-question = 7-minute exception remains unchanged.
@@ -95,9 +95,17 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 
 
 ## Identity-security engineering increment
-- Added `backend/identity_policy.py with bounded password validation and salted scrypt password hashing (Werkzeug), email normalisation, username validation, high-entropy one-time token generation with SHA-256 storage digests, and session-ID hashing.
-- Added `backend/test_identity_policy.py covering password hashing/verification, input bounds, email/username validation and token/session digest behaviour.
+- Added `backend/identity_policy.py` with bounded password validation and salted scrypt password hashing (Werkzeug), email normalisation, username validation, high-entropy one-time token generation with SHA-256 storage digests, and session-ID hashing.
+- Added `backend/test_identity_policy.py` covering password hashing/verification, input bounds, email/username validation and token/session digest behaviour.
 - These are tested identity primitives, not a working registration/login service. No account endpoint, email delivery, session cookie, CSRF protection, rate limiter or database identity transaction is claimed complete.
 - No dependencies beyond the existing Flask/Werkzeug stack were added. Database migrations remain unapplied; deployment and production credentials remain owner-controlled.
 
 - Latest branch head after the identity-policy increment: `73789c10375f25afb1ef91b1a4add69a18ca5fa1`. The workflow-run lookup did not return a run for this push, so the new identity tests are awaiting a confirmed CI result; do not report them as passed yet.
+
+
+## Schema consistency correction
+- Repository inspection found that migration 004 was referenced by the status document but absent from the actual file tree. Added `backend/migrations/004_student_profiles_and_assessments.sql` and schema contract tests in `backend/test_assessment_migration.py`.
+- The migration adds private-by-default profile fields, explicit consent history, assessment definitions and objective question types, per-attempt briefing agreement and server deadlines, integrity events, answer persistence and notification records. It is not applied to any database.
+- Moved the export migration into the ordered `backend/migrations/005_student_data_exports.sql` path and removed the misplaced root-level copy. Updated backend setup instructions to apply migrations 001–005 in order.
+- Migration SQL and tests still require CI execution and a later real PostgreSQL migration rehearsal before any production use.
+- Latest schema correction commits include `755f288` (migration 004), `cce8b62` (migration contract tests), `1158896` (canonical migration 005 path), `3c549e2` (remove misplaced copy), and `b4e0c2d` (migration setup instructions).

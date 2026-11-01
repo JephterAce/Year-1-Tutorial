@@ -48,3 +48,20 @@ Last updated: 2026-11-01
 The student and admin interfaces remain prototypes. The API does not yet handle production accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy university bot has been changed or deployed.
 
 Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy university bot without the owner's explicit approval.
+
+
+## New requirements accepted: independent assessment and learner profiles
+
+- Product requirement: students should independently register, learn, submit assessments, receive calculated scores and feedback, and see results without routine owner marking or one-to-one owner contact.
+- Added `migrations/004_student_profiles_and_assessments.sql` with learner profile metadata, explicit consent records, assessment definitions/questions/attempts/answers, and notification records.
+- Added `AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md` defining automated objective grading, result release, notifications, attempt integrity, student data minimisation and privacy requirements.
+- Updated product journey to include learner profiles and automatic assessment results.
+- Student frontend prototype now includes profile editing preview (display name, username, email, class, optional photo, bio, private-by-default visibility), assessment history and automated-results explanation.
+- Added UI contract tests for profile fields, private default and assessment experience.
+- Profile frontend is still a local prototype: it does not save data or upload images to a server.
+- Migration 004 has NOT been applied to any database. There are no production registration, image upload, assessment submission, grading, result notification or background worker endpoints yet.
+- Initial auto-grading scope is deterministic objective questions: single-choice, multiple-select, true/false, numeric with defined tolerance, and exact-answer text. Essays, handwritten work and open-ended proofs are not represented as reliably auto-gradable in the first release.
+- No external reuse or marketing consent is bundled with account creation; optional use requires separate revocable consent. Profile visibility defaults to private. Because learners may be minors, legal/privacy and safeguarding review is a launch gate.
+
+## Latest implementation caveat
+The student and admin profile/assessment additions require a fresh GitHub Actions run to pass before the expanded test suite is considered verified.

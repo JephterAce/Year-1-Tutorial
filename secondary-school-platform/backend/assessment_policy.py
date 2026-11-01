@@ -27,7 +27,7 @@ class TestTiming:
     @property
     def display(self):
         if self.seconds:
-            return f"{self.minutes}m {self.seconds}s"
+            return f"{self.minutes}m {self.seconds}s" if self.minutes else f"{self.seconds}s"
         return f"{self.minutes} minutes"
 
 

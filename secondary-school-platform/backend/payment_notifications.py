@@ -41,8 +41,8 @@ def build_payment_alert(payment):
 
     if not reference or len(reference) > 120:
         raise ValueError("A valid payment reference is required")
-    if not currency or len(currency) != 3 or not currency.isalpha():
-        raise ValueError("A valid currency code is required")
+    if currency != "NGN":
+        raise ValueError("Learnwise currently accepts NGN payments only")
     if not paid_at or len(paid_at) > 80:
         raise ValueError("A payment timestamp is required")
     try:

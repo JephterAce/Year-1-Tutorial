@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b35"><meta name="description" content="A smarter way to learn, listen and practise for senior secondary school.">
+<title>Learnwise — Senior Secondary Learning</title>
+<style>
+:root{--navy:#101b35;--navy2:#172746;--ink:#172033;--muted:#68758b;--line:#e7ebf2;--paper:#f6f8fc;--white:#fff;--blue:#4263eb;--mint:#dff7ed;--gold:#f4c66a;--shadow:0 12px 35px #15264a12}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}.shell{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:248px;background:var(--navy);color:#dce5f7;padding:25px 17px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:800;letter-spacing:-.5px;padding:0 10px 35px;color:#fff}.brandmark{width:34px;height:34px;border-radius:11px;background:#6ee7bd;color:#10213a;display:grid;place-items:center;font-weight:900}.navlabel{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#8291ad;padding:0 12px;margin:15px 0 8px}.nav{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;color:#aebbd2;text-decoration:none;margin:2px 0;font-weight:550}.nav.active,.nav:hover{background:#243657;color:white}.nav .ico{width:19px;text-align:center;font-size:17px}.sidebottom{margin-top:auto;border-top:1px solid #2b3a57;padding:17px 8px 0;font-size:12px;color:#9cabc4}.main{margin-left:248px;min-height:100vh}.topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 38px;position:sticky;top:0;z-index:4}.crumb{color:var(--muted);font-size:13px}.crumb b{color:var(--ink)}.topright{display:flex;align-items:center;gap:17px}.search{border:1px solid var(--line);background:#f9fafc;border-radius:10px;padding:10px 13px;width:220px;outline:none}.avatar{width:36px;height:36px;border-radius:50%;background:#e6edff;color:#3854c9;display:grid;place-items:center;font-weight:800}.content{max-width:1320px;margin:auto;padding:34px 38px 70px}.welcome{background:linear-gradient(115deg,#142342,#243f6c);color:white;border-radius:20px;padding:31px 34px;display:flex;justify-content:space-between;align-items:center;overflow:hidden;position:relative;box-shadow:var(--shadow)}.welcome:after{content:"";position:absolute;width:260px;height:260px;border:1px solid #ffffff18;border-radius:50%;right:7%;top:-130px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff06}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9debd0;font-weight:800}.welcome h1{font-size:29px;line-height:1.18;letter-spacing:-.8px;margin:10px 0 9px}.welcome p{color:#c6d2e6;margin:0;max-width:540px}.welcome .cta{position:relative;z-index:1;background:#75e2bd;color:#11213a;border:0;border-radius:10px;padding:12px 17px;font-weight:800;white-space:nowrap}.sectionhead{display:flex;justify-content:space-between;align-items:end;margin:30px 0 15px}.sectionhead h2{font-size:19px;margin:0;letter-spacing:-.3px}.sectionhead p{margin:3px 0 0;color:var(--muted);font-size:13px}.link{border:0;background:none;color:var(--blue);font-weight:700}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}.stat,.panel,.subject,.lesson{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #14234406}.stat{padding:17px 18px}.stat small{color:var(--muted);font-size:12px}.stat strong{display:block;font-size:24px;margin:4px 0 1px;letter-spacing:-.5px}.stat span{font-size:11px;color:#23865e}.subjects{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}.subject{padding:17px;transition:.18s;cursor:pointer}.subject:hover,.lesson:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#cdd7f7}.subicon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px}.subject h3{font-size:14px;margin:0 0 3px}.subject p{margin:0;color:var(--muted);font-size:11px}.progress{height:5px;border-radius:10px;background:#edf0f6;margin-top:13px;overflow:hidden}.progress i{display:block;height:100%;background:#5fcaa1;border-radius:10px}.lower{display:grid;grid-template-columns:1.45fr 1fr;gap:17px;margin-top:22px}.panel{padding:20px}.panel h3{font-size:15px;margin:0}.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.lessonlist{display:grid;gap:10px}.lesson{display:flex;align-items:center;gap:12px;padding:12px;box-shadow:none}.play{width:39px;height:39px;border-radius:11px;background:#edf2ff;color:#4562dc;display:grid;place-items:center}.lessoninfo{flex:1;min-width:0}.lessoninfo b{display:block;font-size:13px}.lessoninfo small{color:var(--muted);font-size:11px}.tag{font-size:10px;padding:5px 8px;border-radius:20px;background:#e5f7ef;color:#217b58;font-weight:800}.tag.lock{background:#fff4df;color:#94611a}.termrow{display:flex;gap:7px;margin:15px 0}.term{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;color:var(--muted);font-size:12px}.term.active{background:var(--navy);border-color:var(--navy);color:#fff}.tip{background:#f0f7ff;border:1px solid #dceaff;border-radius:12px;padding:14px;margin-top:14px;color:#42577b;font-size:12px}.footer{color:#8a94a6;font-size:11px;text-align:center;margin-top:35px}.page{display:none}.page.active{display:block}.catalogfilters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.catalogfilters select,.catalogfilters input{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 12px;color:var(--ink)}.cataloggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.catalogcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px}.catalogcard h3{font-size:14px;margin:7px 0}.catalogcard p{font-size:12px;color:var(--muted);min-height:36px}.catalogcard button,.primary{border:0;border-radius:9px;background:var(--navy);color:white;padding:10px 13px;font-weight:700}.price{font-weight:800;font-size:14px}.notice{background:#fff8e9;border:1px solid #f4e4c1;color:#76551d;border-radius:10px;padding:12px;font-size:12px;margin:14px 0}.mobilemenu{display:none}
+@media(max-width:1050px){.subjects{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.sidebar{width:72px;padding:18px 9px}.brand{padding:0 9px 27px}.brandname,.navlabel,.nav span:not(.ico),.sidebottom{display:none}.nav{justify-content:center;padding:12px 8px}.main{margin-left:72px}.topbar{padding:0 16px;height:64px}.search{width:145px}.content{padding:22px 15px 50px}.welcome{padding:23px 20px;display:block}.welcome h1{font-size:24px}.welcome .cta{margin-top:18px}.subjects{grid-template-columns:repeat(2,1fr);gap:9px}.subject{padding:13px}.lower{grid-template-columns:1fr}.cataloggrid{grid-template-columns:1fr}.stats{gap:9px}.stat{padding:13px}.stat strong{font-size:21px}}
+@media(max-width:390px){.search{width:112px}.crumb{font-size:11px}.subjects{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+ <div class="brand"><div class="brandmark">L</div><span class="brandname">learnwise</span></div>
+ <div class="navlabel">Learning space</div>
+ <a class="nav active" href="#home" data-page="home"><span class="ico">⌂</span><span>Overview</span></a>
+ <a class="nav" href="#catalog" data-page="catalog"><span class="ico">▦</span><span>Explore lessons</span></a>
+ <a class="nav" href="#subjects" data-page="subjects"><span class="ico">▤</span><span>My subjects</span></a>
+ <a class="nav" href="#progress" data-page="progress"><span class="ico">◷</span><span>My progress</span></a>
+ <div class="navlabel">Your account</div>
+ <a class="nav" href="#saved" data-page="saved"><span class="ico">♡</span><span>Saved lessons</span></a>
+ <a class="nav" href="#help" data-page="help"><span class="ico">?</span><span>Help & support</span></a>
+ <div class="sidebottom">Learn confidently. Grow consistently.<br><br>Student preview · 2026</div>
+</aside>
+<main class="main">
+ <header class="topbar"><div class="crumb">Learning space&nbsp; / &nbsp;<b id="crumb">Overview</b></div><div class="topright"><input class="search" id="globalSearch" placeholder="⌕  Search topics..."><div class="avatar">S</div></div></header>
+ <div class="content">
+ <section class="page active" id="home">
+  <div class="welcome"><div><div class="eyebrow">Your next chapter starts here</div><h1>Small steps. Strong results.</h1><p>Explore clear audio lessons, expert explanations and practice designed for your senior secondary journey.</p></div><button class="cta" onclick="showPage('catalog')">Explore lessons&nbsp; →</button></div>
+  <div class="stats">
+   <div class="stat"><small>Learning streak</small><strong>— days</strong><span>Start your first lesson</span></div>
+   <div class="stat"><small>Lessons completed</small><strong>0</strong><span>Your progress begins here</span></div>
+   <div class="stat"><small>Subjects available</small><strong>5</strong><span>Across SS1–SS3</span></div>
+   <div class="stat"><small>Your class</small><strong>SS2</strong><span>Demo profile · change later</span></div>
+  </div>
+  <div class="sectionhead"><div><h2>Explore your subjects</h2><p>Choose a subject to discover its lessons</p></div><button class="link" onclick="showPage('catalog')">View catalogue →</button></div>
+  <div class="subjects" id="subjectTiles">
+   <article class="subject" onclick="filterSubject('Mathematics')"><div class="subicon" style="background:#edf1ff">📐</div><h3>Mathematics</h3><p>Concepts, methods & practice</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Further Mathematics')"><div class="subicon" style="background:#f2edff">∑</div><h3>Further Mathematics</h3><p>Advanced mathematical thinking</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Biology')"><div class="subicon" style="background:#e8f8ef">🧬</div><h3>Biology</h3><p>Life, systems & organisms</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Chemistry')"><div class="subicon" style="background:#fff3e5">⚗️</div><h3>Chemistry</h3><p>Matter, reactions & energy</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Physics')"><div class="subicon" style="background:#e7f6fb">⚛️</div><h3>Physics</h3><p>Understand how the world works</p><div class="progress"><i style="width:0%"></i></div></article>
+  </div>
+  <div class="lower">
+   <div class="panel"><div class="panelhead"><h3>Continue learning</h3><button class="link" onclick="showPage('catalog')">Find a lesson</button></div><div class="lessonlist"><div class="lesson"><div class="play">▶</div><div class="lessoninfo"><b>Your learning journey is ready</b><small>Choose a topic to begin your first lesson</small></div><span class="tag">Start</span></div></div></div>
+   <div class="panel"><div class="panelhead"><h3>Choose your class</h3></div><div class="termrow"><button class="term" onclick="setClass('SS1',this)">SS1</button><button class="term active" onclick="setClass('SS2',this)">SS2</button><button class="term" onclick="setClass('SS3',this)">SS3</button></div><p style="font-size:12px;color:var(--muted);margin:0">Your class selection helps organise your subject catalogue.</p><div class="tip">✦ Learn at your pace with teacher-led audio, podcast-style discussions and practice resources.</div></div>
+  </div>
+ </section>
+ <section class="page" id="catalog">
+  <div class="sectionhead" style="margin-top:0"><div><div class="eyebrow" style="color:#4563d7">The lesson library</div><h2 style="font-size:25px;margin-top:5px">Find your next lesson</h2><p>Explore subjects, terms and topics for your class.</p></div></div>
+  <div class="notice">Preview catalogue only. Sample topics are illustrative, not yet verified as the official sequence for every school. Payments and lesson access are not enabled in this prototype.</div>
+  <div class="catalogfilters"><select id="classFilter" onchange="renderCatalog()"><option>SS1</option><option selected>SS2</option><option>SS3</option></select><select id="subjectFilter" onchange="renderCatalog()"><option value="All">All subjects</option><option>Mathematics</option><option>Further Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select><select id="termFilter" onchange="renderCatalog()"><option value="All">All terms</option><option>First term</option><option>Second term</option><option>Third term</option></select><input id="topicSearch" placeholder="Search topic..." oninput="renderCatalog()"></div>
+  <div class="cataloggrid" id="catalogGrid"></div>
+ </section>
+ <section class="page" id="subjects"><div class="sectionhead" style="margin-top:0"><div><h2>My subjects</h2><p>Your selected learning areas will appear here.</p></div></div><div class="panel">You haven't enrolled in any subjects yet. Explore the catalogue to find topics for your class.</div></section>
+ <section class="page" id="progress"><div class="sectionhead" style="margin-top:0"><div><h2>My progress</h2><p>Your completed lessons, listening time and quiz results.</p></div></div><div class="panel">Progress tracking will become available when student accounts and lesson playback are connected.</div></section>
+ <section class="page" id="saved"><div class="sectionhead" style="margin-top:0"><div><h2>Saved lessons</h2><p>Keep useful topics close at hand.</p></div></div><div class="panel">You haven't saved any lessons yet.</div></section>
+ <section class="page" id="help"><div class="sectionhead" style="margin-top:0"><div><h2>Help & support</h2><p>We're building a simple way to get learning and account support.</p></div></div><div class="panel"><b>Need help?</b><p style="color:var(--muted)">Support contact details will be published before launch. Never send payment PINs, passwords or card details to support.</p></div></section>
+ <div class="footer">Learnwise · Student experience prototype · Secure learning is our priority</div>
+ </div>
+</main>
+</div>
+<script>
+const topics=[
+["Mathematics","Algebraic expressions and identities","Simplify expressions and apply algebraic identities.","First term",1000,"📐"],
+["Mathematics","Quadratic equations","Solve quadratic equations using factorisation and formula methods.","First term",1200,"📐"],
+["Mathematics","Trigonometry and applications","Explore ratios, angles and practical applications.","Second term",1000,"📐"],
+["Further Mathematics","Functions and mappings","Understand domain, range and function notation.","First term",1500,"∑"],
+["Further Mathematics","Differentiation basics","Explore rates of change and introductory derivatives.","Second term",1500,"∑"],
+["Biology","Cell structure and organisation","Explore cell components and their functions.","First term",1000,"🧬"],
+["Biology","Nutrition and digestion","Understand nutrients and digestion in living organisms.","Second term",1000,"🧬"],
+["Chemistry","Atomic structure","Explore protons, neutrons, electrons and electronic arrangement.","First term",1000,"⚗️"],
+["Chemistry","Chemical bonding","Understand ionic, covalent and metallic bonding.","Second term",1200,"⚗️"],
+["Physics","Motion and linear kinematics","Interpret distance, displacement, speed and acceleration.","First term",1000,"⚛️"],
+["Physics","Work, energy and power","Connect force, work, energy transfer and power.","Second term",1000,"⚛️"],
+["Physics","Waves and sound","Explore wave properties and sound behaviour.","Third term",1000,"⚛️"]
+];
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',help:'Help & support'})[id]||'Overview';if(id==='catalog')renderCatalog();window.scrollTo(0,0)}
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
+function filterSubject(s){showPage('catalog');document.getElementById('subjectFilter').value=s;renderCatalog()}
+function setClass(c,b){document.querySelectorAll('.term').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('classFilter').value=c}
+function renderCatalog(){let c=document.getElementById('classFilter').value,s=document.getElementById('subjectFilter').value,t=document.getElementById('termFilter').value,q=document.getElementById('topicSearch').value.toLowerCase();let list=topics.filter(x=>(s==='All'||x[0]===s)&&(t==='All'||x[3]===t)&&(x[1]+' '+x[2]).toLowerCase().includes(q));document.getElementById('catalogGrid').innerHTML=list.map(x=>'<article class="catalogcard"><div style="display:flex;justify-content:space-between"><span style="font-size:22px">'+x[5]+'</span><span class="tag lock">Preview</span></div><small style="color:#66748a">'+x[0]+' · '+c+' · '+x[3]+'</small><h3>'+x[1]+'</h3><p>'+x[2]+'</p><div style="display:flex;justify-content:space-between;align-items:center"><span class="price">From ₦'+x[4].toLocaleString('en-NG')+'</span><button onclick="previewTopic(\''+x[1].replace(/'/g,"\\'")+'\')">View topic</button></div></article>').join('')||'<div class="panel">No matching sample topics. Try another filter.</div>'}
+function previewTopic(t){alert(t+'\n\nThis is a design preview. Lesson content and secure checkout are not connected yet.')}
+document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('catalog');document.getElementById('topicSearch').value=e.target.value;renderCatalog()}});
+renderCatalog();
+</script>
+</body></html>

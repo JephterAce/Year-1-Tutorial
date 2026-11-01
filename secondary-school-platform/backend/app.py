@@ -12,6 +12,7 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 256 * 1024
 
 DEMO_CATALOGUE = [
     {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "demo": True},
@@ -79,6 +80,27 @@ def catalogue():
     except Exception:
         app.logger.exception("Catalogue query failed")
         return jsonify({"error": "catalogue_unavailable", "message": "The catalogue is temporarily unavailable."}), 503
+
+
+@app.post("/api/v1/webhooks/paystack")
+def paystack_webhook():
+    """Public provider callback; authenticates raw body and verifies transaction."""
+    from paystack_webhooks import PaystackWebhookError
+    from payments import PaymentProcessingError, process_paystack_charge_success
+
+    signature = request.headers.get("x-paystack-signature", "")
+    raw_body = request.get_data(cache=False, as_text=False)
+    try:
+        result = process_paystack_charge_success(raw_body, signature)
+        return jsonify({"received": True, "payment": result}), 200
+    except PaystackWebhookError:
+        return jsonify({"error": "invalid_webhook"}), 400
+    except PaymentProcessingError:
+        app.logger.exception("Paystack payment could not be safely fulfilled")
+        return jsonify({"error": "payment_processing_unavailable"}), 503
+    except Exception:
+        app.logger.exception("Unexpected Paystack webhook failure")
+        return jsonify({"error": "webhook_unavailable"}), 503
 
 
 @app.errorhandler(404)

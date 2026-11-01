@@ -1,9 +1,14 @@
-"""Isolated API starter for the secondary-school platform.
+"""Isolated Flask API for the senior-secondary learning platform.
 
-This intentionally exposes only health and clearly-labelled demo catalogue data.
-It does not authenticate users, process payments, persist records or serve audio.
+Without DATABASE_URL this serves clearly-labelled demo catalogue data.
+With DATABASE_URL it reads only published topics from the dedicated platform DB.
+No payment, account or protected media endpoints are enabled yet.
 """
-from flask import Flask, jsonify
+import os
+from decimal import Decimal
+from uuid import UUID
+
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -17,18 +22,63 @@ DEMO_CATALOGUE = [
 ]
 
 
+def serialise_topic(row):
+    result = dict(row)
+    for key, value in result.items():
+        if isinstance(value, (UUID, Decimal)):
+            result[key] = str(value) if isinstance(value, UUID) else int(value)
+    return result
+
+
 @app.get("/health")
 def health():
-    return jsonify({"status": "ok", "service": "secondary-school-api", "mode": "starter"})
+    if not os.environ.get("DATABASE_URL"):
+        return jsonify({"status": "ok", "service": "secondary-school-api", "mode": "demo"})
+    from database import database_ready
+    if not database_ready():
+        return jsonify({"status": "degraded", "service": "secondary-school-api", "database": "unavailable"}), 503
+    return jsonify({"status": "ok", "service": "secondary-school-api", "mode": "database"})
 
 
 @app.get("/api/v1/catalogue")
 def catalogue():
-    return jsonify({
-        "items": DEMO_CATALOGUE,
-        "is_demo": True,
-        "notice": "Illustrative sample data; not a verified curriculum or published lesson catalogue.",
-    })
+    class_level = request.args.get("class")
+    subject_slug = request.args.get("subject")
+    term_raw = request.args.get("term")
+    search = request.args.get("q", "").strip()[:100] or None
+
+    if class_level and class_level not in ("SS1", "SS2", "SS3"):
+        return jsonify({"error": "invalid_class", "message": "Class must be SS1, SS2 or SS3."}), 400
+    term_number = None
+    if term_raw:
+        try:
+            term_number = int(term_raw)
+        except ValueError:
+            return jsonify({"error": "invalid_term", "message": "Term must be 1, 2 or 3."}), 400
+        if term_number not in (1, 2, 3):
+            return jsonify({"error": "invalid_term", "message": "Term must be 1, 2 or 3."}), 400
+
+    if not os.environ.get("DATABASE_URL"):
+        items = DEMO_CATALOGUE
+        if class_level:
+            items = [x for x in items if x["class_level"] == class_level]
+        if subject_slug:
+            items = [x for x in items if x["subject"].lower().replace(" ", "-") == subject_slug]
+        if search:
+            items = [x for x in items if search.lower() in (x["title"] + " " + x["subject"]).lower()]
+        return jsonify({
+            "items": items,
+            "is_demo": True,
+            "notice": "Illustrative sample data; not a verified curriculum or published lesson catalogue.",
+        })
+
+    try:
+        from database import list_published_topics
+        rows = list_published_topics(class_level, subject_slug, term_number, search)
+        return jsonify({"items": [serialise_topic(row) for row in rows], "is_demo": False})
+    except Exception:
+        app.logger.exception("Catalogue query failed")
+        return jsonify({"error": "catalogue_unavailable", "message": "The catalogue is temporarily unavailable."}), 503
 
 
 @app.errorhandler(404)

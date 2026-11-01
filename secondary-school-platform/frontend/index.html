@@ -34,7 +34,7 @@
   <div class="stats">
    <div class="stat"><small>Learning streak</small><strong>— days</strong><span>Start your first lesson</span></div>
    <div class="stat"><small>Lessons completed</small><strong>0</strong><span>Your progress begins here</span></div>
-   <div class="stat"><small>Subjects available</small><strong>5</strong><span>Across SS1–SS3</span></div>
+   <div class="stat"><small>Subjects available</small><strong>6</strong><span>Across SS1–SS3</span></div>
    <div class="stat"><small>Your class</small><strong>SS2</strong><span>Demo profile · change later</span></div>
   </div>
   <div class="sectionhead"><div><h2>Explore your subjects</h2><p>Choose a subject to discover its lessons</p></div><button class="link" onclick="showPage('catalog')">View catalogue →</button></div>
@@ -53,8 +53,8 @@
  </section>
  <section class="page" id="catalog">
   <div class="sectionhead" style="margin-top:0"><div><div class="eyebrow" style="color:#4563d7">The lesson library</div><h2 style="font-size:25px;margin-top:5px">Find your next lesson</h2><p>Explore subjects, terms and topics for your class.</p></div></div>
-  <div class="notice">Preview catalogue only. Sample topics are illustrative, not yet verified as the official sequence for every school. Payments and lesson access are not enabled in this prototype.</div>
-  <div class="catalogfilters"><select id="classFilter" onchange="renderCatalog()"><option>SS1</option><option selected>SS2</option><option>SS3</option></select><select id="subjectFilter" onchange="renderCatalog()"><option value="All">All subjects</option><option>English Language</option><option>General Mathematics</option><option>Further Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select><select id="termFilter" onchange="renderCatalog()"><option value="All">All terms</option><option>First term</option><option>Second term</option><option>Third term</option></select><input id="topicSearch" placeholder="Search topic..." oninput="renderCatalog()"></div>
+  <div class="notice">Preview catalogue only. Sample topics are illustrative and are not yet verified or assigned to a specific SS1, SS2 or SS3 curriculum sequence or term. Term allocation is pending verification. Payments and lesson access are not enabled in this prototype.</div>
+  <div class="catalogfilters"><select id="classFilter" onchange="renderCatalog()"><option>SS1</option><option selected>SS2</option><option>SS3</option></select><select id="subjectFilter" onchange="renderCatalog()"><option value="All">All subjects</option><option>English Language</option><option>General Mathematics</option><option>Further Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select><select id="termFilter" onchange="renderCatalog()"><option value="All">All term statuses</option><option value="Term allocation pending">Term allocation pending</option></select><input id="topicSearch" placeholder="Search topic..." oninput="renderCatalog()"></div>
   <div class="cataloggrid" id="catalogGrid"></div>
  </section>
  <section class="page" id="subjects"><div class="sectionhead" style="margin-top:0"><div><h2>My subjects</h2><p>Your selected learning areas will appear here.</p></div></div><div class="panel">You haven't enrolled in any subjects yet. Explore the catalogue to find topics for your class.</div></section>

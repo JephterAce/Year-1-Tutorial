@@ -66,12 +66,12 @@ Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy uni
 ## Timed assessment and integrity requirements (specified; implementation pending)
 
 - Added `TIMED_ASSESSMENT_AND_INTEGRITY_SPEC.md`.
-- Default timing is 36 seconds per selected question: 5 = 3 minutes, 10 = 6 minutes, 50 = 30 minutes, 100 = 60 minutes. The earlier 10 = 7 example conflicts with the other examples and is documented as a mismatch, not silently encoded.
+- Timing policy: 36 seconds per question by default, with an explicit exception of 10 questions = 7 minutes. Examples: 5 = 3 minutes, 10 = 7 minutes, 50 = 30 minutes, 100 = 60 minutes.
 - Each attempt requires a mandatory pre-test briefing and per-attempt affirmative agreement.
 - Three qualifying focus/visibility/fullscreen incidents: warnings on incidents one and two; third incident ends the attempt and submits server-persisted answers.
 - Browser restrictions are deterrents, not guarantees: a website cannot prevent screenshots, second devices, external cameras, or every OS/browser route. Integrity signals can false-positive; termination is flagged for review and appeal, not treated as conclusive cheating.
 - Server-authoritative timer, answer persistence, immutable assessment versions, idempotent terminal states, objective grading, accessibility and minor-safety acceptance tests are specified.
-- Added pure server-side timing helper `backend/assessment_policy.py` and unit tests `backend/test_assessment_policy.py` for the 36-second rule and invalid input handling. These are policy primitives only; the live test service is NOT yet implemented.
+- Added pure server-side timing helper `backend/assessment_policy.py` and unit tests `backend/test_assessment_policy.py` for the 36-second rule and invalid input handling. The helper now applies the approved 10-question/7-minute exception and tests cover the requested examples. These are policy primitives only; the live test service is NOT yet implemented.
 - The new commits have not yet been confirmed by a completed CI run; do not treat them as passed until GitHub Actions reports success.
 
 ## Latest implementation caveat

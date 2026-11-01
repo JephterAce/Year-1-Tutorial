@@ -63,5 +63,15 @@ Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy uni
 - Initial auto-grading scope is deterministic objective questions: single-choice, multiple-select, true/false, numeric with defined tolerance, and exact-answer text. Essays, handwritten work and open-ended proofs are not represented as reliably auto-gradable in the first release.
 - No external reuse or marketing consent is bundled with account creation; optional use requires separate revocable consent. Profile visibility defaults to private. Because learners may be minors, legal/privacy and safeguarding review is a launch gate.
 
+## Timed assessment and integrity requirements (specified; implementation pending)
+
+- Added `TIMED_ASSESSMENT_AND_INTEGRITY_SPEC.md`.
+- Default timing is 36 seconds per selected question: 5 = 3 minutes, 10 = 6 minutes, 50 = 30 minutes, 100 = 60 minutes. The earlier 10 = 7 example conflicts with the other examples and is documented as a mismatch, not silently encoded.
+- Each attempt requires a mandatory pre-test briefing and per-attempt affirmative agreement.
+- Three qualifying focus/visibility/fullscreen incidents: warnings on incidents one and two; third incident ends the attempt and submits server-persisted answers.
+- Browser restrictions are deterrents, not guarantees: a website cannot prevent screenshots, second devices, external cameras, or every OS/browser route. Integrity signals can false-positive; termination is flagged for review and appeal, not treated as conclusive cheating.
+- Server-authoritative timer, answer persistence, immutable assessment versions, idempotent terminal states, objective grading, accessibility and minor-safety acceptance tests are specified.
+- These rules are requirements only. They are NOT yet implemented in a live student test service.
+
 ## Latest implementation caveat
 The student and admin profile/assessment additions require a fresh GitHub Actions run to pass before the expanded test suite is considered verified.

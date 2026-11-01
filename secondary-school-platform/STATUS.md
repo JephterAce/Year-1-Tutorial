@@ -76,3 +76,12 @@ Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy uni
 
 ## Latest implementation caveat
 The student and admin profile/assessment additions require a fresh GitHub Actions run to pass before the expanded test suite is considered verified.
+
+
+## Student data isolation and extraction requirement
+
+- Added `STUDENT_DATA_EXPORT_AND_ISOLATION_SPEC.md` defining per-student ownership boundaries, individual extraction, authorised class/subject/bulk extraction, privacy-safe fields, secure storage, auditability, expiry and acceptance tests.
+- Added migration `005_student_data_exports.sql` for export-job metadata and lifecycle audit events. It stores export metadata only; exported learner records remain in secured production storage, never in Git.
+- Architecture decision: one immutable student UUID per learner, shared PostgreSQL with strict row-level ownership checks and indexed student foreign keys; no separate physical database per learner by default.
+- Export APIs, permission model, background worker, private object storage, short-lived download links and automated tests are NOT yet implemented. Migration 005 has NOT been applied to any database.
+- Corrected assessment time display for sub-minute tests (e.g. one question displays 36s rather than 0m 36s). The 10-question = 7-minute exception remains unchanged.

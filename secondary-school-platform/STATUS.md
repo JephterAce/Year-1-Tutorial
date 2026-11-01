@@ -145,3 +145,9 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Corrected README setup to list all six migrations in order (001–006).
 - The outbox delivery worker, retry/dead-letter execution, student authentication, secure server-side order creation, payment reconciliation operations and production deployment remain unfinished. The endpoint must not be advertised as production-ready or connected to live Paystack until those controls are implemented and reviewed.
 - No real Paystack secret, SMTP credential, database connection, checkout, test email or production migration has been configured or executed.
+
+
+## Payment email outbox worker
+- Added `payment_outbox.py` with database-backed claim/lease using `FOR UPDATE SKIP LOCKED`, SMTP delivery outside the webhook request, stale-lease recovery, capped exponential retries (30 seconds to 1 hour), and dead-letter after eight failed attempts.
+- Added unit tests for retry backoff bounds and attempt validation. Worker execution is not scheduled in a hosting environment; operators must configure and monitor a supervised worker before real payments.
+- The webhook/outbox system remains development-only until CI passes on the latest branch head, server-side order creation and student identity are complete, and production configuration is reviewed.

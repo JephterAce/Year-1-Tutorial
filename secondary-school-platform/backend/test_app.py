@@ -24,9 +24,18 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(payload["is_demo"])
         self.assertGreaterEqual(len(payload["items"]), 1)
         subjects = {item["subject"] for item in payload["items"]}
-        self.assertIn("English Language", subjects)
-        self.assertIn("General Mathematics", subjects)
-        self.assertIn("Further Mathematics", subjects)
+        expected_subjects = {
+            "English Language",
+            "General Mathematics",
+            "Further Mathematics",
+            "Biology",
+            "Chemistry",
+            "Physics",
+        }
+        self.assertEqual(subjects, expected_subjects)
+        self.assertEqual(len(payload["items"]), 6)
+        self.assertTrue(all(item["demo"] is True for item in payload["items"]))
+        self.assertTrue(all(item["term"] == "Term allocation pending" for item in payload["items"]))
 
     def test_invalid_class_rejected(self):
         response = self.client.get("/api/v1/catalogue?class=Year7")

@@ -126,3 +126,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Corrected `backend/README.md` so the database setup sequence includes all five canonical migrations (001–005).
 - The correction commits are `1be522b` (NGN validation) and `37d5a4e` (migration instructions). A fresh CI run is required; do not report the correction as passing until GitHub Actions confirms it.
 - Payment alerts remain infrastructure only. No Paystack webhook, transaction verification, durable outbox, SMTP secrets, live email or live payment flow has been enabled.
+
+
+## Paystack webhook security foundation
+- Added `backend/paystack_webhooks.py` to authenticate Paystack's HMAC-SHA512 signature over the exact raw request body using constant-time comparison, then validate a minimal `charge.success` event (reference, positive integer amount in kobo, NGN currency, success status).
+- Added `backend/test_paystack_webhooks.py` for valid signatures, modified bodies, invalid signatures, unsupported events, non-NGN currency, invalid statuses, malformed amounts and references.
+- This is a security helper only, not a live webhook route. It does not call Paystack's transaction verification API, compare against a server-side order, persist events/payments, grant entitlements, or enqueue/send email. The payload alone must never authorise fulfilment.
+- Updated backend README with the exact remaining verification and durable-outbox requirements. No Paystack credentials or live service settings have been added.
+- CI confirmed success for the NGN validation and migration-documentation fixes: runs `41352701010` and `41352703175`. The status-documentation update also passed in run `41352709320`. Webhook helper/test CI is queued or running; wait for a completed run before calling it verified.

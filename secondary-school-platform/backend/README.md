@@ -30,8 +30,9 @@ Copy `.env.example` to a local `.env` and set a dedicated PostgreSQL connection 
 6. Apply `migrations/004_student_profiles_and_assessments.sql`.
 7. Apply `migrations/005_student_data_exports.sql`.
 8. Apply `migrations/006_payment_notification_outbox.sql`.
-9. Configure the application connection using a least-privilege database role and TLS.
-10. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
+9. Apply `migrations/007_student_sessions_and_rate_limits.sql`.
+10. Configure the application connection using a least-privilege database role and TLS.
+11. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
 
 ## Current security boundary
 This API currently exposes health and a public list of published catalogue topics only. It does not yet provide student registration/login, admin authorisation, payment processing, webhook handling, entitlement checks, or protected audio delivery. Do not add secrets to source control or connect live payments until these controls and their tests are implemented.
@@ -56,3 +57,7 @@ The outbox is durable, but an email delivery worker and retry/dead-letter schedu
 
 ## Payment email outbox worker
 `payment_outbox.py` provides a single-item worker function for a supervised scheduler/background process. It claims rows using PostgreSQL `FOR UPDATE SKIP LOCKED`, reclaims stale processing leases, sends through the configured TLS SMTP adapter, marks successful delivery, and retries failures with capped exponential backoff (30 seconds up to 1 hour; 8 attempts before dead-letter). It never runs inside the webhook request. The host must schedule this worker and monitor dead-letter rows before live payment activation.
+
+
+## Student session foundation (not yet an account API)
+Migration `007_student_sessions_and_rate_limits.sql` adds hashed server-side student sessions, CSRF token hashes, expiry/revocation fields, database-backed auth rate-limit buckets and case-insensitive email uniqueness. No student registration/login route is active yet. Keep cookies HttpOnly, Secure and SameSite in production; use CSRF validation on state-changing requests, rotate session identifiers after login, and store only token hashes server-side.

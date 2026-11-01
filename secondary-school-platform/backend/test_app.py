@@ -77,6 +77,17 @@ class StudentUiContractTests(unittest.TestCase):
         ):
             self.assertEqual(html.count(f"<h3>{subject}</h3>"), 1)
 
+    def test_admin_workspace_has_working_preview_sections(self):
+        admin = Path(__file__).resolve().parents[1] / "admin" / "index.html"
+        html = admin.read_text(encoding="utf-8")
+        for page in ("overview", "curriculum", "studio", "audio", "announcements", "students", "settings"):
+            self.assertIn(f'id="{page}"', html)
+            self.assertIn(f'data-page="{page}"', html)
+        self.assertIn("broadcast-only Channel", html)
+        self.assertIn("Manual publishing", html)
+        self.assertIn("copyAnnouncement()", html)
+        self.assertIn("not connected", html.lower())
+
     def test_student_catalogue_does_not_invent_class_or_term_mapping(self):
         frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
         html = frontend.read_text(encoding="utf-8")

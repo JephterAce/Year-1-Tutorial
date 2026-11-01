@@ -2,31 +2,49 @@
 
 Last updated: 2026-11-01
 
-## Verified present in this development branch
-- GitHub write access confirmed; isolated development branch created.
-- Product overview, product specification and staged build/release roadmap.
-- NERDC curriculum source register, scope definitions and mandatory curriculum/term-allocation validation rules.
-- Initial PostgreSQL relational schema plus two follow-up migrations: baseline hardening/webhook event ledger and identity-token/admin credential schema. Migrations are authored but have NOT been applied to a live database.
-- Responsive student portal UI prototype at `frontend/index.html`, updated to display all six requested subjects and pending term allocations.
-- Admin workspace UI prototype at `admin/index.html`, updated to show the six-subject scope.
-- Flask API with health endpoint and catalogue endpoint.
-- PostgreSQL repository layer that reads published topics when a dedicated `DATABASE_URL` is configured; otherwise the API explicitly serves demo catalogue data.
-- Query filters for class, subject, term and search, with invalid class/term validation.
-- Environment-variable example and setup guidance; no real credentials stored in Git.
-- API and database-configuration unit tests executed successfully in GitHub Actions (run 41342284699; `api-tests` job completed successfully).
-- Git ignore rules for secrets, databases, dependencies and generated media.
-- All new work is confined to `secondary-school-platform/` on the development branch.
+## Verified project state
+- Work is isolated in `secondary-school-platform/` on `secondary-school-platform-foundation`.
+- Draft pull request #1 remains open and unmerged: https://github.com/JephterAce/Year-1-Tutorial/pull/1
+- Product scope: SS1–SS3 and six subjects — English Language, General Mathematics, Further Mathematics, Biology, Chemistry and Physics.
+- Student portal prototype at `frontend/index.html`; dashboard now displays six subjects. Sample topics are illustrative only and are not assigned to verified class-specific sequences or terms.
+- Catalogue term filter now reflects the actual data state: term allocation pending verification. It does not imply verified First/Second/Third Term placement.
+- Admin workspace at `admin/index.html` remains a static design preview.
+- Flask API, PostgreSQL repository, schema and three authored migrations are present. Migrations have NOT been applied to a live database.
+- API demo mode is used without a dedicated `DATABASE_URL`; no production database or real student records are connected.
+- Curriculum source register records official NERDC links and validation rules. Full topic-by-topic mapping for all 18 class-subject combinations remains outstanding.
+- Telegram scope is a broadcast-only Channel for announcements and lesson updates. No student bot, group, private bot delivery or account-linking feature is in scope. The separate university bot `@Ustpaymentbot` remains untouched.
+- No production deployment, domain, payment integration, secure audio delivery or AI narration workflow is active.
+
+## Verified completed foundation
+- Product overview, product specification and staged roadmap.
+- NERDC source register and curriculum/term-allocation validation rules.
+- PostgreSQL relational schema and migrations:
+  1. `001_platform_hardening.sql`
+  2. `002_identity_security.sql`
+  3. `003_nerdc_curriculum_metadata.sql`
+- Six subject records and three term labels are seeded by migration; no unverified lesson topics are seeded into the database.
+- Flask health and catalogue endpoints, PostgreSQL repository and environment-variable example.
+- API/database configuration unit tests and GitHub Actions workflow.
+- Responsive student and admin interface prototypes.
+- Latest student UI correction committed: subject count 5 → 6; term filter now matches pending term-allocation metadata; catalogue notice clarifies that sample topics are not class/term-verified.
 
 ## Not yet implemented
-- Provisioned PostgreSQL database, applied migrations, seeded approved curriculum catalogue or production student records.
-- Complete topic-by-topic NERDC capture for all 18 class/subject combinations and school-specific term mapping.
-- Student registration/login, email delivery for verification/reset, password reset flows, session revocation endpoints or admin authorisation.
-- Paystack checkout, server verification, webhook processing, refunds or entitlement fulfilment.
-- Private audio storage, signed media delivery or playback.
-- Telegram bot/account linking/notifications.
-- AI voice generation, lesson scripts or editorial approval workflow.
-- Automated baseline test suite and CI job passed in run 41342284699. The six-subject UI/API changes, curriculum documentation and migrations 002–003 were committed after that run and still need a fresh CI run. Security review, database integration tests, backup/restore and deployment remain outstanding.
-- Production domain, privacy/terms/refund policy and support process.
+- Provisioned PostgreSQL database and application of migrations.
+- Complete, verified NERDC topic mapping for SS1, SS2 and SS3 across the six subjects.
+- Student registration/login, email verification/reset delivery, session lifecycle endpoints and production admin authorisation.
+- Functional database-backed admin CMS and complete student portal workflows.
+- Paystack checkout, server-side verification, webhook processing, refunds and entitlement fulfilment.
+- Private audio storage, signed media delivery and playback.
+- Teacher narration and two-presenter podcast scripts, generated audio and editorial approval.
+- Telegram Channel creation/link and announcement publishing workflow. Initial publishing is intended to be manual; no bot automation is currently required.
+- Production domain, privacy/terms/refund policies and support process.
 
-## Safety statement
-The student and admin interfaces remain prototypes. The API does not yet handle accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy bot has been changed or deployed.
+## Testing and CI
+- Historical GitHub Actions run `41342284699` passed.
+- Historical run `41344517426` passed after the main six-subject groundwork.
+- Later commits were not covered by those historical runs. A fresh run must be verified against the latest branch head before claiming the current state passes CI.
+
+## Safety and release status
+The student and admin interfaces remain prototypes. The API does not yet handle production accounts, payments, real student data or protected audio. No production database has been connected, no migrations have been applied, and no live service or legacy university bot has been changed or deployed.
+
+Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy university bot without the owner's explicit approval.

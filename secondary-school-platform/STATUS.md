@@ -71,7 +71,8 @@ Keep PR #1 in draft. Do not merge, deploy, spend money, or modify the legacy uni
 - Three qualifying focus/visibility/fullscreen incidents: warnings on incidents one and two; third incident ends the attempt and submits server-persisted answers.
 - Browser restrictions are deterrents, not guarantees: a website cannot prevent screenshots, second devices, external cameras, or every OS/browser route. Integrity signals can false-positive; termination is flagged for review and appeal, not treated as conclusive cheating.
 - Server-authoritative timer, answer persistence, immutable assessment versions, idempotent terminal states, objective grading, accessibility and minor-safety acceptance tests are specified.
-- These rules are requirements only. They are NOT yet implemented in a live student test service.
+- Added pure server-side timing helper `backend/assessment_policy.py` and unit tests `backend/test_assessment_policy.py` for the 36-second rule and invalid input handling. These are policy primitives only; the live test service is NOT yet implemented.
+- The new commits have not yet been confirmed by a completed CI run; do not treat them as passed until GitHub Actions reports success.
 
 ## Latest implementation caveat
 The student and admin profile/assessment additions require a fresh GitHub Actions run to pass before the expanded test suite is considered verified.

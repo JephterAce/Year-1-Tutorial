@@ -148,11 +148,8 @@ async function renderCatalog(){
 }
 function previewTopic(index){
  const topic=catalogueApiItems[index];
- if(topic){
-  const detail=[topic.title,topic.subject+' · '+topic.class_level,topic.summary||'',topic.curriculum_source?'Source: '+topic.curriculum_source:''].filter(Boolean).join('\\n\\n');
-  alert(detail+'\\n\\nLesson playback and checkout will appear only after approved content and secure entitlement services are enabled.');
-  return;
- }
+ if(topic&&topic.id){location.assign('/lesson.html?topic='+encodeURIComponent(topic.id));return;}
+ if(topic){alert((topic.title||'Sample lesson')+'\\n\\nThis is illustrative demo data, not an approved lesson.');return;}
 }
 document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('catalog');document.getElementById('topicSearch').value=e.target.value;renderCatalog()}});
 renderCatalog();

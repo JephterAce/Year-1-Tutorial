@@ -278,4 +278,4 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added migration 012 for student assessment issue reports, including integrity appeals, question errors and technical problems.
 - Added authenticated, CSRF-protected report submission and student-owned report listing endpoints. Question references are checked against the attempt; integrity appeals are restricted to integrity-terminated attempts; five-report cap per attempt.
 - Added input-validation tests. Staff review queue, notification, appeal adjudication policy and operational response process remain outstanding.
-- Migration 012 is authored but unapplied. PostgreSQL integration tests and full CI verification on the resulting head are pending.
+- Migration 012 is authored but unapplied. PostgreSQL integration tests remain outstanding. GitHub Actions run 41391411324 passed on exact branch head `8f03d86c3d72843d45ace3b0a10c05529822830b`.

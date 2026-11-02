@@ -33,7 +33,7 @@ Do not bypass portal login, subscriptions, access controls or copyright restrict
 
 ## Import and review
 
-Use `CURRICULUM_IMPORT_TEMPLATE.csv` and `backend/curriculum_import.py`. The validator checks:
+Use `CURRICULUM_IMPORT_TEMPLATE.csv` and `backend/curriculum_import.py`. The `parse_csv_import()` and `validate_csv_import()` helpers support a no-write dry run before any database integration. The validator checks:
 
 - class and subject scope;
 - target curriculum version;
@@ -48,6 +48,6 @@ A row with `school_scheme_required` or `not_assigned` is not a term-specific les
 
 The platform defaults to the revised 2025 framework as the intended target for SS1, SS2 and SS3. It does not silently declare every current cohort eligible for that framework. The 2025 implementation notice identifies a cycle-based rollout; capture the exact applicability for each intake from authoritative evidence before assigning students. The schema supports multiple versions and cohort-specific applicability without forcing an unsupported assumption.
 
-## What remains intentionally empty
+The database publication guard in migration 010 independently enforces the source/class/subject/version match, reviewer metadata, evidence note, rights status and term mapping rules. This protects against an admin tool or API accidentally bypassing the import validator.\n\n## What remains intentionally empty
 
 Until source capture and teacher review are completed, the class/subject topic catalogue remains empty rather than being populated with guessed topics or guessed term order. Any illustrative UI samples must remain explicitly marked as demo data and must never be represented as official curriculum content.

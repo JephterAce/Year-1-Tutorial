@@ -26,7 +26,7 @@ Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. I
 ## Ordered database setup
 
 1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
-2. Apply migrations `001_platform_hardening.sql` through `011_curriculum_source_immutability.sql` in numeric order.
+2. Apply migrations `001_platform_hardening.sql` through `012_assessment_issue_reporting.sql` in numeric order.
 3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
 4. Run the application with a least-privilege database role.
 
@@ -73,3 +73,8 @@ Migration 011 makes source records immutable once referenced by a published topi
 ## Assessment issue reporting
 
 Migration 012 adds student-owned reports for integrity appeals, question errors and technical problems. Authenticated students can submit reports against their own attempts and retrieve only their own report status. Question-error reports must reference a question in that attempt; integrity appeals are accepted only for integrity-terminated attempts. Details are length-limited and each attempt is capped at five reports. This is a student submission path only: a privileged admin review queue and staff response workflow are still required before launch.
+
+
+## Student-data export serialization
+
+`export_serialization.py` provides allowlist-only JSON/CSV serialization, normalises dates/UUIDs/decimals, rejects unsupported values, and neutralises spreadsheet formula injection in text cells while preserving numeric values. It is deliberately not an export endpoint: authentication, role authorisation, consent/legal basis, audit logging, bounded database queries, private storage, expiring downloads and deletion/retention workflows must exist before any student data is exported. Unit tests cover field exclusion and CSV/JSON safety.

@@ -48,7 +48,7 @@ The callback validates the raw Paystack HMAC signature, looks up a server-create
 
 ## Release gates
 
-- Dedicated PostgreSQL provisioned; migrations 001–008 rehearsed and applied only after approval.
+- Dedicated PostgreSQL provisioned; migrations 001–010 rehearsed and applied only after approval.
 - SMTP and HTTPS public app URL configured privately; email delivery/resend and operational monitoring tested.
 - Payment order creation, reconciliation/refunds, outbox scheduling and alerting implemented before live checkout.
 - Revised NERDC curriculum versioning, source capture, cohort applicability and teacher-review workflow implemented; authorised source documents and term schemes still required. No invented topic/term mapping.

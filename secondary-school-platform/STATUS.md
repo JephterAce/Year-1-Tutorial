@@ -167,3 +167,16 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - The branch remains isolated from `main`; draft PR #1 is open, unmerged and still marked draft.
 - This CI result verifies the automated suite on the current branch head; it does not validate a live PostgreSQL migration, production configuration, SMTP delivery, Paystack checkout or a deployed service.
 - The next engineering milestone remains a complete, tested student identity service (registration, email verification, login/logout, session rotation/revocation, CSRF enforcement, rate limiting and password recovery). The existing identity helpers and migration 007 are groundwork only; no account endpoints or session cookies are active.
+
+
+## Student identity service implementation increment — 2026-11-02
+
+- Added `backend/identity_service.py`: PostgreSQL-backed student registration, normalized email/username, scrypt password hashes, hashed single-use verification and reset tokens, active-account login, server-side random sessions (only hashes stored), previous-session revocation on login, logout revocation, session expiry, CSRF-token hash validation, password reset with session revocation, and independent HMAC-keyed database rate-limit updates.
+- Added `backend/identity_email.py`: SMTP-over-TLS verification and reset link delivery. Links require a configured HTTPS `PUBLIC_APP_URL`; raw tokens are not logged or returned by the public registration route.
+- Added routes in `backend/app.py`: registration with explicit terms/privacy acceptance, email verification, login, authenticated current-student lookup, CSRF-protected logout, generic password-reset request, and reset completion.
+- Added production cookie controls: HttpOnly session cookie, readable CSRF cookie, Secure in production, SameSite=Lax, and 12-hour expiry.
+- Added `test_identity_routes.py` covering explicit consent, verification token non-disclosure, cookie attributes, unauthenticated access, and generic reset responses.
+- Added required configuration keys to `backend/.env.example`: `AUTH_RATE_LIMIT_PEPPER`, HTTPS `PUBLIC_APP_URL`, policy versions, and existing SMTP settings.
+- GitHub Actions run `41386067651` for exact branch head `320ab673ce888353a00ee54b6ebbbb643d42fe0a` completed successfully; all job steps passed. Earlier identity-service commits also passed.
+- Important remaining limitations: this is not yet a production release. No PostgreSQL instance has been provisioned and migrations 001–007 remain unapplied; no real SMTP credentials or HTTPS app URL have been configured; no end-to-end test has exercised email delivery, concurrent database transactions, rate limits or session lifecycle against PostgreSQL. No browser registration/verification/reset screens have been connected to these API routes. Registration currently sends mail synchronously after account creation, so SMTP failure can leave a pending account requiring a future resend-verification workflow.
+- Security review still required for proxy-aware client/IP throttling, email resend and abuse controls, CSRF/origin policy, production cookie/domain settings, database migration rehearsal, privacy/guardian-consent and safeguarding requirements for minors. Do not enable payments until identity and server-side order creation are complete and reviewed.

@@ -271,3 +271,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Corrections must be captured as replacement source/version records and pass the review workflow rather than rewriting historical evidence.
 - Added migration contract coverage for both immutability triggers.
 - Migration 011 is authored but not applied. Trigger semantics and full migration ordering still require a disposable PostgreSQL rehearsal; CI must pass on the exact resulting branch head.
+
+
+## Assessment reporting and appeals — 2026-11-02
+
+- Added migration 012 for student assessment issue reports, including integrity appeals, question errors and technical problems.
+- Added authenticated, CSRF-protected report submission and student-owned report listing endpoints. Question references are checked against the attempt; integrity appeals are restricted to integrity-terminated attempts; five-report cap per attempt.
+- Added input-validation tests. Staff review queue, notification, appeal adjudication policy and operational response process remain outstanding.
+- Migration 012 is authored but unapplied. PostgreSQL integration tests and full CI verification on the resulting head are pending.

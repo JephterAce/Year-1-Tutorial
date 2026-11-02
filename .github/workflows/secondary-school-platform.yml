@@ -51,3 +51,8 @@ jobs:
         env:
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python rehearse_migrations.py
+      - name: Run PostgreSQL schema integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+          LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+        run: python -m unittest -v test_postgres_schema_integration

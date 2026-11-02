@@ -58,3 +58,18 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python -m unittest -v test_postgres_schema_integration
+
+  container-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Build application container without publishing
+        uses: docker/build-push-action@v6
+        with:
+          context: secondary-school-platform
+          file: secondary-school-platform/backend/Dockerfile
+          push: false
+          tags: learnwise-api:ci

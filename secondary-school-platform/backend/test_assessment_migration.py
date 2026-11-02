@@ -33,7 +33,7 @@ class ProfileAssessmentMigrationTests(unittest.TestCase):
         self.assertNotIn("'essay'", sql)
 
     def test_assessment_issue_reporting_schema_has_owner_and_question_guards(self):
-        sql = (ROOT / "backend" / "migrations" / "012_assessment_issue_reporting.sql").read_text()
+        sql = (Path(__file__).resolve().parent / "migrations" / "012_assessment_issue_reporting.sql").read_text(encoding="utf-8")
         self.assertIn("issue_report_question_pair_fk", sql)
         self.assertIn("learnwise_validate_assessment_issue_owner", sql)
         self.assertIn("question_error_requires_question", sql)

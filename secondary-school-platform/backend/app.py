@@ -401,3 +401,18 @@ def edit_student_profile():
     except Exception:
         app.logger.exception("Student profile update failed")
         return jsonify({"error": "profile_update_unavailable"}), 503
+
+
+@app.get("/api/v1/assessments")
+def list_student_assessments():
+    from assessment_attempts import list_published_assessments, AttemptError
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        return jsonify({"items": list_published_assessments(student["student_id"])}), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Published assessment catalogue failed")
+        return jsonify({"error": "assessment_catalogue_unavailable"}), 503

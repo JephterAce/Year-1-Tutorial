@@ -254,3 +254,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added tests for CSV import, invalid JSON, publication guard contract and term mapping states.
 - CI passed for curriculum architecture/import commit `8d6475d` (run 41389078056). The migration 010 and CSV-import hardening commits are newer and awaiting their own CI result.
 - Migrations 009–010 remain unapplied. No database has been connected or altered.
+
+
+## Latest verification checkpoint — 2026-11-02
+
+- Fixed the CSV test fixture after GitHub Actions identified incorrect CSV quote escaping. The parser was correctly rejecting the malformed test data.
+- Latest branch head: `ba53e25ae0e353e2e848bdf522fb3f648e9ea11e`.
+- GitHub Actions run `41389450150` completed successfully on that exact head (api-tests: success).
+- Curriculum migrations 009–010 and CSV parser/dry-run validation now have passing automated tests. PostgreSQL execution/rehearsal remains outstanding because no dedicated database has been provisioned.
+- PR #1 remains open, draft and unmerged. No deployment, live migration, payment activation or legacy bot change has occurred.

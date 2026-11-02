@@ -1,5 +1,13 @@
 # Implementation status
 
+Last updated: 2026-11-02
+
+## Latest verified engineering additions
+- Dedicated admin login/session lifecycle is implemented with server-side hashed sessions, CSRF validation, eight-hour expiry, inactive-account checks and login throttling. Account provisioning remains offline-only.
+- Admin assessment issue review endpoints now enforce the default-deny role/capability policy. Review decisions lock the report row and write the append-only audit event in the same database transaction.
+- Assessment review queue returns bounded, minimal report data; student identifiers are not exposed. Sensitive queue access is restricted to reviewers/owners; support role cannot browse the queue.
+- These endpoints are code-complete but require CI and disposable PostgreSQL integration verification before use. No production database or live admin account is configured.
+
 Last updated: 2026-11-01
 
 ## Verified project state

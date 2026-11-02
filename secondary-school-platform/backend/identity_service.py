@@ -32,13 +32,14 @@ def _digest(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-def _rate_limit(conn, action, subject, limit=8):
+def _rate_limit(action, subject, limit=8):
     """Atomic fixed-window limit keyed by an HMAC of the supplied subject."""
     pepper = os.environ.get("AUTH_RATE_LIMIT_PEPPER", "")
     if len(pepper) < 32:
         raise RuntimeError("AUTH_RATE_LIMIT_PEPPER must contain at least 32 characters")
     key = hmac.new(pepper.encode(), subject.encode(), hashlib.sha256).hexdigest()
-    row = conn.execute(
+    with connection() as limiter_conn:
+        row = limiter_conn.execute(
         """INSERT INTO auth_rate_limits(action_key,subject_hash,window_started_at,attempts)
            VALUES (%s,%s,now(),1)
            ON CONFLICT(action_key,subject_hash) DO UPDATE SET
@@ -74,7 +75,7 @@ def register_student(email, username, display_name, class_level, password):
     password_hash = hash_password(password)
     raw_token, token_hash = create_one_time_token()
     with connection() as conn:
-        _rate_limit(conn, "register", email, limit=5)
+        _rate_limit("register", email, limit=5)
         try:
             student = conn.execute(
                 """INSERT INTO students(email,username,display_name,class_level,password_hash,
@@ -129,7 +130,7 @@ def login_student(email, password):
     except ValueError:
         email = "invalid"
     with connection() as conn:
-        _rate_limit(conn, "login", email, limit=8)
+        _rate_limit("login", email, limit=8)
         student = conn.execute(
             """SELECT id,password_hash,account_status FROM students
                WHERE lower(email)=%s""", (email,)
@@ -200,7 +201,7 @@ def request_password_reset(email):
         email = "invalid"
     raw_token = None
     with connection() as conn:
-        _rate_limit(conn, "password_reset", email, limit=5)
+        _rate_limit("password_reset", email, limit=5)
         student = conn.execute(
             "SELECT id FROM students WHERE lower(email)=%s AND account_status='active'",
             (email,),

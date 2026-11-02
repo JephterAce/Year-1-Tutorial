@@ -20,6 +20,17 @@ class AttemptError(ValueError):
 
 POLICY_VERSION = "learnwise-test-briefing-v1"
 DEBOUNCE_SECONDS = 2
+BRIEFING = [
+    "Your test starts only after you accept this briefing and press Start Test.",
+    "Time allowed is 36 seconds per question, except exactly 10 questions receive 7 minutes.",
+    "The server clock controls the deadline. Switching tabs, losing focus, disconnecting, refreshing or reopening the test does not pause or reset time.",
+    "Save your answers as you work. Answers already saved on the server are submitted when time expires.",
+    "You may navigate between questions while the attempt is active. Unanswered questions receive no points.",
+    "The first and second qualifying focus, visibility or fullscreen incidents show warnings. A third qualifying incident ends the attempt and submits saved answers.",
+    "Integrity signals can be mistaken or caused by accessibility/device behaviour. A terminated attempt is flagged for review, not automatically treated as proven misconduct. You may appeal.",
+    "The test interface may restrict common copy, cut, paste and context-menu actions and may request fullscreen where supported. These controls cannot prevent screenshots, second devices, external cameras or every operating-system capture method.",
+    "Do not use unauthorised help. Technical problems should be reported through the published support route.",
+]
 
 
 def _json(value):
@@ -82,7 +93,7 @@ def create_attempt(student_id, assessment_id, question_count):
         ).fetchone()
         return {"attempt_id": str(attempt["id"]), "status": "briefing",
                 "question_count": question_count, "time_limit_seconds": timing.time_limit_seconds,
-                "policy_version": POLICY_VERSION}
+                "policy_version": POLICY_VERSION, "briefing": BRIEFING}
 
 
 def start_attempt(student_id, attempt_id, accepted, policy_version):

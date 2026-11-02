@@ -28,7 +28,11 @@ def _json(value):
 
 def _public_question(row):
     prompt = _json(row["question_snapshot"]).get("prompt", {})
-    options = _json(row["question_snapshot"]).get("options")
+    raw_options = _json(row["question_snapshot"]).get("options")
+    options = ([{"id": item.get("id"), "text": item.get("text")}
+                for item in raw_options if isinstance(item, dict)
+                and isinstance(item.get("id"), str) and isinstance(item.get("text"), str)]
+               if isinstance(raw_options, list) else None)
     return {
         "id": str(row["question_id"]),
         "type": _json(row["question_snapshot"]).get("question_type"),

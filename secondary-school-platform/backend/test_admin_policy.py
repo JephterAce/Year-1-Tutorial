@@ -41,6 +41,9 @@ class AdminPolicyTests(unittest.TestCase):
         self.assertFalse(can(self.principal("superuser"), "settings.manage"))
         self.assertFalse(can(self.principal("owner"), "system.shell"))
 
+    def test_malformed_capability_fails_closed(self):
+        self.assertFalse(can(self.principal("owner"), []))
+
     def test_require_raises_for_denied_action(self):
         with self.assertRaises(PermissionError):
             require(self.principal("editor"), "curriculum.publish")

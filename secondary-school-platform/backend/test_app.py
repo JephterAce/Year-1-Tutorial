@@ -77,13 +77,14 @@ class StudentUiContractTests(unittest.TestCase):
         ):
             self.assertEqual(html.count(f"<h3>{subject}</h3>"), 1)
 
-    def test_student_catalogue_escapes_content_and_preserves_preview_record(self):
+    def test_student_catalogue_uses_safe_dom_text_and_published_api(self):
         frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
         html = frontend.read_text(encoding="utf-8")
-        self.assertIn("function escapeHTML(value)", html)
-        self.assertIn("escapeHTML(x[1])", html)
-        self.assertIn("escapeHTML(x[2])", html)
-        self.assertIn("topics.indexOf(x)", html)
+        self.assertIn("fetch('/api/v1/catalogue?'", html)
+        self.assertIn("title.textContent=topic.title", html)
+        self.assertIn("summary.textContent=topic.summary", html)
+        self.assertIn("button.addEventListener('click'", html)
+        self.assertIn("Class mapping pending", html)
 
     def test_student_profile_and_assessment_experience_is_present(self):
         frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"

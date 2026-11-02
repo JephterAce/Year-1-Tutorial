@@ -83,3 +83,8 @@ Migration 012 adds student-owned reports for integrity appeals, question errors 
 ## Administrative capability policy
 
 `admin_policy.py` defines a default-deny capability matrix for owner, editor, reviewer, support and analyst roles. Inactive or unknown principals and unknown capabilities are denied. It is a policy primitive only: admin login/session authentication, server-side principal loading, endpoint decorators, audit events and role assignment controls must be implemented and tested before exposing admin APIs.
+
+
+## Admin security foundation (migration 013)
+
+Migration `013_admin_sessions_and_audit_guard.sql` adds a separate server-side admin session table with hashed session and CSRF tokens, expiry/revocation fields and active-session indexes. It also makes audit events append-only and adds case/space-insensitive admin email lookup. The migration does not enable admin login or grant access by itself. A dedicated admin authentication service, secure cookie/CSRF routes, capability enforcement, audit-writing wrappers and controlled owner provisioning are still required. Rehearse this migration on disposable PostgreSQL before any deployment.

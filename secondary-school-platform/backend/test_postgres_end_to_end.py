@@ -57,6 +57,7 @@ class PostgreSQLEndToEndFlows(unittest.TestCase):
     def tearDown(self):
         with connection() as conn:
             if self.assessment:
+                conn.execute("DELETE FROM assessment_attempts WHERE assessment_id=%s", (self.assessment,))
                 conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment,))
             if self.topic:
                 conn.execute("DELETE FROM payment_notification_outbox WHERE payment_id IN (SELECT id FROM payment_transactions WHERE topic_id=%s)", (self.topic,))

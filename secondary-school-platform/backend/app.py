@@ -15,6 +15,11 @@ app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 app.config["MAX_CONTENT_LENGTH"] = 256 * 1024
 
+
+def _secure_cookie():
+    """Require Secure cookies in staging and production deployments."""
+    return os.environ.get("APP_ENV", "development").strip().lower() in {"staging", "production"}
+
 DEMO_CATALOGUE = [
     {"subject": "English Language", "title": "Reading comprehension and inference", "term": "Term allocation pending", "demo": True},
     {"subject": "General Mathematics", "title": "Quadratic equations", "term": "Term allocation pending", "demo": True},
@@ -157,7 +162,7 @@ def login():
     try:
         result = login_student(data.get("email"), data.get("password"))
         response = jsonify({"authenticated": True})
-        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        secure = _secure_cookie()
         response.set_cookie(
             "learnwise_session", result["session_id"], httponly=True, secure=secure,
             samesite="Lax", path="/", max_age=12 * 60 * 60,
@@ -455,7 +460,7 @@ def admin_login():
     try:
         result = login_admin(data.get("email"), data.get("password"))
         response = jsonify({"authenticated": True})
-        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        secure = _secure_cookie()
         response.set_cookie("learnwise_admin_session", result["session_id"], httponly=True,
                             secure=secure, samesite="Strict", path="/", max_age=8 * 60 * 60)
         response.set_cookie("learnwise_admin_csrf", result["csrf_token"], httponly=False,
@@ -531,7 +536,7 @@ def create_private_audio_access(topic_id, asset_id):
             str(student["student_id"]), str(topic_id), row["storage_key"], True, ttl=180
         )
         response = jsonify({"audio_url": f"/api/v1/private-audio/{topic_id}/{asset_id}"})
-        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        secure = _secure_cookie()
         response.set_cookie(
             "learnwise_audio_access", token, httponly=True, secure=secure,
             samesite="Strict", path=f"/api/v1/private-audio/{topic_id}/{asset_id}",

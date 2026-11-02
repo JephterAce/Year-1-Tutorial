@@ -72,7 +72,7 @@ class CurriculumImportTests(unittest.TestCase):
             "class_level,subject_slug,title,curriculum_version,source_title,source_url,"
             "source_kind,source_section,review_status,term_mapping_status,learning_outcomes\n"
             'SS1,general-mathematics,Example,nerdc_ssec_2025,NERDC,https://nerdc.gov.ng/x,'
-            'official_nerdc,Page 2,source_captured,not_assigned,"[\"Outcome one\"]"\n'
+            'official_nerdc,Page 2,source_captured,not_assigned,"[""Outcome one""]"\n'
         )
         rows = parse_csv_import(csv_text)
         self.assertEqual(rows[0]["learning_outcomes"], ["Outcome one"])

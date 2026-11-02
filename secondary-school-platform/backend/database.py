@@ -33,7 +33,12 @@ def database_ready():
 
 
 def list_published_topics(class_level=None, subject_slug=None, term_number=None, search=None):
-    clauses = ["t.status = 'published'"]
+    clauses = [
+        "t.status = 'published'",
+        "t.curriculum_status = 'published'",
+        "cv.version_code = 'nerdc_ssec_2025'",
+        "csr.verification_status = 'approved'",
+    ]
     params = []
     if class_level in ("SS1", "SS2", "SS3"):
         clauses.append("t.class_level = %s")
@@ -50,10 +55,15 @@ def list_published_topics(class_level=None, subject_slug=None, term_number=None,
     query = """
         SELECT t.id, t.class_level, s.slug AS subject_slug, s.name AS subject, s.offering_group,
                tr.term_number, tr.label AS term, t.slug, t.title, t.summary,
-               t.learning_objectives, t.price_kobo, t.currency, t.estimated_minutes
+               t.learning_objectives, t.price_kobo, t.currency, t.estimated_minutes,
+               cv.version_code AS curriculum_version, csr.source_title AS curriculum_source,
+               csr.source_url AS curriculum_source_url, csr.source_section AS curriculum_source_section,
+               t.term_mapping_status
         FROM topics t
         JOIN subjects s ON s.id = t.subject_id
-        JOIN terms tr ON tr.id = t.term_id
+        LEFT JOIN terms tr ON tr.id = t.term_id
+        JOIN curriculum_versions cv ON cv.id = t.curriculum_version_id
+        JOIN curriculum_source_records csr ON csr.id = t.curriculum_source_record_id
         WHERE """ + " AND ".join(clauses) + """
         ORDER BY t.class_level, s.sort_order, tr.term_number, t.sort_order, t.title
         LIMIT 200

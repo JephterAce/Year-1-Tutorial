@@ -206,3 +206,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Updated backend README with the new endpoints and exact production limitations.
 - This is a first execution-service increment, not a production-ready exam system. It has not been run against a real PostgreSQL instance. Appeal/fault-reporting, client autosave/recovery, result notifications, admin authoring, concurrency/idempotency hardening, and end-to-end browser tests remain. Database migrations 001–008 are still unapplied; no production service or student data is connected.
 - Latest code changes require a new GitHub Actions run before they can be reported as CI-verified. Keep the draft PR open; do not deploy or enable live payments.
+
+
+## Server-priced Paystack checkout increment — 2026-11-02
+
+- Added `backend/payment_orders.py`: requires an active, email-verified student; loads the published lesson price from PostgreSQL; enforces NGN and the minimum ₦1,000 price; rejects existing entitlements; creates a server-generated payment reference/order; and initialises Paystack with the server-held secret.
+- Added authenticated, CSRF-protected `POST /api/v1/topics/{topic_id}/checkout`. The amount is never accepted from the browser. Checkout URLs must use HTTPS and Paystack's checkout host.
+- Added mocked provider tests for exact server amount/reference/currency, provider failure and untrusted redirect rejection.
+- This is still not permission to accept real money. The DB has not been provisioned or migrated; Paystack secret is not configured; webhook/checkout has not been exercised end-to-end; outbox scheduling/monitoring, reconciliation/refunds, operational alerts, production security review and explicit launch approval remain outstanding.

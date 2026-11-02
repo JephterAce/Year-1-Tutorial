@@ -296,3 +296,10 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Question references are parsed and canonicalised as UUIDs before database access; malformed identifiers and unhashable issue types return controlled validation errors rather than database exceptions.
 - Added regression tests for UUID validation, malformed issue types and the row-lock contract.
 - This does not yet create a staff adjudication workflow or admin endpoint. No admin access is exposed until role authentication and audit controls are implemented.
+
+
+## Least-privilege admin policy increment — 2026-11-02
+
+- Added `backend/admin_policy.py` with a default-deny capability matrix for owner, editor, reviewer, support and analyst roles.
+- Added tests covering role boundaries, inactive/unknown principals, unknown capabilities and malformed inputs.
+- No admin endpoint consumes this policy yet. Verified admin authentication/session management, principal loading, audited action wrappers and role-management controls are still required before exposing privileged routes.

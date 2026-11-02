@@ -61,9 +61,18 @@ ALTER TABLE topics
   ADD COLUMN IF NOT EXISTS curriculum_approved_by TEXT,
   ADD COLUMN IF NOT EXISTS curriculum_approved_at TIMESTAMPTZ;
 
-ALTER TABLE curriculum_cohort_assignments
-  ADD CONSTRAINT curriculum_cohort_confirmation_source_fk
-  FOREIGN KEY (confirmation_source_record_id) REFERENCES curriculum_source_records(id);
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'curriculum_cohort_confirmation_source_fk'
+      AND conrelid = 'curriculum_cohort_assignments'::regclass
+  ) THEN
+    ALTER TABLE curriculum_cohort_assignments
+      ADD CONSTRAINT curriculum_cohort_confirmation_source_fk
+      FOREIGN KEY (confirmation_source_record_id) REFERENCES curriculum_source_records(id);
+  END IF;
+END $;
 
 CREATE INDEX IF NOT EXISTS curriculum_versions_target_idx
   ON curriculum_versions(is_target_version,status);

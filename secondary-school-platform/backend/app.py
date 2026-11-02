@@ -370,3 +370,34 @@ def create_topic_checkout(topic_id):
     except Exception:
         app.logger.exception("Topic checkout initialisation failed")
         return jsonify({"error": "checkout_unavailable"}), 503
+
+
+@app.get("/api/v1/student/profile")
+def read_student_profile():
+    from student_profiles import get_profile, ProfileError
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        return jsonify({"profile": get_profile(student["student_id"])}), 200
+    except ProfileError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Student profile read failed")
+        return jsonify({"error": "profile_unavailable"}), 503
+
+
+@app.patch("/api/v1/student/profile")
+def edit_student_profile():
+    from student_profiles import update_profile, ProfileError
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    try:
+        return jsonify({"profile": update_profile(student["student_id"], data)}), 200
+    except ProfileError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Student profile update failed")
+        return jsonify({"error": "profile_update_unavailable"}), 503

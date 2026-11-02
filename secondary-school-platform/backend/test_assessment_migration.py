@@ -32,6 +32,12 @@ class ProfileAssessmentMigrationTests(unittest.TestCase):
         self.assertIn("'single_choice','multiple_select','true_false','numeric','exact_text'", sql)
         self.assertNotIn("'essay'", sql)
 
+    def test_assessment_report_submission_serialises_attempt_limit_checks(self):
+        service = (Path(__file__).resolve().parent / "assessment_reports.py").read_text(encoding="utf-8")
+        self.assertIn("FOR UPDATE", service)
+        self.assertIn("count(*) AS n FROM assessment_issue_reports", service)
+        self.assertIn("if count >= 5", service)
+
     def test_assessment_issue_reporting_schema_has_owner_and_question_guards(self):
         sql = (Path(__file__).resolve().parent / "migrations" / "012_assessment_issue_reporting.sql").read_text(encoding="utf-8")
         self.assertIn("issue_report_question_pair_fk", sql)

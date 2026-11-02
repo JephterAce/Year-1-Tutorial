@@ -222,3 +222,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `GET /api/v1/student/profile` and CSRF-protected `PATCH /api/v1/student/profile`. Updates are scoped to the authenticated student's UUID; unsupported fields (including class, email and photo storage) are rejected.
 - Profile photo remains a local preview only; secure object storage/upload, export/download, deletion workflows and privacy-request processing are not yet implemented.
 - Requires migration 004 and a dedicated PostgreSQL database. No live database is connected; real account/profile end-to-end testing and privacy/security review remain outstanding.
+
+
+## Student assessment catalogue and test interface — 2026-11-02
+
+- Added authenticated `GET /api/v1/assessments` listing only published assessments for the student's class and current availability window.
+- Added `frontend/assessment.html`: loads eligible tests, lets the student choose an allowed question count, presents the mandatory briefing and unchecked agreement, starts only after acceptance, renders supported objective question types, saves answers through the authenticated API, displays the server-derived deadline, and submits on expiry or manual confirmation.
+- The page requests fullscreen where supported and reports visibility, focus and fullscreen exits to the server. Copy/cut/paste/context-menu deterrents apply only during an active test; these cannot prevent screenshots, second devices or OS capture.
+- Added UI contract tests to assert the test page uses CSRF, server deadline and integrity routes and does not embed answer keys.
+- The browser page is an initial functional client, not yet browser/end-to-end tested against PostgreSQL. Mobile/accessibility testing, network retry queue for unsaved answers, explicit appeal/faulty-question forms, and result notifications remain.

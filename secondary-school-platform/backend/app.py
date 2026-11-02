@@ -591,3 +591,52 @@ def stream_private_audio(topic_id, asset_id):
     except Exception:
         app.logger.exception("Private audio stream failed")
         return jsonify({"error": "audio_unavailable"}), 503
+
+
+@app.get("/api/v1/topics/<topic_id>")
+def get_student_topic(topic_id):
+    from database import connection
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        with connection() as conn:
+            topic = conn.execute(
+                """SELECT t.id,t.class_level,t.title,t.summary,t.learning_objectives,
+                          t.price_kobo,t.currency,s.name AS subject
+                   FROM topics t JOIN subjects s ON s.id=t.subject_id
+                   JOIN curriculum_versions cv ON cv.id=t.curriculum_version_id
+                   JOIN curriculum_source_records csr ON csr.id=t.curriculum_source_record_id
+                   WHERE t.id=%s AND t.status='published' AND t.curriculum_status='published'
+                     AND cv.version_code='nerdc_ssec_2025'
+                     AND csr.verification_status='approved'""",
+                (topic_id,),
+            ).fetchone()
+            if not topic:
+                return jsonify({"error": "topic_not_found"}), 404
+            entitlement = conn.execute(
+                """SELECT 1 FROM entitlements WHERE student_id=%s AND topic_id=%s
+                   AND revoked_at IS NULL LIMIT 1""",
+                (student["student_id"], topic_id),
+            ).fetchone()
+            assets = []
+            if entitlement:
+                assets = conn.execute(
+                    """SELECT id,asset_type,duration_seconds,mime_type
+                       FROM lesson_assets WHERE topic_id=%s AND review_status='approved'
+                         AND asset_type IN ('teacher_audio','podcast_audio','transcript','notes')
+                       ORDER BY asset_type,version DESC""",
+                    (topic_id,),
+                ).fetchall()
+        result = {key: (str(value) if key == "id" else value)
+                  for key, value in topic.items()}
+        result["has_access"] = bool(entitlement)
+        result["assets"] = [
+            {"id": str(a["id"]), "asset_type": a["asset_type"],
+             "duration_seconds": a["duration_seconds"], "mime_type": a["mime_type"]}
+            for a in assets
+        ]
+        return jsonify({"topic": result}), 200
+    except Exception:
+        app.logger.exception("Student topic detail failed")
+        return jsonify({"error": "topic_unavailable"}), 503

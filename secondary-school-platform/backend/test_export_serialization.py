@@ -36,6 +36,7 @@ class ExportSerialisationTests(unittest.TestCase):
         self.assertEqual(rows[0]["name"][0], "'")
         self.assertEqual(rows[1]["name"], "'  @SUM(A1:A2)")
         self.assertEqual(rows[2]["name"], "Normal learner")
+        self.assertEqual(rows[0]["amount"], "4")
         self.assertNotIn("password_hash", result)
 
     def test_csv_serialises_nested_values_and_decimal(self):

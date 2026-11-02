@@ -263,3 +263,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - GitHub Actions run `41389450150` completed successfully on that exact head (api-tests: success).
 - Curriculum migrations 009–010 and CSV parser/dry-run validation now have passing automated tests. PostgreSQL execution/rehearsal remains outstanding because no dedicated database has been provisioned.
 - PR #1 remains open, draft and unmerged. No deployment, live migration, payment activation or legacy bot change has occurred.
+
+
+## Curriculum evidence immutability — 2026-11-02
+
+- Added migration 011: curriculum source records cannot be updated or deleted while referenced by published topics; material changes to a curriculum version are blocked while published topics use it.
+- Corrections must be captured as replacement source/version records and pass the review workflow rather than rewriting historical evidence.
+- Added migration contract coverage for both immutability triggers.
+- Migration 011 is authored but not applied. Trigger semantics and full migration ordering still require a disposable PostgreSQL rehearsal; CI must pass on the exact resulting branch head.

@@ -10,7 +10,7 @@ class AssessmentAttemptContractTests(unittest.TestCase):
             "question_snapshot": {
                 "question_type": "single_choice",
                 "prompt": {"text": "Choose one"},
-                "options": [{"id": "a", "text": "A"}],
+                "options": [{"id": "a", "text": "A", "is_correct": True, "answer_key": "secret"}],
                 "answer_key": {"correct_option_id": "a"},
             },
         }
@@ -18,6 +18,7 @@ class AssessmentAttemptContractTests(unittest.TestCase):
         self.assertEqual(projected["prompt"]["text"], "Choose one")
         self.assertNotIn("answer_key", projected)
         self.assertNotIn("answer_key_snapshot", projected)
+        self.assertEqual(projected["options"], [{"id": "a", "text": "A"}])
 
     def test_time_exception_is_server_policy(self):
         self.assertEqual(calculate_test_timing(10).time_limit_seconds, 420)

@@ -95,7 +95,8 @@ class StudentUiContractTests(unittest.TestCase):
         for field in ("profileName", "profileUsername", "profileEmail", "profileClass", "profileBio", "profilePhoto", "profileVisibility"):
             self.assertIn(f'id="{field}"', html)
         self.assertIn("Private profile by default", html)
-        self.assertIn("Save profile", html)\n        self.assertIn("loadStudentProfile()", html)
+        self.assertIn("Save profile", html)
+        self.assertIn("loadStudentProfile()", html)
         self.assertIn("automatically by the server", html)
         self.assertIn("separate permission", html)
 

@@ -231,3 +231,15 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - The page requests fullscreen where supported and reports visibility, focus and fullscreen exits to the server. Copy/cut/paste/context-menu deterrents apply only during an active test; these cannot prevent screenshots, second devices or OS capture.
 - Added UI contract tests to assert the test page uses CSRF, server deadline and integrity routes and does not embed answer keys.
 - The browser page is an initial functional client, not yet browser/end-to-end tested against PostgreSQL. Mobile/accessibility testing, network retry queue for unsaved answers, explicit appeal/faulty-question forms, and result notifications remain.
+
+
+## Revised NERDC curriculum architecture — 2026-11-02
+
+- Owner preference confirmed: use the latest revised NERDC curriculum as Learnwise's target standard for SS1, SS2 and SS3.
+- Added migration 009 for curriculum version records, cohort-specific applicability, source provenance/rights metadata, optional term assignments and evidence-gated topic publication. The target version key is `nerdc_ssec_2025`; cohort applicability is intentionally pending until official transition evidence is recorded.
+- Added `backend/curriculum_import.py` and unit tests. Imports are restricted to the six selected subjects and target curriculum version. Publication is blocked without a traceable source section, named teacher review, approval timestamp, evidence note and known rights status. Official term allocation requires an official NERDC source; school term mapping requires a named school scheme.
+- Added `CURRICULUM_IMPORT_TEMPLATE.csv` and `CURRICULUM_WORKFLOW.md` with NERDC source links, acquisition steps, rights safeguards and review workflow.
+- Hardened the database-backed published catalogue: it now requires the target curriculum version, approved source record and explicit published curriculum review state. Unmapped/unsupported topics cannot silently enter the student catalogue.
+- Current branch head before this checkpoint: curriculum work is committed on `secondary-school-platform-foundation`; latest Actions run for the prior head `c21921d` passed (run 41388502302). New curriculum commits require their own completed CI run.
+- Migration 009 is not applied. No NERDC full-text material has been imported, no curriculum topic/term rows have been invented, and no external portal access controls have been bypassed. Official authorised documents and school schemes are still required for full content mapping.
+- The branch remains separate from `main`; PR #1 remains open, draft and unmerged. No deployment, production database migration, payment activation or legacy bot change has occurred.

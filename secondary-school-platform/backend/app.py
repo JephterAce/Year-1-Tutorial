@@ -448,3 +448,55 @@ def list_assessment_issue_reports(attempt_id):
     except Exception:
         app.logger.exception("Assessment issue report listing failed")
         return jsonify({"error": "report_list_unavailable"}), 503
+
+
+# Dedicated admin identity routes. Account provisioning is deliberately offline-only.
+@app.post("/api/v1/admin/auth/login")
+def admin_login():
+    from admin_auth import login_admin, AdminAuthError
+    data = request.get_json(silent=True) or {}
+    try:
+        result = login_admin(data.get("email"), data.get("password"))
+        response = jsonify({"authenticated": True})
+        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        response.set_cookie("learnwise_admin_session", result["session_id"], httponly=True,
+                            secure=secure, samesite="Strict", path="/", max_age=8 * 60 * 60)
+        response.set_cookie("learnwise_admin_csrf", result["csrf_token"], httponly=False,
+                            secure=secure, samesite="Strict", path="/", max_age=8 * 60 * 60)
+        return response
+    except AdminAuthError:
+        return jsonify({"error": "invalid_credentials"}), 401
+    except Exception:
+        app.logger.exception("Admin login failed")
+        return jsonify({"error": "admin_auth_unavailable"}), 503
+
+
+def _current_admin(require_csrf=False):
+    from admin_auth import authenticate_admin, validate_admin_csrf
+    session = authenticate_admin(request.cookies.get("learnwise_admin_session"))
+    if not session:
+        return None
+    if require_csrf and not validate_admin_csrf(session, request.headers.get("X-CSRF-Token", "")):
+        return None
+    return session
+
+
+@app.get("/api/v1/admin/auth/me")
+def admin_me():
+    session = _current_admin()
+    if not session:
+        return jsonify({"error": "unauthenticated"}), 401
+    return jsonify({"admin": {"id": session["admin_id"], "email": session["email"],
+                              "role": session["role"]}})
+
+
+@app.post("/api/v1/admin/auth/logout")
+def admin_logout():
+    from admin_auth import logout_admin
+    if not _current_admin(require_csrf=True):
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    logout_admin(request.cookies.get("learnwise_admin_session"))
+    response = jsonify({"logged_out": True})
+    response.delete_cookie("learnwise_admin_session", path="/", samesite="Strict")
+    response.delete_cookie("learnwise_admin_csrf", path="/", samesite="Strict")
+    return response

@@ -288,3 +288,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added tests for allowlist exclusion, nested metadata, date/decimal handling, malicious formula cells and invalid records.
 - This is a serialization layer only. It does not expose student records, create an export endpoint, or replace the pending admin authorisation, audit, secure storage, expiring download, deletion and retention controls.
 - Updated backend setup instructions to include migrations 001–012. No migration has been applied.
+
+
+## Assessment report concurrency hardening — 2026-11-02
+
+- Assessment issue submission now locks the owning attempt row before checking the per-attempt report count and inserting. Concurrent submissions for one attempt are serialised, preventing parallel requests from bypassing the five-report cap.
+- Question references are parsed and canonicalised as UUIDs before database access; malformed identifiers and unhashable issue types return controlled validation errors rather than database exceptions.
+- Added regression tests for UUID validation, malformed issue types and the row-lock contract.
+- This does not yet create a staff adjudication workflow or admin endpoint. No admin access is exposed until role authentication and audit controls are implemented.

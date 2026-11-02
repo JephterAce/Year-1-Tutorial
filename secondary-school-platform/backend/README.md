@@ -72,7 +72,7 @@ Migration 011 makes source records immutable once referenced by a published topi
 
 ## Assessment issue reporting
 
-Migration 012 adds student-owned reports for integrity appeals, question errors and technical problems. Authenticated students can submit reports against their own attempts and retrieve only their own report status. Question-error reports must reference a question in that attempt; integrity appeals are accepted only for integrity-terminated attempts. Details are length-limited and each attempt is capped at five reports. This is a student submission path only: a privileged admin review queue and staff response workflow are still required before launch.
+Migration 012 adds student-owned reports for integrity appeals, question errors and technical problems. Authenticated students can submit reports against their own attempts and retrieve only their own report status. Question-error reports must reference a valid UUID for a question in that attempt; integrity appeals are accepted only for integrity-terminated attempts. Details are length-limited and each attempt is capped at five reports. Submission locks the owning attempt row while checking/inserting the report, serialising concurrent submissions so parallel requests cannot bypass the per-attempt cap. This is a student submission path only: a privileged admin review queue and staff response workflow are still required before launch.
 
 
 ## Student-data export serialization

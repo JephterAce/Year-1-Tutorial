@@ -1,5 +1,5 @@
 """Short-lived authorisation tokens for private lesson audio objects."""
-import base64, hashlib, hmac, json, os, time
+import base64, hashlib, hmac, json, os, time\nfrom pathlib import Path
 
 class AudioAccessError(ValueError): pass
 
@@ -38,3 +38,20 @@ def verify_audio_token(token, now=None):
         return payload
     except AudioAccessError: raise
     except Exception: raise AudioAccessError("Invalid audio token.") from None
+
+
+def resolve_private_audio_path(storage_root, object_key):
+    """Resolve an object key beneath a private local media root; reject symlink/path escapes."""
+    if not isinstance(storage_root, str) or not storage_root.strip():
+        raise AudioAccessError("Private audio storage is not configured.")
+    if not isinstance(object_key, str) or not object_key.strip():
+        raise AudioAccessError("Invalid private object key.")
+    root = Path(storage_root).resolve()
+    candidate = (root / object_key).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        raise AudioAccessError("Audio object is outside the private storage root.") from None
+    if not candidate.is_file():
+        raise AudioAccessError("Audio object is unavailable.")
+    return candidate

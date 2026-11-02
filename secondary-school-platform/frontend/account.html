@@ -29,7 +29,7 @@ function cookie(n){const v=document.cookie.split('; ').find(x=>x.startsWith(n+'=
 async function refresh(){try{const d=await api('/api/v1/auth/me',undefined,'GET');msg('sessionMsg','Signed in as '+d.student.display_name+' · '+d.student.class_level);document.getElementById('logout').hidden=false}catch{msg('sessionMsg','You are not signed in.');document.getElementById('logout').hidden=true}}
 document.getElementById('logout').onclick=async()=>{try{await api('/api/v1/auth/logout',{},'POST',{'X-CSRF-Token':cookie('learnwise_csrf')});await refresh()}catch(x){msg('sessionMsg',x.message)}};
 const token=new URLSearchParams(location.search).get('token');
-if(location.pathname.endsWith('/verify-email')&&token){api('/api/v1/auth/verify-email',{token}).then(()=>{history.replaceState({},'',location.pathname);msg('registerMsg','Email verified. You can now sign in.');}).catch(()=>msg('registerMsg','Verification link is invalid or expired.'))}
-if(location.pathname.endsWith('/reset-password')&&token)document.getElementById('resetComplete').hidden=false;
+if(new URLSearchParams(location.search).get('action')==='verify'&&token){api('/api/v1/auth/verify-email',{token}).then(()=>{history.replaceState({},'',location.pathname);msg('registerMsg','Email verified. You can now sign in.');}).catch(()=>msg('registerMsg','Verification link is invalid or expired.'))}
+if(new URLSearchParams(location.search).get('action')==='reset'&&token)document.getElementById('resetComplete').hidden=false;
 refresh();
 </script></body></html>

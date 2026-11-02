@@ -32,6 +32,14 @@ class ProfileAssessmentMigrationTests(unittest.TestCase):
         self.assertIn("'single_choice','multiple_select','true_false','numeric','exact_text'", sql)
         self.assertNotIn("'essay'", sql)
 
+    def test_assessment_issue_reporting_schema_has_owner_and_question_guards(self):
+        sql = (ROOT / "backend" / "migrations" / "012_assessment_issue_reporting.sql").read_text()
+        self.assertIn("issue_report_question_pair_fk", sql)
+        self.assertIn("learnwise_validate_assessment_issue_owner", sql)
+        self.assertIn("question_error_requires_question", sql)
+        self.assertIn("assessment_issue_reports", sql)
+
+
 
 if __name__ == "__main__":
     unittest.main()

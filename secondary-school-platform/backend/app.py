@@ -356,14 +356,14 @@ def assessment_integrity_event(attempt_id):
 
 
 @app.post("/api/v1/topics/<topic_id>/checkout")
-def create_topic_checkout():
+def create_topic_checkout(topic_id):
     from payment_orders import create_topic_checkout, PaymentOrderError
     student = _assessment_student()
     if not student:
         return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
     data = request.get_json(silent=True) or {}
     try:
-        result = create_topic_checkout(student["student_id"], request.view_args["topic_id"])
+        result = create_topic_checkout(student["student_id"], topic_id)
         return jsonify(result), 201
     except PaymentOrderError as exc:
         return jsonify({"error": exc.code, "message": str(exc)}), exc.status

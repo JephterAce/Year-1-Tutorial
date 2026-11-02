@@ -16,6 +16,7 @@ python app.py
 - Health: `GET /health`
 - Catalogue: `GET /api/v1/catalogue`
 - Student account: `/api/v1/auth/*`
+- Private student profile: `GET/PATCH /api/v1/student/profile`
 - Assessment execution: `/api/v1/assessments/{assessment_id}/attempts` and `/api/v1/assessment-attempts/{attempt_id}/*`
 - Lesson checkout: `POST /api/v1/topics/{topic_id}/checkout` (server-priced; provider credentials required)
 - Paystack callback: `POST /api/v1/webhooks/paystack` (development foundation only)

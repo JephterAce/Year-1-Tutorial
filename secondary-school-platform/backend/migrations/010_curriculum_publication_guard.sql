@@ -1,5 +1,8 @@
 -- Enforce evidence requirements at the database boundary, not only in import code.
 -- Apply after migration 009. Safe to re-run.
+ALTER TABLE topics DROP CONSTRAINT IF EXISTS topics_term_mapping_status_check;
+ALTER TABLE topics ADD CONSTRAINT topics_term_mapping_status_check
+  CHECK (term_mapping_status IN ('official_term_allocation','school_scheme_verified','school_scheme_required','not_assigned','not_applicable'));
 CREATE OR REPLACE FUNCTION learnwise_validate_curriculum_publication()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 DECLARE

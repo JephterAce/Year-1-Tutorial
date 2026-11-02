@@ -1,6 +1,6 @@
 # Curriculum source register and validation rules
 
-Last checked: 2026-11-01
+Last checked: 2026-11-02
 
 ## Authoritative starting points
 
@@ -84,3 +84,21 @@ The full topic-by-topic capture for all 18 class/subject combinations and verifi
 - Federal Ministry of Education press release (3 September 2025): https://nerdc.gov.ng/content_manager/pdf_files/Press%20Release%20On%20New%20FG%20Curriculum.pdf
 - NERDC revised SSEC landing page: https://www.nerdc.gov.ng/content_manager/new_senior_curriculum_home.html
 - NERDC e-Curriculum browse page: https://nerdc.org.ng/CurriculumView.aspx
+
+
+## Public-source verification update — 2026-11-02
+
+Official pages have now been checked directly:
+
+- The NERDC SSEC landing page links to three separate class portals (SSS1, SSS2, SSS3): https://nerdc.gov.ng/content_manager/new_senior_curriculum_home.html
+- The NERDC e-Curriculum browse page exposes SSS1–SSS3 selectors and all six selected subjects. Its rendered page shows a sample General Mathematics theme/topic sequence, but the dynamic page is not a complete export of all class/topic/content records: https://www.nerdc.org.ng/CurriculumView.aspx
+- The Federal Ministry of Education's 3 September 2025 press release says the revised curriculum takes effect in 2025/26, SSS students select 8–9 subjects, and identifies five core/compulsory subjects: English Language, General Mathematics, one trade subject, Citizenship and Heritage Studies, and Digital Technologies. Biology, Chemistry, Physics and Further Mathematics are in the Science field: https://nerdc.gov.ng/content_manager/pdf_files/Press%20Release%20On%20New%20FG%20Curriculum.pdf
+- NERDC's 8 September 2025 approved-subject notice confirms the revised subject offering and says implementation begins at the start of each three-year cycle, including SS1: https://nerdc.org.ng/eCurriculum/Doc/NERDC-approved-subjects-notice.pdf
+- NERDC e-Curriculum explains that full digital access/Teachers' Aid is associated with school access/subscription. Contact shown by NERDC: subscription@nerdc.org.ng and 08069234214. General NERDC site contact: info@nerdc.gov.ng; +2347081361390 / +2348036656492.
+
+### Important transition and product implications
+
+1. The revised 2025/26 senior-secondary framework is now the starting point for new SS1 cohorts. Do not silently apply the revised SS1 structure to all existing SS2/SS3 cohorts; retain cohort/curriculum-version metadata and verify the transition rules for those cohorts with NERDC and the relevant school/state education authority.
+2. Learnwise's six-subject learning library remains a valid product scope, but must not be represented as the complete compulsory SSS subject package. Biology, Chemistry, Physics and Further Mathematics are Science-field subjects, not all five compulsory subjects.
+3. Curriculum content and school term schemes are different layers. Keep topic coverage separate from First/Second/Third-term placement. Term mapping must cite a school scheme or official term allocation.
+4. Next source-acquisition step: request access to the class-specific SSS curriculum and full content details from NERDC; if digital access is subscription-controlled, obtain an authorised school/teacher account or a written official extract/permission. Never bypass login or access controls.

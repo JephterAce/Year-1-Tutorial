@@ -35,6 +35,10 @@ def _csv_safe(value):
     """Neutralise spreadsheet formula prefixes without changing normal text."""
     if value is None:
         return ""
+    if isinstance(value, bool):
+        return str(value)
+    if isinstance(value, (int, float)):
+        return str(value)
     if isinstance(value, (dict, list, tuple)):
         value = json.dumps(_json_value(value), ensure_ascii=False, sort_keys=True)
     elif isinstance(value, (datetime, date)):

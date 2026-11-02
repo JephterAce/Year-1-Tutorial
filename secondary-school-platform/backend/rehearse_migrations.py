@@ -4,6 +4,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 import psycopg
 
+ROOT = Path(__file__).resolve().parents[1]
+BASE_SCHEMA = ROOT / "DATABASE_SCHEMA.sql"
 MIGRATIONS = Path(__file__).resolve().parent / "migrations"
 NAME = re.compile(r"^\d{3}_[a-z0-9_]+\.sql$")
 
@@ -33,6 +35,22 @@ def rehearse(dsn=None):
             version TEXT PRIMARY KEY, sha256 CHAR(64) NOT NULL,
             applied_at TIMESTAMPTZ NOT NULL DEFAULT now())""")
         conn.commit()
+        baseline_sql = BASE_SCHEMA.read_text(encoding="utf-8")
+        baseline_digest = hashlib.sha256(baseline_sql.encode()).hexdigest()
+        with conn.transaction():
+            baseline = conn.execute(
+                "SELECT sha256 FROM learnwise_schema_migrations WHERE version='000_DATABASE_SCHEMA.sql'"
+            ).fetchone()
+            if baseline:
+                if baseline[0].strip() != baseline_digest:
+                    raise RuntimeError("Initial schema checksum changed; create a reviewed forward migration.")
+            else:
+                conn.execute(baseline_sql)
+                conn.execute(
+                    "INSERT INTO learnwise_schema_migrations(version,sha256) VALUES ('000_DATABASE_SCHEMA.sql',%s)",
+                    (baseline_digest,),
+                )
+                applied.append("000_DATABASE_SCHEMA.sql")
         for path in migration_files():
             sql = path.read_text(encoding="utf-8")
             digest = hashlib.sha256(sql.encode()).hexdigest()

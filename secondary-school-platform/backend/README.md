@@ -88,3 +88,8 @@ Migration 012 adds student-owned reports for integrity appeals, question errors 
 ## Admin security foundation (migration 013)
 
 Migration `013_admin_sessions_and_audit_guard.sql` adds a separate server-side admin session table with hashed session and CSRF tokens, expiry/revocation fields and active-session indexes. It also makes audit events append-only and adds case/space-insensitive admin email lookup. The migration does not enable admin login or grant access by itself. A dedicated admin authentication service, secure cookie/CSRF routes, capability enforcement, audit-writing wrappers and controlled owner provisioning are still required. Rehearse this migration on disposable PostgreSQL before any deployment.
+
+
+## Admin authentication service
+
+admin_auth.py authenticates pre-provisioned admin accounts against the dedicated admin table, applies an HMAC-keyed login rate limit, issues random server-side sessions with only token hashes stored, revokes prior sessions on login, checks active status on every session lookup, validates CSRF tokens, and supports revocation on logout. Flask routes expose admin login, current-session inspection and logout only. There is deliberately no public admin signup or role-change endpoint. Privileged admin business operations must still be wrapped in capability checks and append-only audit events before they are exposed.

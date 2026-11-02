@@ -1,64 +1,56 @@
-# API foundation
+# Learnwise backend
 
-Local Flask API for the separate senior-secondary learning platform.
+Isolated Flask/PostgreSQL API for the SS1–SS3 learning platform. The existing Year 1 Telegram bot is outside this application.
 
-## Local run
+## Local development
+
 ```bash
 cd secondary-school-platform/backend
 python -m venv .venv
-# Activate the virtual environment, then:
+# Activate the virtual environment
 pip install -r requirements.txt
 python -m unittest -v
 python app.py
 ```
 
-Health endpoint: `GET /health`
-Catalogue endpoint: `GET /api/v1/catalogue`
-Optional filters: `?class=SS2&subject=general-mathematics&term=1&q=quadratic`
+- Health: `GET /health`
+- Catalogue: `GET /api/v1/catalogue`
+- Student account: `/api/v1/auth/*`
+- Assessment execution: `/api/v1/assessments/{assessment_id}/attempts` and `/api/v1/assessment-attempts/{attempt_id}/*`
+- Paystack callback: `POST /api/v1/webhooks/paystack` (development foundation only)
 
-## Demo and database modes
-Without `DATABASE_URL`, the API returns clearly labelled illustrative demo catalogue records. With `DATABASE_URL`, it queries published topics from the dedicated platform database. It does not silently fall back to sample records when a configured database is unavailable.
+Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. Identity, assessment and payment operations require PostgreSQL and fail closed without it. Use a dedicated TLS PostgreSQL database and never commit real environment files or credentials.
 
-Copy `.env.example` to a local `.env` and set a dedicated PostgreSQL connection string. Never commit the real `.env` or share database credentials in chat.
+## Ordered database setup
 
-## Database setup
-1. Provision a separate PostgreSQL database for this platform; do not reuse the Year 1 bot's SQLite database.
-2. Apply `../DATABASE_SCHEMA.sql` using a database owner/migration role.
-3. Apply `migrations/001_platform_hardening.sql`.
-4. Apply `migrations/002_identity_security.sql`.
-5. Apply `migrations/003_nerdc_curriculum_metadata.sql`.
-6. Apply `migrations/004_student_profiles_and_assessments.sql`.
-7. Apply `migrations/005_student_data_exports.sql`.
-8. Apply `migrations/006_payment_notification_outbox.sql`.
-9. Apply `migrations/007_student_sessions_and_rate_limits.sql`.
-10. Apply `migrations/008_assessment_immutability.sql`.
-11. Configure the application connection using a least-privilege database role and TLS.
-11. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
+1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
+2. Apply migrations `001_platform_hardening.sql` through `008_assessment_immutability.sql` in numeric order.
+3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
+4. Run the application with a least-privilege database role.
 
-## Current security boundary
-The API includes student registration, email verification, login/logout, password recovery and server-side student sessions. It still lacks production admin authorisation, secure payment-order creation, full assessment attempt execution, entitlement-protected media delivery and operational deployment. Do not add secrets to source control or connect live payments until the remaining controls and reviews are complete.
+No migration has been applied to a live database.
 
-## Payment email alerts (foundation only)
-The backend includes `payment_notifications.py`, which sends a minimal owner notification to `PAYMENT_ALERT_RECIPIENT` (default: `emmanuelbjephter@gmail.com`) through a configured SMTP relay using TLS. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` and optionally `SMTP_FROM` as deployment secrets. Do not commit credentials or paste them into chat.
+## Student identity
 
-This mailer is deliberately not connected to a public checkout redirect. A future Paystack webhook handler must first verify the webhook signature, fetch/verify the transaction server-side, confirm amount/currency/reference and idempotently record the successful payment, then enqueue the alert. A mail failure must not reverse a valid payment or duplicate fulfilment; use a durable retry/outbox worker. Live payment/webhook processing and SMTP delivery are not enabled yet.
+Registration requires explicit Terms and Privacy acceptance. The API supports email verification, login/logout, session revocation, CSRF validation and password reset. The account page assumes a same-origin API or reviewed same-origin reverse proxy. Production requires HTTPS, reviewed origin/CSRF policy, proxy-aware rate limiting, email resend/abuse controls, transactional email outbox and a real PostgreSQL/SMTP end-to-end test.
 
+## Assessment execution
 
-## Paystack webhook security primitives (not a live integration)
-`paystack_webhooks.py` verifies the HMAC-SHA512 signature against the exact raw request body and validates the minimum shape of a `charge.success` event. Its tests use synthetic payloads only.
+The attempt service creates a briefing-state attempt, checks class eligibility/attempt limits/allowed question counts, and starts only after affirmative agreement to the current briefing policy version. Start populates immutable per-attempt question and answer-key snapshots. Student projections omit answer keys. Server UTC deadlines enforce the 36-seconds-per-question rule, with the 10-question/7-minute exception. Answers are ownership-checked and saved server-side. Submission/expiry grades supported objective types and persists results. Focus/visibility/fullscreen incidents are debounced; the first two warn and the third terminates with an integrity-review flag, not a finding of misconduct.
 
-This helper is not a payment endpoint and must not grant access or trigger email. Before fulfilment, the future service must fetch the transaction from Paystack using a server-held secret, compare the verified reference/amount/currency against a pending server-created order, atomically record the payment and entitlement with unique idempotency constraints, and enqueue an owner email in a durable outbox. Do not trust the webhook payload alone. No Paystack secret, checkout, live webhook route, entitlement grant or live email is configured.
+The browser countdown is display-only. A production client must autosave answers, send integrity events, keep the server deadline visible, and submit persisted answers on expiry. This increment has unit/contract coverage but has not been exercised against PostgreSQL. It does not yet provide an appeal workflow, fault-reporting workflow, robust recovery for concurrent/retried requests, result notifications, admin assessment authoring, or end-to-end browser tests. No essays, handwriting, proofs, webcam or microphone surveillance are supported.
 
+## Payment and owner email
 
-## Paystack callback and verified fulfilment (development only)
-The backend now exposes `POST /api/v1/webhooks/paystack`. It authenticates the exact raw request body using `x-paystack-signature`, requires a matching server-created `payment_transactions` order, fetches the transaction from Paystack's verification API, compares reference/amount/NGN currency/status, and atomically records payment success, entitlement and an owner-email outbox row. Duplicate callbacks use deterministic idempotency keys. A processing/database failure returns a retryable 503; an invalid signature returns 400.
+The callback validates the raw Paystack HMAC signature, looks up a server-created pending order, verifies the transaction directly with Paystack, and atomically records payment/entitlement/outbox state. The outbox worker supports leased claims and retries but is not scheduled or monitored. Trusted order creation is not implemented; therefore there is no safe checkout path and real payments must remain disabled. SMTP notification recipient defaults to `emmanuelbjephter@gmail.com`; configure SMTP and Paystack credentials only in the host's secret manager, never in source control or chat. No live email or payment has been tested.
 
-The outbox is durable, but an email delivery worker and retry/dead-letter scheduler are not yet implemented. Therefore this callback queues an alert but does not send one. Do not configure live Paystack callbacks or accept real payments until student authentication, trusted order creation, operational monitoring, outbox worker/retries and deployment controls are complete. The migration must be applied only to a dedicated Learnwise database after migrations 001–005.
+## Release gates
 
+- Dedicated PostgreSQL provisioned; migrations 001–008 rehearsed and applied only after approval.
+- SMTP and HTTPS public app URL configured privately; email delivery/resend and operational monitoring tested.
+- Payment order creation, reconciliation/refunds, outbox scheduling and alerting implemented before live checkout.
+- Verified NERDC/school curriculum source documents supplied; no invented topic/term mapping.
+- Nigerian privacy, data-protection, minor-consent, accessibility and safeguarding review completed.
+- Security review, production monitoring, backup/restore and incident response tested.
 
-## Payment email outbox worker
-`payment_outbox.py` provides a single-item worker function for a supervised scheduler/background process. It claims rows using PostgreSQL `FOR UPDATE SKIP LOCKED`, reclaims stale processing leases, sends through the configured TLS SMTP adapter, marks successful delivery, and retries failures with capped exponential backoff (30 seconds up to 1 hour; 8 attempts before dead-letter). It never runs inside the webhook request. The host must schedule this worker and monitor dead-letter rows before live payment activation.
-
-
-## Student session foundation (not yet an account API)
-Migration `007_student_sessions_and_rate_limits.sql` adds hashed server-side student sessions, CSRF token hashes, expiry/revocation fields, database-backed auth rate-limit buckets and case-insensitive email uniqueness. No student registration/login route is active yet. Keep cookies HttpOnly, Secure and SameSite in production; use CSRF validation on state-changing requests, rotate session identifiers after login, and store only token hashes server-side.
+Keep PR #1 draft and unmerged. Do not deploy, apply production migrations, activate live payments, change production secrets/config, spend money, or modify the legacy bot without explicit approval.

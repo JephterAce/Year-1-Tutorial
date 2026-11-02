@@ -26,7 +26,7 @@ Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. I
 ## Ordered database setup
 
 1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
-2. Apply migrations `001_platform_hardening.sql` through `009_curriculum_versioning_and_review.sql` in numeric order.
+2. Apply migrations `001_platform_hardening.sql` through `010_curriculum_publication_guard.sql` in numeric order.
 3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
 4. Run the application with a least-privilege database role.
 
@@ -60,8 +60,8 @@ Keep PR #1 draft and unmerged. Do not deploy, apply production migrations, activ
 
 ## Revised NERDC curriculum workflow
 
-Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum across SS1–SS3 for the six selected subjects. Migration 009 adds curriculum-version records, cohort applicability records, source rights/provenance metadata, topic review states and optional term assignment. Cohort applicability remains pending until official evidence confirms it.
+Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum across SS1–SS3 for the six selected subjects. Migrations 009–010 add curriculum-version records, cohort applicability records, source rights/provenance metadata, optional term assignment and a database trigger that rejects unsupported topic publication. Cohort applicability remains pending until official evidence confirms it.
 
-Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` validates rows and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
+Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` parses the CSV template, supports a dry-run validation report and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
 
-Migration 009 is authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
+Migrations 009–010 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.

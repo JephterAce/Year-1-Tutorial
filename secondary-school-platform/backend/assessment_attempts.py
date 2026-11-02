@@ -326,3 +326,21 @@ def record_integrity_event(student_id, attempt_id, event_type):
         )
         return {"recorded": True, "warning": incident, "integrity_incidents": incident,
                 "message": "Please return to the test. The timer continues."}
+
+
+def list_published_assessments(student_id):
+    with connection() as conn:
+        student = conn.execute("SELECT class_level FROM students WHERE id=%s", (student_id,)).fetchone()
+        if not student:
+            raise AttemptError("not_found", "Student account not found.", 404)
+        rows = conn.execute(
+            """SELECT a.id,a.title,a.description,a.class_level,a.allowed_question_counts,
+                      a.pass_mark_percent,a.max_attempts,s.name AS subject
+               FROM assessments a JOIN subjects s ON s.id=a.subject_id
+               WHERE a.status='published' AND a.class_level=%s
+                 AND (a.available_from IS NULL OR a.available_from<=now())
+                 AND (a.available_until IS NULL OR a.available_until>now())
+               ORDER BY s.sort_order,a.title""", (student["class_level"],)
+        ).fetchall()
+        return [{key: (str(value) if key == "id" else value) for key,value in row.items()}
+                for row in rows]

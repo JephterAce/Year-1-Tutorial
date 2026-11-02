@@ -1,6 +1,9 @@
 import unittest
 
-from curriculum_import import validate_curriculum_row, validate_import, TARGET_VERSION
+from curriculum_import import (
+    validate_curriculum_row, validate_import, validate_csv_import,
+    parse_csv_import, TARGET_VERSION,
+)
 
 
 def valid_row(**overrides):
@@ -63,6 +66,37 @@ class CurriculumImportTests(unittest.TestCase):
         result = validate_import([valid_row(), valid_row(class_level="SS4")])
         self.assertFalse(result["valid"])
         self.assertEqual(result["row_count"], 2)
+
+    def test_csv_parser_decodes_json_outcomes(self):
+        csv_text = (
+            "class_level,subject_slug,title,curriculum_version,source_title,source_url,"
+            "source_kind,source_section,review_status,term_mapping_status,learning_outcomes\n"
+            'SS1,general-mathematics,Example,nerdc_ssec_2025,NERDC,https://nerdc.gov.ng/x,'
+            'official_nerdc,Page 2,source_captured,not_assigned,"[\"Outcome one\"]"\n'
+        )
+        rows = parse_csv_import(csv_text)
+        self.assertEqual(rows[0]["learning_outcomes"], ["Outcome one"])
+
+    def test_csv_rejects_invalid_json_outcomes(self):
+        csv_text = (
+            "class_level,subject_slug,title,curriculum_version,source_title,source_url,"
+            "source_kind,review_status,term_mapping_status,learning_outcomes\n"
+            "SS1,general-mathematics,Example,nerdc_ssec_2025,NERDC,https://nerdc.gov.ng/x,"
+            'official_nerdc,source_captured,not_assigned,"not json"\n'
+        )
+        with self.assertRaisesRegex(ValueError, "learning_outcomes"):
+            parse_csv_import(csv_text)
+
+    def test_csv_dry_run_returns_validation_report(self):
+        csv_text = (
+            "class_level,subject_slug,title,curriculum_version,source_title,source_url,"
+            "source_kind,review_status,term_mapping_status\n"
+            "SS1,general-mathematics,Example,nerdc_ssec_2025,NERDC,https://nerdc.gov.ng/x,"
+            "official_nerdc,source_captured,not_assigned\n"
+        )
+        report = validate_csv_import(csv_text)
+        self.assertTrue(report["valid"])
+        self.assertEqual(report["row_count"], 1)
 
 
 if __name__ == "__main__":

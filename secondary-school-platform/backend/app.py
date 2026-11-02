@@ -1,8 +1,9 @@
 """Isolated Flask API for the senior-secondary learning platform.
 
 Without DATABASE_URL this serves clearly-labelled demo catalogue data.
-With DATABASE_URL it reads only published topics from the dedicated platform DB.
-No payment, account or protected media endpoints are enabled yet.
+With DATABASE_URL it enables the database-backed student, assessment,
+admin-review, payment-webhook and protected-media routes. Provider credentials
+and production infrastructure remain explicit deployment prerequisites.
 """
 import os
 from decimal import Decimal
@@ -112,10 +113,6 @@ def not_found(_error):
 def internal_error(_error):
     return jsonify({"error": "internal_error", "message": "An unexpected error occurred."}), 500
 
-
-if __name__ == "__main__":
-    # Local development only. Use a production WSGI server in deployment.
-    app.run(host="127.0.0.1", port=8000, debug=False)
 
 
 @app.post("/api/v1/auth/register")
@@ -676,3 +673,8 @@ def student_assessment_history():
     except Exception:
         app.logger.exception("Student assessment history failed")
         return jsonify({"error": "assessment_history_unavailable"}), 503
+
+
+if __name__ == "__main__":
+    # Local development only. Use a production WSGI server in deployment.
+    app.run(host="127.0.0.1", port=8000, debug=False)

@@ -640,3 +640,39 @@ def get_student_topic(topic_id):
     except Exception:
         app.logger.exception("Student topic detail failed")
         return jsonify({"error": "topic_unavailable"}), 503
+
+
+@app.get("/api/v1/student/assessment-history")
+def student_assessment_history():
+    from database import connection
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        with connection() as conn:
+            rows = conn.execute(
+                """SELECT a.id,a.title,s.name AS subject,a.class_level,
+                          x.status,x.question_count,x.score,x.maximum_score,x.percentage,
+                          x.passed,x.integrity_review_required,x.started_at,x.submitted_at
+                   FROM assessment_attempts x
+                   JOIN assessments a ON a.id=x.assessment_id
+                   JOIN subjects s ON s.id=a.subject_id
+                   WHERE x.student_id=%s AND x.status <> 'briefing'
+                   ORDER BY x.created_at DESC LIMIT 100""",
+                (student["student_id"],),
+            ).fetchall()
+        return jsonify({"items": [
+            {"attempt_id": str(row["id"]), "title": row["title"], "subject": row["subject"],
+             "class_level": row["class_level"], "status": row["status"],
+             "question_count": row["question_count"],
+             "score": str(row["score"]) if row["score"] is not None else None,
+             "maximum_score": str(row["maximum_score"]) if row["maximum_score"] is not None else None,
+             "percentage": str(row["percentage"]) if row["percentage"] is not None else None,
+             "passed": row["passed"], "integrity_review_required": row["integrity_review_required"],
+             "started_at": row["started_at"].isoformat() if row["started_at"] else None,
+             "submitted_at": row["submitted_at"].isoformat() if row["submitted_at"] else None}
+            for row in rows
+        ]}), 200
+    except Exception:
+        app.logger.exception("Student assessment history failed")
+        return jsonify({"error": "assessment_history_unavailable"}), 503

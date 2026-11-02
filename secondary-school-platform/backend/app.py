@@ -500,3 +500,8 @@ def admin_logout():
     response.delete_cookie("learnwise_admin_session", path="/", samesite="Strict")
     response.delete_cookie("learnwise_admin_csrf", path="/", samesite="Strict")
     return response
+
+
+# Protected admin assessment review endpoints.
+from admin_assessment_reviews import admin_reviews
+app.register_blueprint(admin_reviews)

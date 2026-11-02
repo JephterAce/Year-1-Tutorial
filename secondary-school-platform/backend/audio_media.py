@@ -1,5 +1,6 @@
 """Short-lived authorisation tokens for private lesson audio objects."""
-import base64, hashlib, hmac, json, os, time\nfrom pathlib import Path
+import base64, hashlib, hmac, json, os, time
+from pathlib import Path
 
 class AudioAccessError(ValueError): pass
 

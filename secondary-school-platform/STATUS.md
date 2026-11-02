@@ -194,3 +194,15 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - These are foundations, not a complete assessment system. No attempt-start service, server-authoritative attempt timer, question snapshot population, answer autosave, incident debounce/termination, atomic submission/grading persistence, appeals or result notifications have been implemented. No student-facing assessment execution is enabled.
 - Current browser identity page assumes a same-origin API or reverse proxy; no CORS/cross-origin cookie configuration is provided. The deployed site must use HTTPS and a same-origin API arrangement.
 - PostgreSQL and SMTP end-to-end verification remain pending; do not launch or accept payments until migrations are rehearsed, auth abuse controls and safeguarding are reviewed, and payment order creation is implemented.
+
+
+## Assessment execution service increment — 2026-11-02
+
+- Added `backend/assessment_attempts.py` with PostgreSQL-backed attempt creation, eligibility and attempt-limit checks, mandatory briefing acceptance/version, server UTC deadline creation, random question selection, immutable per-attempt question/answer-key snapshots, answer ownership/type validation and server-side answer persistence.
+- Added student-facing routes for attempt creation, briefing acceptance/start, attempt retrieval, answer saving, submission and integrity events. Every route requires a valid student session and CSRF token.
+- Server-side timing uses the approved 36-seconds-per-question rule and exact 10-question/7-minute exception. Browser time is not authoritative.
+- Submission and expiry use deterministic objective grading and persist scores. First two debounced focus/visibility/fullscreen incidents warn; the third terminates the attempt and flags it for integrity review. The response explicitly does not treat an integrity signal as proof of misconduct.
+- Added tests for answer-key omission from student question projections and timing-policy contracts.
+- Updated backend README with the new endpoints and exact production limitations.
+- This is a first execution-service increment, not a production-ready exam system. It has not been run against a real PostgreSQL instance. Appeal/fault-reporting, client autosave/recovery, result notifications, admin authoring, concurrency/idempotency hardening, and end-to-end browser tests remain. Database migrations 001–008 are still unapplied; no production service or student data is connected.
+- Latest code changes require a new GitHub Actions run before they can be reported as CI-verified. Keep the draft PR open; do not deploy or enable live payments.

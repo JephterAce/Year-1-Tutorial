@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import patch
 import rehearse_migrations as migrations
-from audio_media import AudioAccessError, issue_audio_token, verify_audio_token
+from audio_media import AudioAccessError, issue_audio_token, verify_audio_token, resolve_private_audio_path
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 class MigrationSafetyTests(unittest.TestCase):
  def test_requires_explicit_rehearsal_url(self):
@@ -30,5 +32,11 @@ class AudioTokenTests(unittest.TestCase):
   with self.assertRaises(AudioAccessError): issue_audio_token("s","t","audio.mp3",False)
  def test_path_traversal_rejected(self):
   with self.assertRaises(AudioAccessError): issue_audio_token("s","t","../secret.mp3",True)
+
+ def test_private_storage_path_is_confined(self):
+  with TemporaryDirectory() as root:
+   p=Path(root)/"lesson.mp3";p.write_bytes(b"audio")
+   self.assertEqual(resolve_private_audio_path(root,"lesson.mp3"),p.resolve())
+   with self.assertRaises(AudioAccessError): resolve_private_audio_path(root,"../outside.mp3")
 
 if __name__=="__main__": unittest.main()

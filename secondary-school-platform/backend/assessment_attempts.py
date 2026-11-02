@@ -180,7 +180,7 @@ def _finalize(conn, attempt, status):
         q = {"question_type": snap.get("question_type"),
              "answer_key": _json(item["answer_key_snapshot"]),
              "points": item["points_snapshot"],
-             "numeric_tolerance": item["numeric_tolerance_snapshot"],
+             "numeric_tolerance": item["numeric_tolerance_snapshot"] if item["numeric_tolerance_snapshot"] is not None else 0,
              "accepted_answers": item["accepted_answers_snapshot"]}
         result = grade_answer(q, item["answer"])
         score += result["awarded_points"]

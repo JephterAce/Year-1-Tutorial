@@ -1,4 +1,6 @@
 """Student-submitted assessment issue reports and integrity appeals."""
+from uuid import UUID
+
 from database import connection
 
 ISSUE_TYPES = frozenset({"integrity_appeal", "question_error", "technical_issue"})
@@ -14,7 +16,7 @@ def validate_report_payload(payload):
     if not isinstance(payload, dict):
         raise AssessmentReportError("invalid_report", "A report object is required.")
     issue_type = payload.get("issue_type")
-    if issue_type not in ISSUE_TYPES:
+    if not isinstance(issue_type, str) or issue_type not in ISSUE_TYPES:
         raise AssessmentReportError("invalid_issue_type", "Choose a supported report type.")
     details = payload.get("details")
     if not isinstance(details, str):
@@ -25,8 +27,11 @@ def validate_report_payload(payload):
     question_id = payload.get("question_id")
     if issue_type == "question_error" and not question_id:
         raise AssessmentReportError("question_required", "Select the question with the problem.")
-    if question_id is not None and (not isinstance(question_id, str) or len(question_id) > 64):
-        raise AssessmentReportError("invalid_question", "The question reference is invalid.")
+    if question_id is not None:
+        try:
+            question_id = str(UUID(question_id))
+        except (TypeError, ValueError, AttributeError):
+            raise AssessmentReportError("invalid_question", "The question reference is invalid.") from None
     return issue_type, details, question_id
 
 
@@ -34,7 +39,7 @@ def submit_assessment_report(student_id, attempt_id, payload):
     issue_type, details, question_id = validate_report_payload(payload)
     with connection() as conn:
         attempt = conn.execute(
-            "SELECT id,status FROM assessment_attempts WHERE id=%s AND student_id=%s FOR SHARE",
+            "SELECT id,status FROM assessment_attempts WHERE id=%s AND student_id=%s FOR UPDATE",
             (attempt_id, student_id),
         ).fetchone()
         if not attempt:

@@ -31,11 +31,12 @@ Copy `.env.example` to a local `.env` and set a dedicated PostgreSQL connection 
 7. Apply `migrations/005_student_data_exports.sql`.
 8. Apply `migrations/006_payment_notification_outbox.sql`.
 9. Apply `migrations/007_student_sessions_and_rate_limits.sql`.
-10. Configure the application connection using a least-privilege database role and TLS.
+10. Apply `migrations/008_assessment_immutability.sql`.
+11. Configure the application connection using a least-privilege database role and TLS.
 11. Populate approved subjects, terms and curriculum-reviewed topics before expecting the production catalogue to show results.
 
 ## Current security boundary
-This API currently exposes health and a public list of published catalogue topics only. It does not yet provide student registration/login, admin authorisation, payment processing, webhook handling, entitlement checks, or protected audio delivery. Do not add secrets to source control or connect live payments until these controls and their tests are implemented.
+The API includes student registration, email verification, login/logout, password recovery and server-side student sessions. It still lacks production admin authorisation, secure payment-order creation, full assessment attempt execution, entitlement-protected media delivery and operational deployment. Do not add secrets to source control or connect live payments until the remaining controls and reviews are complete.
 
 ## Payment email alerts (foundation only)
 The backend includes `payment_notifications.py`, which sends a minimal owner notification to `PAYMENT_ALERT_RECIPIENT` (default: `emmanuelbjephter@gmail.com`) through a configured SMTP relay using TLS. Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` and optionally `SMTP_FROM` as deployment secrets. Do not commit credentials or paste them into chat.

@@ -8,6 +8,7 @@ import hmac
 import json
 import os
 import unittest
+from decimal import Decimal
 from uuid import uuid4
 from unittest.mock import patch
 
@@ -90,7 +91,7 @@ class PostgreSQLEndToEndFlows(unittest.TestCase):
         save_answer(self.student, created["attempt_id"], question, "a")
         result = submit_attempt(self.student, created["attempt_id"])
         self.assertEqual(result["status"], "submitted")
-        self.assertEqual(result["score"], "2")
+        self.assertEqual(Decimal(result["score"]), Decimal("2"))
         self.assertEqual(result["percentage"], "100.00")
 
     def test_paystack_checkout_webhook_verify_and_entitlement_are_idempotent(self):

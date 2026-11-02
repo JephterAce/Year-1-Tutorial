@@ -48,7 +48,7 @@ The callback validates the raw Paystack HMAC signature, looks up a server-create
 
 ## Release gates
 
-- Dedicated PostgreSQL provisioned; migrations 001–010 rehearsed and applied only after approval.
+- Dedicated PostgreSQL provisioned; migrations 001–012 rehearsed and applied only after approval.
 - SMTP and HTTPS public app URL configured privately; email delivery/resend and operational monitoring tested.
 - Payment order creation, reconciliation/refunds, outbox scheduling and alerting implemented before live checkout.
 - Revised NERDC curriculum versioning, source capture, cohort applicability and teacher-review workflow implemented; authorised source documents and term schemes still required. No invented topic/term mapping.
@@ -64,7 +64,12 @@ Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum a
 
 Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` parses the CSV template, supports a dry-run validation report and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
 
-Migrations 009–011 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
+Migrations 009–012 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
 
 
 Migration 011 makes source records immutable once referenced by a published topic and prevents material changes to a curriculum version while published topics use it. Corrections must use a replacement source/version and pass review; migration execution and PostgreSQL trigger behaviour still require disposable-database rehearsal.
+
+
+## Assessment issue reporting
+
+Migration 012 adds student-owned reports for integrity appeals, question errors and technical problems. Authenticated students can submit reports against their own attempts and retrieve only their own report status. Question-error reports must reference a question in that attempt; integrity appeals are accepted only for integrity-terminated attempts. Details are length-limited and each attempt is capped at five reports. This is a student submission path only: a privileged admin review queue and staff response workflow are still required before launch.

@@ -26,7 +26,7 @@ Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. I
 ## Ordered database setup
 
 1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
-2. Apply migrations `001_platform_hardening.sql` through `008_assessment_immutability.sql` in numeric order.
+2. Apply migrations `001_platform_hardening.sql` through `009_curriculum_versioning_and_review.sql` in numeric order.
 3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
 4. Run the application with a least-privilege database role.
 
@@ -51,8 +51,17 @@ The callback validates the raw Paystack HMAC signature, looks up a server-create
 - Dedicated PostgreSQL provisioned; migrations 001–008 rehearsed and applied only after approval.
 - SMTP and HTTPS public app URL configured privately; email delivery/resend and operational monitoring tested.
 - Payment order creation, reconciliation/refunds, outbox scheduling and alerting implemented before live checkout.
-- Verified NERDC/school curriculum source documents supplied; no invented topic/term mapping.
+- Revised NERDC curriculum versioning, source capture, cohort applicability and teacher-review workflow implemented; authorised source documents and term schemes still required. No invented topic/term mapping.
 - Nigerian privacy, data-protection, minor-consent, accessibility and safeguarding review completed.
 - Security review, production monitoring, backup/restore and incident response tested.
 
 Keep PR #1 draft and unmerged. Do not deploy, apply production migrations, activate live payments, change production secrets/config, spend money, or modify the legacy bot without explicit approval.
+
+
+## Revised NERDC curriculum workflow
+
+Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum across SS1–SS3 for the six selected subjects. Migration 009 adds curriculum-version records, cohort applicability records, source rights/provenance metadata, topic review states and optional term assignment. Cohort applicability remains pending until official evidence confirms it.
+
+Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` validates rows and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
+
+Migration 009 is authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.

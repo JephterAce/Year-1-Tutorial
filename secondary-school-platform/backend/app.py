@@ -116,3 +116,135 @@ def internal_error(_error):
 if __name__ == "__main__":
     # Local development only. Use a production WSGI server in deployment.
     app.run(host="127.0.0.1", port=8000, debug=False)
+
+
+@app.post("/api/v1/auth/register")
+def register():
+    from identity_service import register_student, IdentityError
+    from identity_email import send_identity_link
+    data = request.get_json(silent=True) or {}
+    if data.get("accept_terms") is not True or data.get("accept_privacy") is not True:
+        return jsonify({"error": "consent_required"}), 400
+    try:
+        result = register_student(
+            data.get("email"), data.get("username"), data.get("display_name"),
+            data.get("class_level"), data.get("password"),
+        )
+        send_identity_link(result["student"]["email"], result["verification_token"], "verify")
+        return jsonify({"message": "If the details are eligible, a verification email will be sent."}), 202
+    except (ValueError, IdentityError) as exc:
+        return jsonify({"error": "registration_unavailable", "message": str(exc)}), 400
+    except Exception:
+        app.logger.exception("Student registration failed")
+        return jsonify({"error": "registration_unavailable"}), 503
+
+
+@app.post("/api/v1/auth/verify-email")
+def verify_email():
+    from identity_service import verify_student_email, IdentityError
+    data = request.get_json(silent=True) or {}
+    try:
+        verify_student_email(data.get("token"))
+        return jsonify({"verified": True}), 200
+    except IdentityError:
+        return jsonify({"error": "invalid_or_expired_link"}), 400
+    except Exception:
+        app.logger.exception("Email verification failed")
+        return jsonify({"error": "verification_unavailable"}), 503
+
+
+@app.post("/api/v1/auth/login")
+def login():
+    from identity_service import login_student, IdentityError
+    data = request.get_json(silent=True) or {}
+    try:
+        result = login_student(data.get("email"), data.get("password"))
+        response = jsonify({"authenticated": True})
+        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        response.set_cookie(
+            "learnwise_session", result["session_id"], httponly=True, secure=secure,
+            samesite="Lax", path="/", max_age=12 * 60 * 60,
+        )
+        response.set_cookie(
+            "learnwise_csrf", result["csrf_token"], httponly=False, secure=secure,
+            samesite="Lax", path="/", max_age=12 * 60 * 60,
+        )
+        return response
+    except IdentityError:
+        return jsonify({"error": "invalid_credentials_or_unverified"}), 401
+    except Exception:
+        app.logger.exception("Student login failed")
+        return jsonify({"error": "login_unavailable"}), 503
+
+
+def _current_student(require_csrf=False):
+    from identity_service import authenticate_session, validate_csrf
+    session = authenticate_session(request.cookies.get("learnwise_session"))
+    if not session:
+        return None
+    if require_csrf and not validate_csrf(session, request.headers.get("X-CSRF-Token", "")):
+        return None
+    return session
+
+
+@app.get("/api/v1/auth/me")
+def current_student():
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    student.pop("csrf_token_hash", None)
+    student.pop("session_row_id", None)
+    student["id"] = str(student.pop("student_id"))
+    return jsonify({"student": student})
+
+
+@app.post("/api/v1/auth/logout")
+def logout():
+    from identity_service import logout_student
+    if not _current_student(require_csrf=True):
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    logout_student(request.cookies.get("learnwise_session"))
+    response = jsonify({"logged_out": True})
+    response.delete_cookie("learnwise_session", path="/", samesite="Lax")
+    response.delete_cookie("learnwise_csrf", path="/", samesite="Lax")
+    return response
+
+
+@app.post("/api/v1/auth/password-reset")
+def password_reset_request():
+    from identity_service import request_password_reset
+    from identity_email import send_identity_link
+    data = request.get_json(silent=True) or {}
+    try:
+        token = request_password_reset(data.get("email"))
+        if token:
+            # The database returns the associated address only after a matching active account.
+            from database import connection
+            import hashlib
+            digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+            with connection() as conn:
+                row = conn.execute(
+                    """SELECT s.email FROM identity_tokens t JOIN students s ON s.id=t.student_id
+                       WHERE t.token_hash=%s AND t.purpose='reset_student_password'""",
+                    (digest,),
+                ).fetchone()
+            if row:
+                send_identity_link(row["email"], token, "reset")
+        return jsonify({"message": "If an eligible account exists, reset instructions will be sent."}), 202
+    except Exception:
+        app.logger.exception("Password reset request could not be processed")
+        return jsonify({"message": "If an eligible account exists, reset instructions will be sent."}), 202
+
+
+@app.post("/api/v1/auth/password-reset/complete")
+def password_reset_complete():
+    from identity_service import reset_student_password, IdentityError
+    data = request.get_json(silent=True) or {}
+    try:
+        reset_student_password(data.get("token"), data.get("new_password"))
+        return jsonify({"password_reset": True}), 200
+    except (IdentityError, ValueError):
+        return jsonify({"error": "invalid_or_expired_link_or_password"}), 400
+    except Exception:
+        app.logger.exception("Password reset failed")
+        return jsonify({"error": "password_reset_unavailable"}), 503

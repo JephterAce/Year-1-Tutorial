@@ -106,3 +106,38 @@ def validate_import(rows, *, for_publication=False):
         "warning_count": sum(len(result.warnings) for result in results),
         "rows": results,
     }
+
+import csv
+import io
+import json
+
+
+def parse_csv_import(csv_text):
+    """Parse the supplied CSV template, decoding JSON learning outcomes safely."""
+    if not isinstance(csv_text, str):
+        raise ValueError("CSV input must be text")
+    reader = csv.DictReader(io.StringIO(csv_text))
+    if not reader.fieldnames:
+        raise ValueError("CSV header row is required")
+    rows = []
+    for line_number, raw in enumerate(reader, start=2):
+        row = {key: (value.strip() if isinstance(value, str) else value)
+               for key, value in raw.items() if key}
+        outcomes = row.get("learning_outcomes", "")
+        if outcomes:
+            try:
+                row["learning_outcomes"] = json.loads(outcomes)
+            except json.JSONDecodeError as exc:
+                raise ValueError(
+                    f"learning_outcomes on CSV line {line_number} must be a JSON array"
+                ) from exc
+        else:
+            row["learning_outcomes"] = []
+        rows.append(row)
+    return rows
+
+
+def validate_csv_import(csv_text, *, for_publication=False):
+    """Parse and validate a CSV batch without writing to the database."""
+    rows = parse_csv_import(csv_text)
+    return validate_import(rows, for_publication=for_publication)

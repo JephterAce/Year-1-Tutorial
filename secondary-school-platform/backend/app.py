@@ -248,3 +248,108 @@ def password_reset_complete():
     except Exception:
         app.logger.exception("Password reset failed")
         return jsonify({"error": "password_reset_unavailable"}), 503
+
+
+# Assessment execution endpoints. All require a verified student session and CSRF.
+def _assessment_student():
+    student = _current_student(require_csrf=True)
+    return student
+
+
+@app.post("/api/v1/assessments/<assessment_id>/attempts")
+def create_assessment_attempt(assessment_id):
+    from assessment_attempts import create_attempt, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    try:
+        result = create_attempt(student["student_id"], assessment_id, data.get("question_count"))
+        return jsonify(result), 201
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment attempt creation failed")
+        return jsonify({"error": "assessment_unavailable"}), 503
+
+
+@app.post("/api/v1/assessment-attempts/<attempt_id>/start")
+def start_assessment_attempt(attempt_id):
+    from assessment_attempts import start_attempt, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    try:
+        return jsonify(start_attempt(student["student_id"], attempt_id,
+                                     data.get("accepted"), data.get("policy_version"))), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment attempt start failed")
+        return jsonify({"error": "assessment_start_unavailable"}), 503
+
+
+@app.get("/api/v1/assessment-attempts/<attempt_id>")
+def get_assessment_attempt(attempt_id):
+    from assessment_attempts import get_attempt, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        return jsonify(get_attempt(student["student_id"], attempt_id)), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment attempt fetch failed")
+        return jsonify({"error": "assessment_unavailable"}), 503
+
+
+@app.put("/api/v1/assessment-attempts/<attempt_id>/answers/<question_id>")
+def save_assessment_answer(attempt_id, question_id):
+    from assessment_attempts import save_answer, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    if "answer" not in data:
+        return jsonify({"error": "answer_required"}), 400
+    try:
+        return jsonify(save_answer(student["student_id"], attempt_id, question_id, data["answer"])), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment answer save failed")
+        return jsonify({"error": "answer_save_unavailable"}), 503
+
+
+@app.post("/api/v1/assessment-attempts/<attempt_id>/submit")
+def submit_assessment_attempt(attempt_id):
+    from assessment_attempts import submit_attempt, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        return jsonify(submit_attempt(student["student_id"], attempt_id)), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment submission failed")
+        return jsonify({"error": "submission_unavailable"}), 503
+
+
+@app.post("/api/v1/assessment-attempts/<attempt_id>/integrity-events")
+def assessment_integrity_event(attempt_id):
+    from assessment_attempts import record_integrity_event, AttemptError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    try:
+        return jsonify(record_integrity_event(student["student_id"], attempt_id,
+                                              data.get("event_type"))), 200
+    except AttemptError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment integrity event failed")
+        return jsonify({"error": "integrity_event_unavailable"}), 503

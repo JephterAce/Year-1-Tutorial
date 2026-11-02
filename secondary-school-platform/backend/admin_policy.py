@@ -50,7 +50,7 @@ def can(principal, capability):
         return False
     if not isinstance(principal.admin_id, str) or not principal.admin_id.strip():
         return False
-    if capability not in CAPABILITIES:
+    if not isinstance(capability, str) or capability not in CAPABILITIES:
         return False
     return capability in ROLE_CAPABILITIES.get(principal.role, frozenset())
 

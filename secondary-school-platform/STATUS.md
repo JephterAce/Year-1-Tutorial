@@ -279,3 +279,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added authenticated, CSRF-protected report submission and student-owned report listing endpoints. Question references are checked against the attempt; integrity appeals are restricted to integrity-terminated attempts; five-report cap per attempt.
 - Added input-validation tests. Staff review queue, notification, appeal adjudication policy and operational response process remain outstanding.
 - Migration 012 is authored but unapplied. PostgreSQL integration tests remain outstanding. GitHub Actions run 41391411324 passed on exact branch head `8f03d86c3d72843d45ace3b0a10c05529822830b`.
+
+
+## Safe export serialization increment — 2026-11-02
+
+- Added `backend/export_serialization.py` for allowlist-only CSV/JSON serialization, date/UUID/decimal normalisation, unsupported-value rejection and spreadsheet-formula injection protection.
+- Numeric values remain numeric in CSV output; untrusted text beginning with formula characters is neutralised.
+- Added tests for allowlist exclusion, nested metadata, date/decimal handling, malicious formula cells and invalid records.
+- This is a serialization layer only. It does not expose student records, create an export endpoint, or replace the pending admin authorisation, audit, secure storage, expiring download, deletion and retention controls.
+- Updated backend setup instructions to include migrations 001–012. No migration has been applied.

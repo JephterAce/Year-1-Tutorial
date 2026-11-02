@@ -102,7 +102,7 @@ The repository contains a substantial implementation foundation. It is **not app
 
 - Run #503, commit `001ce6dc4b47bd69ca4e4552b552557b72b92185`: successful.
 - Run URL: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/41400544761
-- A follow-up CI run was queued for the direct-startup fix commit `c62354310d9252d8b1e2d69ae1ac7ffcbe2bcc34`; do not treat it as passed until GitHub reports a completed successful conclusion.
+- The direct-startup fix commit `c62354310d9252d8b1e2d69ae1ac7ffcbe2bcc34` passed CI (run 41403284904). The audit document commit `83db267f71dbcbe4bd4bd28db222d032668a7c66` also passed CI (run 41403318357).
 
 ## Safety and change control
 

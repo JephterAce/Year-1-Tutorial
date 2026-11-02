@@ -4,6 +4,7 @@ import os
 import re
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from database import connection
@@ -40,6 +41,9 @@ def _initialise_with_paystack(email, reference, amount_kobo, callback_url, secre
     if result.get("status") is not True or not isinstance(data, dict):
         raise PaymentOrderError("provider_rejected", "Checkout could not be initialised.", 503)
     if data.get("reference") != reference or not isinstance(data.get("authorization_url"), str):
+        raise PaymentOrderError("provider_response_invalid", "Checkout provider response was invalid.", 503)
+    checkout_url = urlsplit(data["authorization_url"])
+    if checkout_url.scheme != "https" or checkout_url.hostname != "checkout.paystack.com":
         raise PaymentOrderError("provider_response_invalid", "Checkout provider response was invalid.", 503)
     return {"authorization_url": data["authorization_url"], "access_code": data.get("access_code")}
 

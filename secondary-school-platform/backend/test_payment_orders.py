@@ -48,6 +48,15 @@ class PaymentOrderTests(unittest.TestCase):
             _initialise_with_paystack("student@example.com", "lw_expected", 100000,
                                       "https://learnwise.example/payment-return", "secret", opener=opener)
 
+    def test_untrusted_checkout_host_fails_closed(self):
+        def opener(request, timeout):
+            return FakeResponse({"status": True, "data": {
+                "reference": "lw_expected", "authorization_url": "https://attacker.example/checkout"
+            }})
+        with self.assertRaises(PaymentOrderError):
+            _initialise_with_paystack("student@example.com", "lw_expected", 100000,
+                                      "https://learnwise.example/payment-return", "secret", opener=opener)
+
     def test_provider_failure_fails_closed(self):
         def opener(request, timeout):
             return FakeResponse({"status": False, "message": "declined"})

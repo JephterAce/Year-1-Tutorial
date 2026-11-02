@@ -54,6 +54,20 @@ class StudentIdentityRouteTests(unittest.TestCase):
         self.assertNotIn("HttpOnly", csrf_cookie)
         self.assertIn("Secure", csrf_cookie)
 
+    @patch("identity_service.login_student")
+    def test_login_marks_cookies_secure_in_staging(self, login):
+        login.return_value = {
+            "session_id": "s" * 44, "csrf_token": "c" * 44, "student_id": "student-id"
+        }
+        with patch.dict(os.environ, {"APP_ENV": "staging"}):
+            response = self.client.post("/api/v1/auth/login", json={
+                "email": "learner@example.com", "password": "long-password"
+            })
+        self.assertEqual(response.status_code, 200)
+        cookies = response.headers.getlist("Set-Cookie")
+        self.assertTrue(any(x.startswith("learnwise_session=") and "Secure" in x for x in cookies))
+        self.assertTrue(any(x.startswith("learnwise_csrf=") and "Secure" in x for x in cookies))
+
     def test_current_student_requires_authenticated_session(self):
         response = self.client.get("/api/v1/auth/me")
         self.assertEqual(response.status_code, 401)

@@ -23,6 +23,18 @@ class CurriculumMigrationContractTests(unittest.TestCase):
         self.assertIn("csr.verification_status = 'approved'", database)
         self.assertIn("JOIN curriculum_source_records csr", database)
 
+    def test_database_publication_guard_checks_source_and_review(self):
+        sql = (ROOT / "backend" / "migrations" / "010_curriculum_publication_guard.sql").read_text()
+        self.assertIn("CREATE TRIGGER topics_curriculum_publication_guard", sql)
+        self.assertIn("source_row.verification_status <> 'approved'", sql)
+        self.assertIn("source_row.class_level <> NEW.class_level", sql)
+        self.assertIn("curriculum_approved_by", sql)
+        self.assertIn("school_scheme_name", sql)
+
+    def test_term_mapping_constraint_accepts_unassigned_state(self):
+        sql = (ROOT / "backend" / "migrations" / "010_curriculum_publication_guard.sql").read_text()
+        self.assertIn("'not_assigned'", sql)
+
     def test_workflow_forbids_guessed_term_mapping(self):
         workflow = (ROOT / "CURRICULUM_WORKFLOW.md").read_text()
         self.assertIn("do not guess a term", workflow.lower())

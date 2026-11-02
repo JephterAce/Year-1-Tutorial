@@ -48,17 +48,13 @@ class PostgreSQLEndToEndFlows(unittest.TestCase):
                    VALUES (%s,%s,'Integration learner','SS1','active',now())""",
                 (self.student, self.student + "@integration.invalid"),
             )
-            conn.execute(
-                """INSERT INTO subjects(id,slug,name,description,sort_order,is_active,offering_group)
-                   VALUES (%s,%s,'Integration Mathematics','CI fixture',990,true,'science')""",
-                (self.subject, "integration-" + self.subject),
-            )
+            subject = conn.execute(
+                "SELECT id FROM subjects WHERE slug='general-mathematics'"
+            ).fetchone()
+            self.subject = str(subject["id"])
 
     def tearDown(self):
         with connection() as conn:
-            if self.assessment:
-                conn.execute("DELETE FROM assessment_attempts WHERE assessment_id=%s", (self.assessment,))
-                conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment,))
             if self.topic:
                 conn.execute("DELETE FROM payment_notification_outbox WHERE payment_id IN (SELECT id FROM payment_transactions WHERE topic_id=%s)", (self.topic,))
                 conn.execute("DELETE FROM entitlements WHERE topic_id=%s", (self.topic,))
@@ -68,7 +64,6 @@ class PostgreSQLEndToEndFlows(unittest.TestCase):
             if self.source:
                 conn.execute("DELETE FROM curriculum_source_records WHERE id=%s", (self.source,))
             conn.execute("DELETE FROM students WHERE id=%s", (self.student,))
-            conn.execute("DELETE FROM subjects WHERE id=%s", (self.subject,))
 
     def test_assessment_attempt_start_save_and_grade(self):
         self.assessment = str(uuid4())

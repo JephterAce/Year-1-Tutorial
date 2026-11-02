@@ -180,3 +180,17 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - GitHub Actions run `41386067651` for exact branch head `320ab673ce888353a00ee54b6ebbbb643d42fe0a` completed successfully; all job steps passed. Earlier identity-service commits also passed.
 - Important remaining limitations: this is not yet a production release. No PostgreSQL instance has been provisioned and migrations 001–007 remain unapplied; no real SMTP credentials or HTTPS app URL have been configured; no end-to-end test has exercised email delivery, concurrent database transactions, rate limits or session lifecycle against PostgreSQL. No browser registration/verification/reset screens have been connected to these API routes. Registration currently sends mail synchronously after account creation, so SMTP failure can leave a pending account requiring a future resend-verification workflow.
 - Security review still required for proxy-aware client/IP throttling, email resend and abuse controls, CSRF/origin policy, production cookie/domain settings, database migration rehearsal, privacy/guardian-consent and safeguarding requirements for minors. Do not enable payments until identity and server-side order creation are complete and reviewed.
+
+
+## Student account UI and assessment grading increment — 2026-11-02
+
+- Added `frontend/account.html` with registration, sign-in, password-reset request/completion, email-verification handling, authenticated-session display and CSRF-protected logout. Dashboard now links to the account page.
+- Identity emails now link to `account.html?action=verify|reset`; one-time token is removed from the browser URL immediately, and the page sets a no-referrer policy.
+- Added account-page integration contract tests in `backend/test_account_ui.py`.
+- Added `backend/assessment_grading.py` for deterministic server-side grading of single-choice, exact-set multiple-select, true/false, numeric-with-tolerance and exact-text alternatives. Multiple-select uses exact-set scoring; invalid grading definitions fail closed.
+- Added `backend/test_assessment_grading.py`; CI run `41386305066` on commit `72df33f530ab07b119f012a47b30bf86cbba92dd` passed.
+- Added migration `008_assessment_immutability.sql` with per-attempt question/answer-key snapshot columns and triggers preventing edits/deletion of published assessment/question records. Added static contract tests; CI run `41386340201` on commit `6cab3bd55f96d3f644f995b2645258e50e1d3e1d` passed.
+- Updated backend README with migrations 001–008, identity configuration and grading/immutability boundaries.
+- These are foundations, not a complete assessment system. No attempt-start service, server-authoritative attempt timer, question snapshot population, answer autosave, incident debounce/termination, atomic submission/grading persistence, appeals or result notifications have been implemented. No student-facing assessment execution is enabled.
+- Current browser identity page assumes a same-origin API or reverse proxy; no CORS/cross-origin cookie configuration is provided. The deployed site must use HTTPS and a same-origin API arrangement.
+- PostgreSQL and SMTP end-to-end verification remain pending; do not launch or accept payments until migrations are rehearsed, auth abuse controls and safeguarding are reviewed, and payment order creation is implemented.

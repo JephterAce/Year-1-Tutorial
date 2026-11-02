@@ -330,3 +330,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added admin login, current-session and logout routes; session cookies use HttpOnly and SameSite=Strict, with CSRF header validation for logout.
 - Added an audit append helper and unit tests for CSRF and audit metadata validation.
 - No public admin signup, role assignment, password reset or privileged business endpoint is enabled. Capability enforcement and audit wrappers must guard each future admin operation.
+
+## Release-readiness foundations added (2026-11-02)
+- Added a PostgreSQL 16 disposable CI service and migration rehearsal runner. It loads the baseline schema, applies numbered migrations in order, records SHA-256 checksums and refuses remote/default database targets. A clean PostgreSQL replay is now part of CI; initial failures exposed and corrected the curriculum migration's PL/pgSQL delimiter and missing baseline-schema step. Latest replay is pending CI confirmation.
+- Added a non-root Gunicorn Docker image and local PostgreSQL rehearsal compose file; no hosting provider or production deployment is configured.
+- Connected the student lesson catalogue to the published API while preserving an explicitly labelled preview fallback. Fixed the password-reset query handler in the account page.
+- Added an authenticated admin assessment-review page using admin session cookies, CSRF protection and role-gated review endpoints.
+- Added HMAC-signed, short-lived private-audio authorisation primitives and test coverage. This is not yet an object-storage streaming endpoint; a private storage adapter and entitlement lookup are still required.
+- Added NERDC acquisition, content production, privacy/safeguarding/legal review, secure audio and deployment/operations runbooks.
+- Added automated unit/security tests for the new release foundations. External NERDC access/rights, independent teacher review, Nigerian legal sign-off, live provider credentials, staging infrastructure, real Paystack sandbox E2E and production approval remain external gates.

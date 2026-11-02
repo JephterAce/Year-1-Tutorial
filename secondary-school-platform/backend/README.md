@@ -17,6 +17,7 @@ python app.py
 - Catalogue: `GET /api/v1/catalogue`
 - Student account: `/api/v1/auth/*`
 - Assessment execution: `/api/v1/assessments/{assessment_id}/attempts` and `/api/v1/assessment-attempts/{attempt_id}/*`
+- Lesson checkout: `POST /api/v1/topics/{topic_id}/checkout` (server-priced; provider credentials required)
 - Paystack callback: `POST /api/v1/webhooks/paystack` (development foundation only)
 
 Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. Identity, assessment and payment operations require PostgreSQL and fail closed without it. Use a dedicated TLS PostgreSQL database and never commit real environment files or credentials.
@@ -42,7 +43,7 @@ The browser countdown is display-only. A production client must autosave answers
 
 ## Payment and owner email
 
-The callback validates the raw Paystack HMAC signature, looks up a server-created pending order, verifies the transaction directly with Paystack, and atomically records payment/entitlement/outbox state. The outbox worker supports leased claims and retries but is not scheduled or monitored. Trusted order creation is not implemented; therefore there is no safe checkout path and real payments must remain disabled. SMTP notification recipient defaults to `emmanuelbjephter@gmail.com`; configure SMTP and Paystack credentials only in the host's secret manager, never in source control or chat. No live email or payment has been tested.
+The callback validates the raw Paystack HMAC signature, looks up a server-created pending order, verifies the transaction directly with Paystack, and atomically records payment/entitlement/outbox state. The outbox worker supports leased claims and retries but is not scheduled or monitored. A server-priced checkout initialisation route now creates a pending order from the published topic price and verified student account, then initialises Paystack using the server secret. It returns only a validated HTTPS Paystack checkout URL. Payment reconciliation/refunds, a scheduled outbox worker, production monitoring, end-to-end database/provider tests and operational controls remain. Real payments must remain disabled until reviewed and explicitly approved. SMTP notification recipient defaults to `emmanuelbjephter@gmail.com`; configure SMTP and Paystack credentials only in the host's secret manager, never in source control or chat. No live email or payment has been tested.
 
 ## Release gates
 

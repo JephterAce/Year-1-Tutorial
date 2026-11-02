@@ -26,7 +26,7 @@ Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. I
 ## Ordered database setup
 
 1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
-2. Apply migrations `001_platform_hardening.sql` through `010_curriculum_publication_guard.sql` in numeric order.
+2. Apply migrations `001_platform_hardening.sql` through `011_curriculum_source_immutability.sql` in numeric order.
 3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
 4. Run the application with a least-privilege database role.
 
@@ -64,4 +64,7 @@ Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum a
 
 Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` parses the CSV template, supports a dry-run validation report and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
 
-Migrations 009–010 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
+Migrations 009–011 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
+
+
+Migration 011 makes source records immutable once referenced by a published topic and prevents material changes to a curriculum version while published topics use it. Corrections must use a replacement source/version and pass review; migration execution and PostgreSQL trigger behaviour still require disposable-database rehearsal.

@@ -94,8 +94,66 @@ function clearProfilePreview(){['profileName','profileUsername','profileEmail','
 function filterSubject(s){showPage('catalog');document.getElementById('subjectFilter').value=s;renderCatalog()}
 function setClass(c,b){document.querySelectorAll('.term').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('classFilter').value=c}
 function escapeHTML(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
-function renderCatalog(){let c=document.getElementById('classFilter').value,s=document.getElementById('subjectFilter').value,t=document.getElementById('termFilter').value,q=document.getElementById('topicSearch').value.toLowerCase();let list=topics.filter(x=>(s==='All'||x[0]===s)&&(t==='All'||x[3]===t)&&(x[1]+' '+x[2]).toLowerCase().includes(q));document.getElementById('catalogGrid').innerHTML=list.map(x=>'<article class="catalogcard"><div style="display:flex;justify-content:space-between"><span style="font-size:22px">'+escapeHTML(x[5])+'</span><span class="tag lock">Preview</span></div><small style="color:#66748a">'+escapeHTML(x[0])+' · Class mapping pending · '+escapeHTML(x[3])+'</small><h3>'+escapeHTML(x[1])+'</h3><p>'+escapeHTML(x[2])+'</p><div style="display:flex;justify-content:space-between;align-items:center"><span class="price">From ₦'+Number(x[4]).toLocaleString('en-NG')+'</span><button onclick="previewTopic('+topics.indexOf(x)+')">View topic</button></div></article>').join('')||'<div class="panel">No matching sample topics. Try another filter.</div>'}
-function previewTopic(index){const topic=topics[index];if(topic)alert(topic[1]+'\n\nThis is a design preview. Lesson content and secure checkout are not connected yet.')}
+let catalogueApiItems=[];
+let catalogueRequest=0;
+async function renderCatalog(){
+ const requestId=++catalogueRequest;
+ const classLevel=document.getElementById('classFilter').value;
+ const subject=document.getElementById('subjectFilter').value;
+ const query=document.getElementById('topicSearch').value.trim();
+ const params=new URLSearchParams({class:classLevel});
+ if(subject!=='All')params.set('subject',subject.toLowerCase().replaceAll(' ','-'));
+ if(query)params.set('q',query);
+ const grid=document.getElementById('catalogGrid');
+ grid.textContent='Loading verified catalogue…';
+ try{
+  const response=await fetch('/api/v1/catalogue?'+params.toString(),{credentials:'same-origin',headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error('Catalogue API unavailable');
+  const payload=await response.json();
+  if(requestId!==catalogueRequest)return;
+  catalogueApiItems=Array.isArray(payload.items)?payload.items:[];
+  if(!catalogueApiItems.length){
+   grid.textContent=payload.is_demo?'No matching sample topics. The live catalogue is not connected yet.':'No approved lessons are currently published for these filters.';
+   return;
+  }
+  grid.replaceChildren();
+  catalogueApiItems.forEach((topic,index)=>{
+   const card=document.createElement('article');card.className='catalogcard';
+   const meta=document.createElement('small');meta.style.color='#66748a';
+   meta.textContent=(topic.subject||'Subject')+' · '+(topic.class_level||classLevel)+' · '+(topic.term||'Term allocation pending');
+   const title=document.createElement('h3');title.textContent=topic.title||'Untitled lesson';
+   const summary=document.createElement('p');summary.textContent=topic.summary||'Open this lesson to view its learning objectives.';
+   const footer=document.createElement('div');footer.style.cssText='display:flex;justify-content:space-between;align-items:center';
+   const price=document.createElement('span');price.className='price';
+   price.textContent=Number(topic.price_kobo||0)>0?'₦'+(Number(topic.price_kobo)/100).toLocaleString('en-NG'):'Price to be confirmed';
+   const button=document.createElement('button');button.textContent='View lesson';button.addEventListener('click',()=>previewTopic(index));
+   footer.append(price,button);card.append(meta,title,summary,footer);grid.append(card);
+  });
+ }catch(error){
+  if(requestId!==catalogueRequest)return;
+  grid.innerHTML='';
+  const fallback=topics.filter(x=>(subject==='All'||x[0]===subject)&&(x[1]+' '+x[2]).toLowerCase().includes(query.toLowerCase()));
+  if(!fallback.length){grid.textContent='Catalogue is temporarily unavailable.';return;}
+  fallback.forEach(x=>{
+   const card=document.createElement('article');card.className='catalogcard';
+   const meta=document.createElement('small');meta.textContent=x[0]+' · '+classLevel+' · Preview only';
+   const title=document.createElement('h3');title.textContent=x[1];
+   const summary=document.createElement('p');summary.textContent=x[2];
+   const footer=document.createElement('div');footer.style.cssText='display:flex;justify-content:space-between;align-items:center';
+   const price=document.createElement('span');price.className='price';price.textContent='Sample price ₦'+Number(x[4]).toLocaleString('en-NG');
+   const button=document.createElement('button');button.textContent='View preview';button.addEventListener('click',()=>alert(x[1]+'\\n\\nPreview only. Live catalogue is unavailable.'));
+   footer.append(price,button);card.append(meta,title,summary,footer);grid.append(card);
+  });
+ }
+}
+function previewTopic(index){
+ const topic=catalogueApiItems[index];
+ if(topic){
+  const detail=[topic.title,topic.subject+' · '+topic.class_level,topic.summary||'',topic.curriculum_source?'Source: '+topic.curriculum_source:''].filter(Boolean).join('\\n\\n');
+  alert(detail+'\\n\\nLesson playback and checkout will appear only after approved content and secure entitlement services are enabled.');
+  return;
+ }
+}
 document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('catalog');document.getElementById('topicSearch').value=e.target.value;renderCatalog()}});
 renderCatalog();
 </script>

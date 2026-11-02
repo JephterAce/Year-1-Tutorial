@@ -39,10 +39,6 @@ class CurriculumMigrationContractTests(unittest.TestCase):
         workflow = (ROOT / "CURRICULUM_WORKFLOW.md").read_text()
         self.assertIn("do not guess a term", workflow.lower())
         self.assertIn("pending_official_confirmation", workflow)
-
-if __name__ == "__main__":
-    unittest.main()
-
     def test_published_source_and_version_cannot_be_mutated(self):
         sql = (ROOT / "backend" / "migrations" / "011_curriculum_source_immutability.sql").read_text()
         self.assertIn("curriculum_source_published_immutability", sql)
@@ -51,4 +47,8 @@ if __name__ == "__main__":
         self.assertIn("NEW.status IS DISTINCT FROM OLD.status", sql)
         self.assertIn("curriculum_source_record_id = source_id", sql)
         self.assertIn("create and review a replacement source first", sql)
+
+
+if __name__ == "__main__":
+    unittest.main()
 

@@ -30,6 +30,6 @@ async function refresh(){try{const d=await api('/api/v1/auth/me',undefined,'GET'
 document.getElementById('logout').onclick=async()=>{try{await api('/api/v1/auth/logout',{},'POST',{'X-CSRF-Token':cookie('learnwise_csrf')});await refresh()}catch(x){msg('sessionMsg',x.message)}};
 const token=new URLSearchParams(location.search).get('token');
 if(new URLSearchParams(location.search).get('action')==='verify'&&token){api('/api/v1/auth/verify-email',{token}).then(()=>{history.replaceState({},'',location.pathname);msg('registerMsg','Email verified. You can now sign in.');}).catch(()=>msg('registerMsg','Verification link is invalid or expired.'))}
-if(action==='reset'&&token){document.getElementById('resetComplete').hidden=false;document.getElementById('resetComplete').dataset.token=token;}
+if(new URLSearchParams(location.search).get('action')==='reset'&&token){document.getElementById('resetComplete').hidden=false;document.getElementById('resetComplete').dataset.token=token;history.replaceState({},'',location.pathname+'?action=reset');}
 refresh();
 </script></body></html>

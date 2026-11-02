@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import psycopg
 
 MIGRATIONS = Path(__file__).resolve().parent / "migrations"
-NAME = re.compile(r"^\\d{3}_[a-z0-9_]+\\.sql$")
+NAME = re.compile(r"^\d{3}_[a-z0-9_]+\.sql$")
 
 def rehearsal_dsn():
     dsn = os.environ.get("LEARNWISE_REHEARSAL_DATABASE_URL", "")

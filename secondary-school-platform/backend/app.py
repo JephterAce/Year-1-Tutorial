@@ -416,3 +416,35 @@ def list_student_assessments():
     except Exception:
         app.logger.exception("Published assessment catalogue failed")
         return jsonify({"error": "assessment_catalogue_unavailable"}), 503
+
+
+@app.post("/api/v1/assessment-attempts/<attempt_id>/reports")
+def submit_assessment_issue_report(attempt_id):
+    from assessment_reports import submit_assessment_report, AssessmentReportError
+    student = _assessment_student()
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        result = submit_assessment_report(student["student_id"], attempt_id,
+                                          request.get_json(silent=True) or {})
+        return jsonify({"report": result}), 201
+    except AssessmentReportError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment issue report submission failed")
+        return jsonify({"error": "report_unavailable"}), 503
+
+
+@app.get("/api/v1/assessment-attempts/<attempt_id>/reports")
+def list_assessment_issue_reports(attempt_id):
+    from assessment_reports import list_my_assessment_reports, AssessmentReportError
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        return jsonify({"items": list_my_assessment_reports(student["student_id"], attempt_id)}), 200
+    except AssessmentReportError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Assessment issue report listing failed")
+        return jsonify({"error": "report_list_unavailable"}), 503

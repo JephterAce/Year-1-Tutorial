@@ -214,3 +214,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added authenticated, CSRF-protected `POST /api/v1/topics/{topic_id}/checkout`. The amount is never accepted from the browser. Checkout URLs must use HTTPS and Paystack's checkout host.
 - Added mocked provider tests for exact server amount/reference/currency, provider failure and untrusted redirect rejection.
 - This is still not permission to accept real money. The DB has not been provisioned or migrated; Paystack secret is not configured; webhook/checkout has not been exercised end-to-end; outbox scheduling/monitoring, reconciliation/refunds, operational alerts, production security review and explicit launch approval remain outstanding.
+
+
+## Private student profile API increment — 2026-11-02
+
+- Added `backend/student_profiles.py` with authenticated read/update operations for display name, unique username and short bio. Email and class level are read-only through this endpoint; profile visibility remains private by schema default.
+- Added `GET /api/v1/student/profile` and CSRF-protected `PATCH /api/v1/student/profile`. Updates are scoped to the authenticated student's UUID; unsupported fields (including class, email and photo storage) are rejected.
+- Profile photo remains a local preview only; secure object storage/upload, export/download, deletion workflows and privacy-request processing are not yet implemented.
+- Requires migration 004 and a dedicated PostgreSQL database. No live database is connected; real account/profile end-to-end testing and privacy/security review remain outstanding.

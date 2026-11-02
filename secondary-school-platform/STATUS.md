@@ -303,3 +303,13 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `backend/admin_policy.py` with a default-deny capability matrix for owner, editor, reviewer, support and analyst roles.
 - Added tests covering role boundaries, inactive/unknown principals, unknown capabilities and malformed inputs.
 - No admin endpoint consumes this policy yet. Verified admin authentication/session management, principal loading, audited action wrappers and role-management controls are still required before exposing privileged routes.
+
+
+## Latest engineering increment — admin security foundation
+
+- Added migration 013: dedicated admin sessions store only session/CSRF hashes and record expiry, revocation and last-seen timestamps.
+- Added partial active-session and expiry indexes; added normalised admin-email unique index.
+- Added database trigger that rejects audit-event updates/deletes; corrections must be appended as new events.
+- Added migration contract tests for hash-only storage, expiry/revocation, append-only audit and normalised email lookup.
+- This is a database foundation only. Admin authentication routes, session service, capability enforcement, audit wrappers and controlled owner provisioning remain unimplemented; no admin route is enabled.
+- Latest branch head before this increment: 26a1e67680b7e5b67d629371445c28128a5ed6da; CI passed on that exact head. New commits require a fresh exact-head CI run.

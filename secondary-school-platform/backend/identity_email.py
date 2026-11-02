@@ -41,10 +41,10 @@ def send_identity_link(email, token, purpose):
     if not base.startswith("https://"):
         raise RuntimeError("PUBLIC_APP_URL must use HTTPS")
     if purpose == "verify":
-        path, subject, intro = "/verify-email", "Verify your Learnwise email", "Verify your email address"
+        action, subject, intro = "verify", "Verify your Learnwise email", "Verify your email address"
     elif purpose == "reset":
-        path, subject, intro = "/reset-password", "Reset your Learnwise password", "Reset your password"
+        action, subject, intro = "reset", "Reset your Learnwise password", "Reset your password"
     else:
         raise ValueError("Unsupported identity email purpose")
-    url = f"{base}{path}?{urlencode({'token': token})}"
-    _send(email, subject, f"{intro} using this one-time link:\\n\\n{url}\\n\\nIf you did not request this, you can ignore this email. Do not share this link.")
+    url = f"{base}/account.html?{urlencode({'action': action, 'token': token})}"
+    _send(email, subject, f"{intro} using this one-time link:\n\n{url}\n\nIf you did not request this, ignore this email. Do not share this link.")

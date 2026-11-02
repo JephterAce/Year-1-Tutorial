@@ -505,3 +505,89 @@ def admin_logout():
 # Protected admin assessment review endpoints.
 from admin_assessment_reviews import admin_reviews
 app.register_blueprint(admin_reviews)
+
+
+# Private lesson audio: signed access is scoped to an approved asset and active entitlement.
+@app.post("/api/v1/topics/<topic_id>/audio/<asset_id>/access")
+def create_private_audio_access(topic_id, asset_id):
+    from audio_media import issue_audio_token, AudioAccessError
+    from database import connection
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        with connection() as conn:
+            row = conn.execute(
+                """SELECT a.storage_key FROM lesson_assets a
+                   JOIN topics t ON t.id=a.topic_id
+                   WHERE a.id=%s AND a.topic_id=%s AND t.status='published'
+                     AND a.review_status='approved'
+                     AND a.asset_type IN ('teacher_audio','podcast_audio')
+                     AND EXISTS (SELECT 1 FROM entitlements e
+                                 WHERE e.student_id=%s AND e.topic_id=t.id
+                                   AND e.revoked_at IS NULL)""",
+                (asset_id, topic_id, student["student_id"]),
+            ).fetchone()
+        if not row:
+            return jsonify({"error": "audio_not_available"}), 404
+        token = issue_audio_token(
+            str(student["student_id"]), str(topic_id), row["storage_key"], True, ttl=180
+        )
+        response = jsonify({"audio_url": f"/api/v1/private-audio/{topic_id}/{asset_id}"})
+        secure = os.environ.get("APP_ENV", "development").lower() == "production"
+        response.set_cookie(
+            "learnwise_audio_access", token, httponly=True, secure=secure,
+            samesite="Strict", path=f"/api/v1/private-audio/{topic_id}/{asset_id}",
+            max_age=180,
+        )
+        return response, 200
+    except AudioAccessError:
+        return jsonify({"error": "audio_access_unavailable"}), 503
+    except Exception:
+        app.logger.exception("Private audio authorisation failed")
+        return jsonify({"error": "audio_access_unavailable"}), 503
+
+
+@app.get("/api/v1/private-audio/<topic_id>/<asset_id>")
+def stream_private_audio(topic_id, asset_id):
+    from audio_media import verify_audio_token, resolve_private_audio_path, AudioAccessError
+    from database import connection
+    from flask import send_file
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        token = request.cookies.get("learnwise_audio_access", "")
+        claims = verify_audio_token(token)
+        if claims.get("sub") != str(student["student_id"]) or claims.get("topic") != str(topic_id):
+            return jsonify({"error": "audio_access_denied"}), 403
+        with connection() as conn:
+            row = conn.execute(
+                """SELECT a.storage_key,a.mime_type FROM lesson_assets a
+                   JOIN topics t ON t.id=a.topic_id
+                   WHERE a.id=%s AND a.topic_id=%s AND t.status='published'
+                     AND a.review_status='approved'
+                     AND a.asset_type IN ('teacher_audio','podcast_audio')
+                     AND EXISTS (SELECT 1 FROM entitlements e
+                                 WHERE e.student_id=%s AND e.topic_id=t.id
+                                   AND e.revoked_at IS NULL)""",
+                (asset_id, topic_id, student["student_id"]),
+            ).fetchone()
+        if not row or claims.get("key") != row["storage_key"]:
+            return jsonify({"error": "audio_access_denied"}), 403
+        media_path = resolve_private_audio_path(
+            os.environ.get("AUDIO_STORAGE_ROOT", ""), row["storage_key"]
+        )
+        response = send_file(
+            media_path, mimetype=row["mime_type"] or "application/octet-stream",
+            conditional=True, etag=True, max_age=0,
+        )
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Content-Security-Policy"] = "default-src 'none'"
+        return response
+    except AudioAccessError:
+        return jsonify({"error": "audio_unavailable"}), 404
+    except Exception:
+        app.logger.exception("Private audio stream failed")
+        return jsonify({"error": "audio_unavailable"}), 503

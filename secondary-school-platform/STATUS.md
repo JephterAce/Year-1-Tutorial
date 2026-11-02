@@ -243,3 +243,14 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Current branch head before this checkpoint: curriculum work is committed on `secondary-school-platform-foundation`; latest Actions run for the prior head `c21921d` passed (run 41388502302). New curriculum commits require their own completed CI run.
 - Migration 009 is not applied. No NERDC full-text material has been imported, no curriculum topic/term rows have been invented, and no external portal access controls have been bypassed. Official authorised documents and school schemes are still required for full content mapping.
 - The branch remains separate from `main`; PR #1 remains open, draft and unmerged. No deployment, production database migration, payment activation or legacy bot change has occurred.
+
+
+## Curriculum publication hardening — 2026-11-02
+
+- Added migration 010 with a PostgreSQL trigger that independently blocks publication unless topic and curriculum statuses agree, the target revised NERDC version is active, the approved source matches class/subject/version, source and topic teacher-review evidence is complete, rights status is known, and term assignment is supported.
+- Expanded the term-mapping constraint to support explicit `not_assigned` state. Unknown term placement cannot be silently stored as a term.
+- Made migration 009's cohort-confirmation foreign-key creation repeatable.
+- Added CSV import parsing and dry-run validation helpers. Learning outcomes are parsed as JSON arrays; malformed JSON is rejected with a line-specific error.
+- Added tests for CSV import, invalid JSON, publication guard contract and term mapping states.
+- CI passed for curriculum architecture/import commit `8d6475d` (run 41389078056). The migration 010 and CSV-import hardening commits are newer and awaiting their own CI result.
+- Migrations 009–010 remain unapplied. No database has been connected or altered.

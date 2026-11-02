@@ -2,11 +2,19 @@
 
 Last updated: 2026-11-02
 
-## Latest verified engineering additions
-- Dedicated admin login/session lifecycle is implemented with server-side hashed sessions, CSRF validation, eight-hour expiry, inactive-account checks and login throttling. Account provisioning remains offline-only.
-- Admin assessment issue review endpoints now enforce the default-deny role/capability policy. Review decisions lock the report row and write the append-only audit event in the same database transaction.
-- Assessment review queue returns bounded, minimal report data; student identifiers are not exposed. Sensitive queue access is restricted to reviewers/owners; support role cannot browse the queue.
-- These endpoints are code-complete but require CI and disposable PostgreSQL integration verification before use. No production database or live admin account is configured.
+## Current release status
+- CI has passed on commit fa2a096: 148 unit/security tests, JavaScript syntax checks across six HTML pages, clean PostgreSQL 16 baseline plus migrations 001–013, PostgreSQL schema integration tests, assessment attempt/grade E2E, Paystack-shaped checkout/webhook/verification/entitlement idempotency E2E, and a non-publishing container build.
+- Student account, private profile fields, published lesson catalogue, assessment attempt/history, issue reporting and private audio player are API-connected. Profile photo storage and visibility changes remain disabled.
+- Admin login and the protected assessment review console are implemented. The older admin Studio remains a local prototype; full CMS, curriculum publishing and finance workflows remain unexposed.
+- Private audio currently streams from a private local storage root using short-lived signed access cookies and entitlement rechecks. A production object-storage gateway, asset upload/scan pipeline and real audio assets remain outstanding.
+- Docker image builds successfully; no image is pushed and no host/domain is configured. No production deployment or live database migration has occurred.
+- NERDC acquisition is prepared but still requires authorised e-Curriculum access, permitted source capture, rights clearance and independent subject-teacher review. No topics have been fabricated or declared complete.
+- Privacy notice and terms are draft templates. Nigerian legal review, DPIA, child/guardian assessment, safeguarding lead and release approval are mandatory before real learners are onboarded.
+- Paystack end-to-end tests use synthetic data and provider-shaped stubs. No live/sandbox provider credentials are configured and no real payment was made.
+- Draft PR #1 remains open and unmerged. Existing university bot @Ustpaymentbot remains untouched.
+
+## External release gates
+Authorised NERDC materials and permissions; subject-teacher verification; production-like backup/restore rehearsal; real Paystack sandbox credentials and test; private object storage; hosting and secret manager; independent security review; Nigerian privacy/legal and safeguarding sign-off; support and incident contacts; explicit owner approval for deployment.
 
 Last updated: 2026-11-01
 

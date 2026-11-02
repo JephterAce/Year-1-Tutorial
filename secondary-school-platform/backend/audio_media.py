@@ -12,7 +12,7 @@ def issue_audio_token(student_id, topic_id, object_key, entitled, now=None, ttl=
     if not entitled: raise AudioAccessError("A current lesson entitlement is required.")
     if not all(isinstance(x,str) and x.strip() for x in (student_id,topic_id,object_key)):
         raise AudioAccessError("Invalid audio resource.")
-    if object_key.startswith("/") or ".." in object_key.split("/") or "\\\\" in object_key:
+    if object_key.startswith("/") or ".." in object_key.split("/") or chr(92) in object_key:
         raise AudioAccessError("Invalid private object key.")
     if isinstance(ttl,bool) or not isinstance(ttl,int) or not 30<=ttl<=600:
         raise AudioAccessError("Audio token lifetime must be 30–600 seconds.")

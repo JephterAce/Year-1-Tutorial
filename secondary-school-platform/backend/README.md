@@ -78,3 +78,8 @@ Migration 012 adds student-owned reports for integrity appeals, question errors 
 ## Student-data export serialization
 
 `export_serialization.py` provides allowlist-only JSON/CSV serialization, normalises dates/UUIDs/decimals, rejects unsupported values, and neutralises spreadsheet formula injection in text cells while preserving numeric values. It is deliberately not an export endpoint: authentication, role authorisation, consent/legal basis, audit logging, bounded database queries, private storage, expiring downloads and deletion/retention workflows must exist before any student data is exported. Unit tests cover field exclusion and CSV/JSON safety.
+
+
+## Administrative capability policy
+
+`admin_policy.py` defines a default-deny capability matrix for owner, editor, reviewer, support and analyst roles. Inactive or unknown principals and unknown capabilities are denied. It is a policy primitive only: admin login/session authentication, server-side principal loading, endpoint decorators, audit events and role assignment controls must be implemented and tested before exposing admin APIs.

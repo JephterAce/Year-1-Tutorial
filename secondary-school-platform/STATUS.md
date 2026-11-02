@@ -1,3 +1,37 @@
+# Current execution checkpoint — 2026-11-02 (supersedes historical status notes below)
+
+**Branch:** `secondary-school-platform-foundation`  
+**PR:** #1 remains draft, open and unmerged.  
+**Latest commit at this checkpoint:** `83db267f71dbcbe4bd4bd28db222d032668a7c66`  
+**CI:** GitHub Actions run 41403318357 (push) and 41403324273 (pull request) both completed successfully on this exact commit.  
+**Run:** https://github.com/JephterAce/Year-1-Tutorial/actions/runs/41403318357
+
+## Current verified engineering position
+
+- The repository audit is recorded in `EXECUTION_AUDIT.md`.
+- The branch includes a Flask API with student registration/email verification/login/logout/password reset, private profile, published catalogue, assessment execution/history/reporting, server-priced Paystack checkout/webhook verification, admin authentication and assessment issue review, and protected private-audio access routes.
+- Student pages include catalogue/dashboard, account/profile, lessons/audio player and assessments. Admin pages include a local Studio prototype and protected assessment-review workspace.
+- Migrations 001–013 are present. CI on the current commit passes unit/security tests, frontend/admin JavaScript syntax checks, disposable PostgreSQL 16 baseline plus ordered migration replay, PostgreSQL schema integration, assessment/payment database E2E using mocked provider responses, and non-publishing container build.
+- Direct `python app.py` startup registration ordering was corrected in commit `c62354310d9252d8b1e2d69ae1ac7ffcbe2bcc34`; its CI passed. The audit record and this checkpoint were then committed in `83db267`; its CI also passed.
+- The admin assessment-review Blueprint is registered in `app.py`; review routes enforce authenticated admin sessions, CSRF, capability checks and append-only audit records.
+
+## Not complete — external or real-environment gates
+
+- No managed staging PostgreSQL instance has been provisioned or connected. CI PostgreSQL is disposable and is not a deployment database.
+- No real SMTP account is configured; email verification/reset must be tested end-to-end with a controlled mailbox.
+- No Paystack sandbox credentials or real sandbox transactions/webhook deliveries have been supplied or run. CI uses mocks.
+- Private audio has a local private-storage implementation; approved cloud object storage, upload/scan pipeline and real approved audio assets are not configured.
+- NERDC source rights/access, authorised curriculum corpus, 18 class-subject evidence sets and independent teacher verification remain outstanding.
+- Nigerian legal/privacy review, DPIA, child/guardian assessment, safeguarding lead and formal approval remain outstanding.
+- No hosting account, staging domain, secret manager, monitoring/alerting or backup/restore evidence exists.
+- No real student data should be entered until required privacy/safeguarding approvals and staging controls are complete.
+
+## Release decision
+
+**NOT READY for public student use or production.** The repository and CI foundation are verified; external integrations, approvals and real staging acceptance remain release blockers. Keep PR #1 draft/unmerged. Do not deploy, apply migrations to a live DB, activate payments, purchase services or alter production secrets without the owner's explicit approval.
+
+---
+
 # Implementation status
 
 Last updated: 2026-11-02

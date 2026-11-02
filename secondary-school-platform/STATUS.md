@@ -313,3 +313,12 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added migration contract tests for hash-only storage, expiry/revocation, append-only audit and normalised email lookup.
 - This is a database foundation only. Admin authentication routes, session service, capability enforcement, audit wrappers and controlled owner provisioning remain unimplemented; no admin route is enabled.
 - Latest branch head before this increment: 26a1e67680b7e5b67d629371445c28128a5ed6da; CI passed on that exact head. New commits require a fresh exact-head CI run.
+
+
+## Admin authentication increment
+
+- Implemented database-backed admin login for offline-provisioned accounts, with HMAC-keyed rate limiting.
+- Added 8-hour server-side sessions, hashed session/CSRF tokens, prior-session revocation, active-account checks, CSRF validation and logout.
+- Added admin login, current-session and logout routes; session cookies use HttpOnly and SameSite=Strict, with CSRF header validation for logout.
+- Added an audit append helper and unit tests for CSRF and audit metadata validation.
+- No public admin signup, role assignment, password reset or privileged business endpoint is enabled. Capability enforcement and audit wrappers must guard each future admin operation.

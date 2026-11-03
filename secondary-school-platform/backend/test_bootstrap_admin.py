@@ -8,10 +8,9 @@ import bootstrap_admin
 class BootstrapAdminTests(unittest.TestCase):
     def _connection(self, admin_count):
         conn = MagicMock()
-        conn.execute.side_effect = [
-            MagicMock(),  # transaction-scoped advisory lock
-            {"admin_count": admin_count},
-        ]
+        count_result = MagicMock()
+        count_result.fetchone.return_value = {"admin_count": admin_count}
+        conn.execute.side_effect = [MagicMock(), count_result]
         manager = MagicMock()
         manager.__enter__.return_value = conn
         manager.__exit__.return_value = False

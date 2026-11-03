@@ -68,7 +68,7 @@ test("administrator pages redirect anonymous visitors to the dedicated login pag
   for (const path of ["/admin", "/admin/operations", "/admin/reviews"]) {
     const response = await page.goto(path);
     expect(response.status(), path).toBe(200);
-    await expect(page).toHaveURL(/\\/admin\\/login$/);
+    await expect(page).toHaveURL(/\/admin\/login$/);
     await expect(page.getByRole("heading", { name: "Sign in securely" })).toBeVisible();
     expect(response.headers()["x-robots-tag"] || "").toContain("noindex");
   }

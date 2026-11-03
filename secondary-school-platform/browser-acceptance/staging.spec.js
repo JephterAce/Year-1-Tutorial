@@ -64,10 +64,19 @@ test("administrator identity endpoint rejects anonymous sessions", async ({ requ
   expect(response.status()).toBe(401);
 });
 
-test("admin preview pages remain explicitly non-indexed", async ({ page }) => {
+test("administrator pages redirect anonymous visitors to the dedicated login page", async ({ page }) => {
   for (const path of ["/admin", "/admin/operations", "/admin/reviews"]) {
     const response = await page.goto(path);
     expect(response.status(), path).toBe(200);
+    await expect(page).toHaveURL(/\\/admin\\/login$/);
+    await expect(page.getByRole("heading", { name: "Sign in securely" })).toBeVisible();
     expect(response.headers()["x-robots-tag"] || "").toContain("noindex");
   }
+});
+
+test("administrator login form is separate from student identity", async ({ page }) => {
+  await page.goto("/admin/login");
+  await expect(page.locator("#adminLogin")).toBeVisible();
+  await expect(page.locator('input[name="email"]')).toHaveAttribute("autocomplete", "username");
+  await expect(page.locator('input[name="password"]')).toHaveAttribute("autocomplete", "current-password");
 });

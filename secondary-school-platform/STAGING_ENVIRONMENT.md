@@ -59,6 +59,13 @@ Still required in Brevo and Render:
 - Test verification and password-reset emails using a controlled mailbox.
 No SMTP credentials are stored in the repository.
 
+## Staging safety flags
+
+- `STUDENT_REGISTRATION_ENABLED=0` — public student signup is disabled until Brevo delivery and safeguarding/privacy checks are verified.
+- `PAYMENTS_ENABLED=0` — checkout is disabled until Paystack sandbox testing is completed and reviewed.
+
+These flags are set in Render's environment. Do not enable them for real users until the corresponding release gates are signed off.
+
 ## First administrator
 
 There is no public administrator sign-up. Use `backend/bootstrap_admin.py` once from a trusted environment after setting:

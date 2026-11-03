@@ -1,14 +1,15 @@
 # Current execution checkpoint — 2026-11-03 (supersedes older historical status below)
 
 **Development branch:** `secondary-school-platform-foundation`  
-**Latest code commit:** `0675b2f624f03ab2bbbac264307df359a2046c38`  
+**Latest deployed code commit:** `78edbd9e125e9f26cbb4b2ae846117a90a00deee`  
+**Latest test/documentation commit:** `76dbc6eeac7160bbfd5262b6e60f432d23da523b`  
 **PR #1:** open, draft, unmerged. The current main head is `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`; compare it with the branch before any future sync.  
 **Staging API:** https://learnwise-staging-api.onrender.com  
 **Render service:** `learnwise-staging-api`, Free plan, Frankfurt, Docker, one instance. Latest deployment is live on commit `0675b2f...`.  
 **Neon project:** `learnwise` (`spring-cloud-84267029`), Free plan, PostgreSQL 16, Frankfurt.  
 **Neon staging branch:** `learnwise-staging-rehearsal` (`br-still-cherry-baz7g5hk`).  
 **Private audio bucket:** `learnwise-private-audio` (private, branch-scoped).  
-**CI:** both API test and container-build checks passed on commit `0675b2f624f03ab2bbbac264307df359a2046c38`.
+**CI:** API tests and container-build checks passed on commit `76dbc6eeac7160bbfd5262b6e60f432d23da523b` (164 unit/security tests; two optional DATABASE_URL-only test classes skipped).
 
 ## Verified progress in this checkpoint
 
@@ -21,6 +22,7 @@
 - Added protected admin operational views for student records, payment summaries, curriculum source metadata and audio assets. Student/payment data is not exposed to unauthorised roles.
 - Added a one-time owner-admin bootstrap script. No admin account has been created yet; there is no public admin registration.
 - Configured the staging public URL and Brevo SMTP host/port. No Brevo account credentials or verified sender identity have been supplied, so real email delivery remains disabled.
+- Explicit staging feature flags keep student registration and Paystack checkout disabled until SMTP, sandbox and safeguarding gates are cleared.
 - Preserved the latest main-branch assessment/profile specification and root-level migration file. `MIGRATION_RECONCILIATION.md` explains why the backend migration sequence is canonical and why the older overlapping root migration must not be applied again.
 
 ## Free/low-cost architecture decision

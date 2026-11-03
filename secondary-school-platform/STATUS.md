@@ -4,19 +4,19 @@
 **Latest deployed code commit:** `78edbd9e125e9f26cbb4b2ae846117a90a00deee`  
 **Latest test/documentation commit:** `76dbc6eeac7160bbfd5262b6e60f432d23da523b`  
 **PR #1:** open, draft, unmerged. The current main head is `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`; compare it with the branch before any future sync.  
-**Staging API:** https://learnwise-staging-api.onrender.com  
-**Render service:** `learnwise-staging-api`, Free plan, Frankfurt, Docker, one instance. Latest deployment is live on commit `0675b2f...`.  
-**Neon project:** `learnwise` (`spring-cloud-84267029`), Free plan, PostgreSQL 16, Frankfurt.  
-**Neon staging branch:** `learnwise-staging-rehearsal` (`br-still-cherry-baz7g5hk`).  
-**Private audio bucket:** `learnwise-private-audio` (private, branch-scoped).  
+**Staging API:** https://think_tank-staging-api.onrender.com  
+**Render service:** `think_tank-staging-api`, Free plan, Frankfurt, Docker, one instance. Latest deployment is live on commit `0675b2f...`.  
+**Neon project:** `think_tank` (`spring-cloud-84267029`), Free plan, PostgreSQL 16, Frankfurt.  
+**Neon staging branch:** `think_tank-staging-rehearsal` (`br-still-cherry-baz7g5hk`).  
+**Private audio bucket:** `think_tank-private-audio` (private, branch-scoped).  
 **CI:** API tests and container-build checks passed on commit `76dbc6eeac7160bbfd5262b6e60f432d23da523b` (164 unit/security tests; two optional DATABASE_URL-only test classes skipped).
 
 ## Verified progress in this checkpoint
 
 - Provisioned the dedicated Neon project and a separate staging branch; applied `DATABASE_SCHEMA.sql` and ordered backend migrations 001–013 to that branch.
-- Added `learnwise_migration_history` with all 13 migration versions and source blob hashes. The database currently contains six subjects and three term labels; no student records or unverified topic mappings have been fabricated.
+- Added `think_tank_migration_history` with all 13 migration versions and source blob hashes. The database currently contains six subjects and three term labels; no student records or unverified topic mappings have been fabricated.
 - Created a private Neon Object Storage bucket and branch-scoped S3 credentials. Credentials are stored in Render environment variables, not in Git or this document.
-- Render now uses a separate `learnwise_app` database login, not the database owner. It has no superuser, create-database or create-role rights. Audit rows are append-only at the application role level; admin role changes are not permitted through the app role.
+- Render now uses a separate `think_tank_app` database login, not the database owner. It has no superuser, create-database or create-role rights. Audit rows are append-only at the application role level; admin role changes are not permitted through the app role.
 - Deployed the Flask API and student pages from one HTTPS origin. Routes cover the student home, account, lesson, assessment, stylesheet, admin studio, operations and assessment review pages.
 - Added S3-compatible private audio retrieval and upload code, MIME/signature/size validation, pending-review state, entitlement-protected streaming, and separate editor-upload/reviewer-approval capabilities. No real lesson audio has been uploaded or approved.
 - Added protected admin operational views for student records, payment summaries, curriculum source metadata and audio assets. Student/payment data is not exposed to unauthorised roles.
@@ -217,11 +217,11 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added `backend/test_payment_notifications.py` for recipient, payment-summary validation, SMTP TLS path and missing-provider behaviour.
 - Added SMTP and recipient variables to `backend/.env.example`; actual SMTP credentials must be entered privately as deployment secrets.
 - IMPORTANT: this is notification infrastructure only. It is not yet called by a Paystack webhook. No live payment is being processed and no test email has been sent. Paystack signature/transaction verification, idempotent payment recording, durable outbox/retries and production SMTP configuration are still required before alerts are operational.
-- ChatGPT's installed Gmail connector is separate from Learnwise's backend email sender. It can be used by ChatGPT to work with Gmail, but it does not grant the Learnwise server permission to send mail from that mailbox.
+- ChatGPT's installed Gmail connector is separate from Think Tank's backend email sender. It can be used by ChatGPT to work with Gmail, but it does not grant the Think Tank server permission to send mail from that mailbox.
 
 
 ## Payment notification validation and migration documentation follow-up
-- CI run `41351936842` on the previous head found one real validation gap: the alert builder accepted any three-letter currency, while the Learnwise product is currently NGN-only.
+- CI run `41351936842` on the previous head found one real validation gap: the alert builder accepted any three-letter currency, while the Think Tank product is currently NGN-only.
 - Corrected `payment_notifications.py` to reject non-NGN currency values rather than treating a three-letter string as a valid currency.
 - Corrected `backend/README.md` so the database setup sequence includes all five canonical migrations (001–005).
 - The correction commits are `1be522b` (NGN validation) and `37d5a4e` (migration instructions). A fresh CI run is required; do not report the correction as passing until GitHub Actions confirms it.
@@ -238,7 +238,7 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 
 ## Paystack verified fulfilment milestone (development only)
 - Added `paystack_verification.py`: server-to-server verification through Paystack's transaction verification endpoint using a server-held secret; validates provider success, exact reference, exact expected kobo amount and NGN currency.
-- Added `payments.py`: webhook orchestration authenticates the signed `charge.success` payload, finds the server-created Learnwise order, checks the amount, verifies the transaction directly with Paystack, then calls one atomic database fulfilment operation.
+- Added `payments.py`: webhook orchestration authenticates the signed `charge.success` payload, finds the server-created Think Tank order, checks the amount, verifies the transaction directly with Paystack, then calls one atomic database fulfilment operation.
 - Added `database.py` operations to look up an eligible pending order and atomically lock/check it, record success, grant the topic entitlement, record an idempotent webhook event, and enqueue an owner alert.
 - Added migration `006_payment_notification_outbox.sql` for durable notification queue rows with dedupe keys, retry states and scheduling indexes.
 - Added `POST /api/v1/webhooks/paystack`; invalid signatures return 400 and transient processing/database errors return 503 so the provider can retry. Added route and service tests.
@@ -335,7 +335,7 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 
 ## Revised NERDC curriculum architecture — 2026-11-02
 
-- Owner preference confirmed: use the latest revised NERDC curriculum as Learnwise's target standard for SS1, SS2 and SS3.
+- Owner preference confirmed: use the latest revised NERDC curriculum as Think Tank's target standard for SS1, SS2 and SS3.
 - Added migration 009 for curriculum version records, cohort-specific applicability, source provenance/rights metadata, optional term assignments and evidence-gated topic publication. The target version key is `nerdc_ssec_2025`; cohort applicability is intentionally pending until official transition evidence is recorded.
 - Added `backend/curriculum_import.py` and unit tests. Imports are restricted to the six selected subjects and target curriculum version. Publication is blocked without a traceable source section, named teacher review, approval timestamp, evidence note and known rights status. Official term allocation requires an official NERDC source; school term mapping requires a named school scheme.
 - Added `CURRICULUM_IMPORT_TEMPLATE.csv` and `CURRICULUM_WORKFLOW.md` with NERDC source links, acquisition steps, rights safeguards and review workflow.

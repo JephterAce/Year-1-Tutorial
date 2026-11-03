@@ -1,6 +1,6 @@
-# Learnwise — Nigerian Senior Secondary Learning Platform
+# Think Tank — Nigerian Senior Secondary Learning Platform
 
-Learnwise is an independent SS1–SS3 learning platform. It is isolated from the existing Year 1 university Telegram subscription bot.
+Think Tank is an independent SS1–SS3 learning platform. It is isolated from the existing Year 1 university Telegram subscription bot.
 
 ## Initial product scope
 - Classes: SS1, SS2 and SS3.
@@ -58,4 +58,4 @@ Copy `.env.example` into a secure local secret store or host secret manager. Nev
 - No hosting provider, domain, production secrets, live payment credentials or production deployment is configured.
 
 ## Protect the existing service
-All Learnwise work remains under `secondary-school-platform/` and on `secondary-school-platform-foundation`. Do not deploy this product over the legacy service or modify the separate university bot `@Ustpaymentbot`. Keep PR #1 in draft until the owner approves review and release.
+All Think Tank work remains under `secondary-school-platform/` and on `secondary-school-platform-foundation`. Do not deploy this product over the legacy service or modify the separate university bot `@Ustpaymentbot`. Keep PR #1 in draft until the owner approves review and release.

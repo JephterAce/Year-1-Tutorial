@@ -1,4 +1,4 @@
-/* Learnwise UI layer: loads after each page's own <style>. Tokens, dark mode,
+/* Think Tank UI layer: loads after each page's own <style>. Tokens, dark mode,
    accessibility, motion and a mobile-first navigation. No JavaScript required. */
 :root{--blue:#3b5bdb;--radius:16px;--ease:cubic-bezier(.2,.7,.2,1);--shadow:0 1px 2px #0f1a3a0d,0 14px 34px #15264a14}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}

@@ -1,4 +1,4 @@
-# Learnwise backend
+# Think Tank backend
 
 Isolated Flask/PostgreSQL API for the SS1–SS3 learning platform. The existing Year 1 Telegram bot is outside this application.
 
@@ -60,7 +60,7 @@ Keep PR #1 draft and unmerged. Do not deploy, apply production migrations, activ
 
 ## Revised NERDC curriculum workflow
 
-Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum across SS1–SS3 for the six selected subjects. Migrations 009–010 add curriculum-version records, cohort applicability records, source rights/provenance metadata, optional term assignment and a database trigger that rejects unsupported topic publication. Cohort applicability remains pending until official evidence confirms it.
+Think Tank targets the revised 2025 NERDC Senior Secondary Education Curriculum across SS1–SS3 for the six selected subjects. Migrations 009–010 add curriculum-version records, cohort applicability records, source rights/provenance metadata, optional term assignment and a database trigger that rejects unsupported topic publication. Cohort applicability remains pending until official evidence confirms it.
 
 Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` parses the CSV template, supports a dry-run validation report and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
 
@@ -97,7 +97,7 @@ admin_auth.py authenticates pre-provisioned admin accounts against the dedicated
 
 ## Private audio storage adapter
 
-The API supports the local private filesystem for development and Neon branch-scoped S3-compatible storage for staging. Set `AUDIO_STORAGE_BACKEND=neon_s3`, `AUDIO_STORAGE_BUCKET`, and the branch-scoped `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, and `AWS_REGION` values in the host secret manager. The S3 bucket must remain private. Audio requests still require a student session, published topic, approved asset, active entitlement and short-lived Learnwise token; the API streams objects through the same-origin endpoint and forwards byte-range requests. Never expose S3 credentials or object-store URLs to the browser.
+The API supports the local private filesystem for development and Neon branch-scoped S3-compatible storage for staging. Set `AUDIO_STORAGE_BACKEND=neon_s3`, `AUDIO_STORAGE_BUCKET`, and the branch-scoped `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, and `AWS_REGION` values in the host secret manager. The S3 bucket must remain private. Audio requests still require a student session, published topic, approved asset, active entitlement and short-lived Think Tank token; the API streams objects through the same-origin endpoint and forwards byte-range requests. Never expose S3 credentials or object-store URLs to the browser.
 
 
 ## One-time owner administrator bootstrap

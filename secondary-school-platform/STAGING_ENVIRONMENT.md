@@ -1,89 +1,81 @@
 # Think Tank staging environment — 2026-11-03
 
-## Resource map
+## Confirmed Render resource
 
-| Component | Provider | Resource | Plan / location |
-|---|---|---|---|
-| PostgreSQL | Neon | `think_tank` / `think_tank-staging-rehearsal` | Free, PostgreSQL 16, AWS Frankfurt |
-| Private audio | Neon Object Storage | `think_tank-private-audio` | Private bucket on staging branch |
-| API + student/admin pages | Render | `think_tank-staging-api` | Free, Docker, Frankfurt |
-| Transactional email | Brevo (selected) | Not yet provisioned | Free plan intended; 300/day |
-| Payments | Paystack | Existing integration code | Sandbox not yet credentialed |
-| DNS/edge | Cloudflare | Connected account | Not required for the current staging URL |
+| Field | Verified value |
+|---|---|
+| Service | `learnwise-staging-api` |
+| Service ID | `srv-dbkqcmt9fdbs73c2kdpg` |
+| Workspace | Emmanuel's workspace |
+| URL | https://learnwise-staging-api.onrender.com |
+| Branch configured in Render | `secondary-school-platform-foundation` |
+| Region / plan | Frankfurt / Free |
+| Runtime | Docker; context `secondary-school-platform`; Dockerfile `secondary-school-platform/backend/Dockerfile` |
+| Auto deploy | Disabled |
+| Render health-check path | Not configured |
+| Current live deployment | `fe9ff76f7b3b53331bfd4179062d7d38ac273d23` |
+| Current GitHub branch head at audit | `96a4afa508f03e94197326407af6121bacc5ad44` |
 
-## Staging URLs
+The branch is nine commits ahead of the live deployment. The nine-commit comparison contains documentation and student/admin HTML/CSS changes; no backend, migration or storage-adapter files are in that comparison. Do not assume browser acceptance has passed: live HTTP/browser checks remain outstanding. The Flask application exposes `/health`; Render's service-level health-check path is currently blank.
 
-- Application/API: https://think_tank-staging-api.onrender.com
-- Student home: https://think_tank-staging-api.onrender.com/
-- Account: https://think_tank-staging-api.onrender.com/account
-- Assessment: https://think_tank-staging-api.onrender.com/assessment
-- Lesson: https://think_tank-staging-api.onrender.com/lesson
-- Admin operations: https://think_tank-staging-api.onrender.com/admin/operations
-- Assessment reviews: https://think_tank-staging-api.onrender.com/admin/reviews
-- Health: https://think_tank-staging-api.onrender.com/health
+## Application URLs
 
-Admin routes return a noindex header and do not expose private data without an authenticated administrator session.
+- Student home: https://learnwise-staging-api.onrender.com/
+- Account: https://learnwise-staging-api.onrender.com/account
+- Assessment: https://learnwise-staging-api.onrender.com/assessment
+- Lesson: https://learnwise-staging-api.onrender.com/lesson
+- Admin workspace: https://learnwise-staging-api.onrender.com/admin
+- Admin operations: https://learnwise-staging-api.onrender.com/admin/operations
+- Assessment reviews: https://learnwise-staging-api.onrender.com/admin/reviews
+- Health: https://learnwise-staging-api.onrender.com/health
 
-## Database
+Admin pages carry a noindex header. Their API data routes require an authenticated admin session and capability checks.
 
-- Neon project ID: `spring-cloud-84267029`
-- Staging branch ID: `br-still-cherry-baz7g5hk`
-- Database: `think_tank`
-- PostgreSQL: 16
-- Migration baseline: `DATABASE_SCHEMA.sql` followed by `backend/migrations/001`–`013`.
-- Applied versions are recorded in `think_tank_migration_history`.
-- App database role: `think_tank_app`; separate from `think_tank_owner`. The app role is not a superuser and cannot create databases or roles. It cannot update/delete audit events or change administrator roles.
-- Do not point Render at the Neon project default branch; keep staging isolated on the named rehearsal branch.
-- Do not paste connection strings or credentials into Git, tickets, or ChatGPT messages.
+## Neon database — awaiting live verification
 
-## Private audio
+The prior staging handover records the following Neon resources, but they have not yet been independently queried in this audit:
 
-- Bucket: `think_tank-private-audio`
-- Access: private; no public bucket policy.
-- S3 endpoint and branch-scoped access credentials are injected into Render's secret environment.
-- Backend supports upload to pending review, reviewer approval/rejection and authenticated same-origin streaming with byte-range forwarding.
-- Uploaded files are limited to 100 MB and checked against allowed MIME types and file signatures.
-- No approved audio assets exist yet. Malware scanning and a real approved content corpus remain additional release requirements.
+- Project: `think_tank`, project ID `spring-cloud-84267029`
+- Staging branch: `think_tank-staging-rehearsal`, branch ID `br-still-cherry-baz7g5hk`
+- Database: `think_tank`, PostgreSQL 16
+- Expected baseline: `DATABASE_SCHEMA.sql` followed by `backend/migrations/001`–`013`
+- Expected migration ledger: `think_tank_migration_history`
+- Expected application role: `think_tank_app`, distinct from the owner role
 
-## Brevo email setup still required
+Do not treat the migration ledger, database connectivity, role grants or current branch selection as verified until the Neon connector can query this exact project and branch. Do not apply or replay migrations during reconciliation. Never paste database connection strings or credentials into Git, tickets or chat.
 
-Render has non-secret configuration for:
-- `PUBLIC_APP_URL=https://think_tank-staging-api.onrender.com`
-- `SMTP_HOST=smtp-relay.brevo.com`
-- `SMTP_PORT=587`
+## Private audio — bucket identity requires reconciliation
 
-Still required in Brevo and Render:
-- Verify a sender/domain in Brevo.
-- Add `SMTP_USERNAME` and `SMTP_PASSWORD` as Render secret environment variables.
-- Set `SMTP_FROM` to the verified sender.
-- Test verification and password-reset emails using a controlled mailbox.
-No SMTP credentials are stored in the repository.
+The current backend S3 adapter reads these environment variable names:
 
-## Staging safety flags
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_ENDPOINT_URL_S3`
+- `AWS_REGION`
+- `AUDIO_STORAGE_BUCKET`
 
-- `STUDENT_REGISTRATION_ENABLED=0` — public student signup is disabled until Brevo delivery and safeguarding/privacy checks are verified.
-- `PAYMENTS_ENABLED=0` — checkout is disabled until Paystack sandbox testing is completed and reviewed.
+The checked-in audio storage tests use `learnwise-private-audio`. An earlier staging note records `think_tank-private-audio`. Neither the live Render environment values nor the bucket's actual Neon branch scope/policy have been read in this audit. Therefore the live bucket name, private policy, endpoint, credential validity and object inventory remain **unverified**. Do not upload, delete, rename or expose objects until the exact bucket is confirmed read-only through Neon.
 
-These flags are set in Render's environment. Do not enable them for real users until the corresponding release gates are signed off.
+The code supports private upload to pending review, separate reviewer approval, authenticated entitlement-checked streaming and byte-range forwarding. The current adapter validates object keys and file size/type/signatures at the upload route. Malware scanning and approved audio assets remain release requirements.
 
-## First administrator
+## Email and payments
 
-There is no public administrator sign-up. Use `backend/bootstrap_admin.py` once from a trusted environment after setting:
-- `DATABASE_URL` to the staging database (never paste it into chat).
-- `THINK_TANK_ADMIN_EMAIL`.
-- `THINK_TANK_ADMIN_PASSWORD` (strong unique password).
-- `THINK_TANK_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`.
+- Brevo transactional email has been selected, but sender identity and SMTP credentials/delivery are not verified.
+- Student registration remains disabled pending email and safeguarding gates.
+- Paystack checkout remains disabled pending real sandbox credentials and end-to-end sandbox acceptance.
+- No live payment should be attempted.
 
-The script refuses to overwrite an existing account, hashes the password with scrypt and writes an audit event. Remove bootstrap environment variables after success. Do not create an admin account until the owner chooses the intended administrator email.
+## First owner administrator
 
-## Cost guardrails
+There is no public administrator sign-up. The one-time script is `backend/bootstrap_admin.py`. From a trusted environment, after confirming the staging database target and selecting the owner's intended email, set:
 
-- Keep Render on Free for staging. It may sleep when idle and has no production uptime guarantee.
-- Keep Neon at 0.25 CU and monitor the Free plan's 100 CU-hours/month and 1 GB database storage allowance. Neon Free also includes 5 GB object storage.
-- Keep all audio private and within the Neon storage allowance. Consider Cloudflare R2 only if storage grows; its current Free allowance is 10 GB-month standard storage, 1M Class A and 10M Class B requests, with no egress charge. Activating R2 requires a separate subscription checkout.
-- Brevo Free provides 300 sends/day and transactional email. Upgrade only if actual sending volume or deliverability requirements justify it.
-- Paystack has no integration fee; transaction fees apply when a payment succeeds. Keep all testing in sandbox until the owner approves live activation.
+- `DATABASE_URL` — staging database only; never paste it into chat.
+- `LEARNWISE_ADMIN_EMAIL`
+- `LEARNWISE_ADMIN_PASSWORD` — unique, strong password of at least 12 characters.
+- `LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`
 
-## Safety
+The script hashes the password using scrypt, requires explicit confirmation, acquires a transaction-scoped advisory lock and refuses to run if **any** admin account already exists. It records an audit event. Remove bootstrap variables from the environment immediately after success. Do not run it until the Neon staging branch and database role are independently verified. Never send the password through chat or commit it to Git.
 
-This is an isolated staging environment using synthetic data only. It is not approved for real students. No production deployment, live payment, public audio, or public student registration should be enabled before the external release gates in `RELEASE_GATE_REGISTER.md` are closed.
+## Safety and release decision
+
+This is staging only. No production deployment, real student data, public registration, public audio or live payment is approved. Keep PR #1 draft and unmerged, keep `main` untouched, and do not enable auto deploy. Close the external release gates in `RELEASE_GATE_REGISTER.md` before onboarding learners.

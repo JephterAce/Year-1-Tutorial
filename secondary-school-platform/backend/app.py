@@ -126,6 +126,13 @@ def not_found(_error):
     return jsonify({"error": "not_found", "message": "The requested resource was not found."}), 404
 
 
+
+def _feature_enabled(name):
+    value = os.environ.get(name)
+    if value is not None:
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return os.environ.get("APP_ENV", "development").strip().lower() not in {"staging", "production"}
+
 @app.errorhandler(500)
 def internal_error(_error):
     return jsonify({"error": "internal_error", "message": "An unexpected error occurred."}), 500
@@ -134,6 +141,8 @@ def internal_error(_error):
 
 @app.post("/api/v1/auth/register")
 def register():
+    if not _feature_enabled("STUDENT_REGISTRATION_ENABLED"):
+        return jsonify({"error":"registration_temporarily_disabled"}),503
     from identity_service import register_student, IdentityError
     from identity_email import send_identity_link
     data = request.get_json(silent=True) or {}
@@ -371,6 +380,8 @@ def assessment_integrity_event(attempt_id):
 
 @app.post("/api/v1/topics/<topic_id>/checkout")
 def create_topic_checkout(topic_id):
+    if not _feature_enabled("PAYMENTS_ENABLED"):
+        return jsonify({"error":"payments_temporarily_disabled"}),503
     from payment_orders import create_topic_checkout, PaymentOrderError
     student = _assessment_student()
     if not student:

@@ -55,4 +55,12 @@ class NeonS3StorageConfigTests(unittest.TestCase):
   self.assertEqual(cfg["bucket"],"learnwise-private-audio")
   self.assertEqual(cfg["region"],"eu-central-1")
 
+
+ def test_neon_storage_key_rejects_traversal(self):
+  from audio_storage import validate_object_key, AudioStorageError
+  self.assertEqual(validate_object_key("lesson/topic/audio.mp3"), "lesson/topic/audio.mp3")
+  for key in ("../secret.mp3", "/absolute.mp3", "a\\\\b.mp3", "a//b.mp3"):
+   with self.assertRaises(AudioStorageError): validate_object_key(key)
+
+if __name__ == "__main__":
  unittest.main()

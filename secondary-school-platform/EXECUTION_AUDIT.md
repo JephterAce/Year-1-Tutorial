@@ -1,4 +1,4 @@
-# Learnwise execution audit
+# Think Tank execution audit
 
 **Audit date:** 2026-11-02  
 **Repository:** `JephterAce/Year-1-Tutorial`  
@@ -117,7 +117,7 @@ The repository contains a substantial implementation foundation. It is **not app
 - **Overdue attempts** are now scored once, on first view (`get_attempt`), not only on save/submit.
 - **Answer size caps** (text 500 chars; 20 selections of 100 chars) in `check_answer_size`.
 - **Security headers** on all responses (nosniff, X-Frame-Options, Referrer-Policy, no-store on /api, HSTS in staging/production).
-- **UI layer:** `frontend/learnwise-ui.css` adds dark mode, mobile bottom navigation, focus rings, 44px touch targets and reduced-motion support.
+- **UI layer:** `frontend/think_tank-ui.css` adds dark mode, mobile bottom navigation, focus rings, 44px touch targets and reduced-motion support.
 - Tests: `test_attempt_hardening.py`. 153 unit tests pass locally (PostgreSQL tests require CI).
 - **Open:** entitlement enforcement on attempts; admin student/curriculum/payment consoles; per-IP rate limiting; live Paystack sandbox, SMTP, managed PostgreSQL and object storage (Issue #2).
 

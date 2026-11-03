@@ -19,10 +19,10 @@ This document distinguishes verified provider state from configuration that is n
 | Auto deploy | Disabled |
 | Health-check path | Not configured |
 | Current live deployment | `fe9ff76f7b3b53331bfd4179062d7d38ac273d23` |
-| Current development branch head | `30f9f41500e2c0c504f2007bcc618609855cbc28` |
-| Branch commits ahead of live deployment | 30 |
+| Development branch head at last comparison | `30f9f41500e2c0c504f2007bcc618609855cbc28` |
+| Branch commits ahead of live deployment at last comparison | 30 |
 
-The live deployment is running, but it is 30 commits behind the current development branch. The later commits include student/admin presentation updates, runbook corrections and owner-bootstrap hardening/tests. Do not assume these changes are present in the live service. Auto deploy is disabled and no deployment was triggered.
+The live deployment is running. At the recorded comparison, the development branch was 30 commits ahead of the live SHA. Subsequent documentation and browser-acceptance commits may increase that count; re-run the comparison before any deployment decision. The later commits include student/admin presentation updates, runbook corrections and owner-bootstrap hardening/tests. Do not assume these changes are present in the live service. Auto deploy is disabled and no deployment was triggered.
 
 The Flask app exposes `/health`, but the Render health-check path is blank. Direct requests to the health, student, assessment, lesson and admin URLs could not be completed from the available external browser/network environment. Render request-log query returned no request entries for the queried range. Therefore HTTP/browser acceptance remains **not verified**; this is not evidence that the service is down.
 

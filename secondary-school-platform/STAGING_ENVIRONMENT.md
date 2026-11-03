@@ -1,22 +1,30 @@
-# Think Tank staging environment — 2026-11-03
+# Think Tank staging environment — verified 2026-11-03
 
-## Confirmed Render resource
+This document distinguishes verified provider state from configuration that is not readable through the available provider interfaces. No migrations were replayed, no secrets were read or changed, and no deployment was triggered during this audit.
+
+## Render service
 
 | Field | Verified value |
 |---|---|
+| Workspace | Emmanuel's workspace |
 | Service | `learnwise-staging-api` |
 | Service ID | `srv-dbkqcmt9fdbs73c2kdpg` |
-| Workspace | Emmanuel's workspace |
 | URL | https://learnwise-staging-api.onrender.com |
-| Branch configured in Render | `secondary-school-platform-foundation` |
+| Repository | `JephterAce/Year-1-Tutorial` |
+| Configured branch | `secondary-school-platform-foundation` |
+| Runtime | Docker |
+| Docker context | `secondary-school-platform` |
+| Dockerfile | `secondary-school-platform/backend/Dockerfile` |
 | Region / plan | Frankfurt / Free |
-| Runtime | Docker; context `secondary-school-platform`; Dockerfile `secondary-school-platform/backend/Dockerfile` |
 | Auto deploy | Disabled |
-| Render health-check path | Not configured |
+| Health-check path | Not configured |
 | Current live deployment | `fe9ff76f7b3b53331bfd4179062d7d38ac273d23` |
-| Current GitHub branch head at audit | `96a4afa508f03e94197326407af6121bacc5ad44` |
+| Current development branch head | `c4f93d300c656e3101f601e131584b0bf48cfe85` |
+| Branch commits ahead of live deployment | 14 |
 
-At the initial comparison, the branch head was nine commits ahead of the live deployment; subsequent audit commits added owner-bootstrap hardening, tests and runbook corrections. The original nine-commit comparison contained documentation and student/admin HTML/CSS changes; no backend, migration or storage-adapter files were in that comparison. The later bootstrap changes are not deployed. Do not assume browser acceptance has passed: live HTTP/browser checks remain outstanding. The Flask application exposes `/health`; Render's service-level health-check path is currently blank.
+The live deployment is running, but it is 14 commits behind the current development branch. The later commits include student/admin presentation updates, runbook corrections and owner-bootstrap hardening/tests. Do not assume these changes are present in the live service. Auto deploy is disabled and no deployment was triggered.
+
+The Flask app exposes `/health`, but the Render health-check path is blank. Direct requests to the health, student, assessment, lesson and admin URLs could not be completed from the available external browser/network environment. Render request-log query returned no request entries for the queried range. Therefore HTTP/browser acceptance remains **not verified**; this is not evidence that the service is down.
 
 ## Application URLs
 
@@ -29,24 +37,51 @@ At the initial comparison, the branch head was nine commits ahead of the live de
 - Assessment reviews: https://learnwise-staging-api.onrender.com/admin/reviews
 - Health: https://learnwise-staging-api.onrender.com/health
 
-Admin pages carry a noindex header. Their API data routes require an authenticated admin session and capability checks.
+The app's route and CI tests are not a substitute for browser-level acceptance against the deployed service. Admin API access must remain session-authenticated and capability-checked.
 
-## Neon database — awaiting live verification
+## Neon PostgreSQL — live state verified read-only
 
-The prior staging handover records the following Neon resources, but they have not yet been independently queried in this audit:
+| Field | Verified value |
+|---|---|
+| Project name / ID | `learnwise` / `spring-cloud-84267029` |
+| Region | AWS Frankfurt (`eu-central-1`) |
+| PostgreSQL | 16.15 |
+| Staging branch / ID | `think-tank-staging` / `br-still-cherry-baz7g5hk` |
+| Branch state | Ready |
+| Default branch | `main` (`br-calm-wave-baaw8vpu`) — not used for staging audit |
+| Database | `learnwise` |
+| Owner role | `learnwise_owner` |
+| Application role | `learnwise_app` |
 
-- Project: `think_tank`, project ID `spring-cloud-84267029`
-- Staging branch: `think_tank-staging-rehearsal`, branch ID `br-still-cherry-baz7g5hk`
-- Database: `think_tank`, PostgreSQL 16
-- Expected baseline: `DATABASE_SCHEMA.sql` followed by `backend/migrations/001`–`013`
-- Expected migration ledger: `think_tank_migration_history`
-- Expected application role: `think_tank_app`, distinct from the owner role
+The previous documentation incorrectly called the project/database `think_tank`, the staging branch `think_tank-staging-rehearsal`, and the migration ledger `think_tank_migration_history`. The live values above supersede those names.
 
-Do not treat the migration ledger, database connectivity, role grants or current branch selection as verified until the Neon connector can query this exact project and branch. Do not apply or replay migrations during reconciliation. Never paste database connection strings or credentials into Git, tickets or chat.
+### Migration ledger
 
-## Private audio — bucket identity requires reconciliation
+The ledger is `public.learnwise_migration_history`, with columns `version`, `source_blob_sha` and `applied_at`. It contains migrations `001_platform_hardening` through `013_admin_sessions_and_audit_guard`. **All 13 recorded source blob hashes match the corresponding migration file blob hashes on the current GitHub development branch.** Migration 013's hash is `548e463479b322b4197e8a605f63d03b6993fdf8`.
 
-The current backend S3 adapter reads these environment variable names:
+This was a read-only verification. No migration was applied, altered, or replayed.
+
+### Application-role permission check
+
+A read-only query using `learnwise_app` successfully connected to database `learnwise`. The role can read the student table and migration ledger, but cannot update `admin_users` or `audit_events`. The owner role was used only for read-only Neon inspection; no account or permission changes were made.
+
+At audit time, the staging database contained zero administrator accounts, zero student accounts and zero audit events. This is a count-only check; no student or administrator personal records were retrieved. The zero-admin state means the one-time owner bootstrap is still pending, not that it should be run automatically.
+
+**Important unresolved connection check:** Render does not expose the value of its secret `DATABASE_URL` through the service inspection used here. The Neon staging branch/database are verified, but it is not yet proven that the running Render service's `DATABASE_URL` points to this exact branch and database. Verify privately in Render before running the bootstrap.
+
+## Neon private audio storage — live state verified read-only
+
+| Field | Verified value |
+|---|---|
+| Storage | Enabled on `think-tank-staging` |
+| S3 endpoint | `https://br-still-cherry-baz7g5hk.storage.c-8.eu-central-1.aws.neon.tech` |
+| Region | `eu-central-1` |
+| Addressing | Path-style |
+| Bucket | `learnwise-private-audio` |
+| Access level | `private` |
+| Object inventory | Empty at audit time |
+
+The previous documentation's `think_tank-private-audio` name was incorrect for this staging branch. The current backend adapter reads these variables:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
@@ -54,28 +89,42 @@ The current backend S3 adapter reads these environment variable names:
 - `AWS_REGION`
 - `AUDIO_STORAGE_BUCKET`
 
-The checked-in audio storage tests use `learnwise-private-audio`. An earlier staging note records `think_tank-private-audio`. Neither the live Render environment values nor the bucket's actual Neon branch scope/policy have been read in this audit. Therefore the live bucket name, private policy, endpoint, credential validity and object inventory remain **unverified**. Do not upload, delete, rename or expose objects until the exact bucket is confirmed read-only through Neon.
+Expected non-secret Render values for this Neon staging branch are:
 
-The code supports private upload to pending review, separate reviewer approval, authenticated entitlement-checked streaming and byte-range forwarding. The current adapter validates object keys and file size/type/signatures at the upload route. Malware scanning and approved audio assets remain release requirements.
+- `AWS_ENDPOINT_URL_S3=https://br-still-cherry-baz7g5hk.storage.c-8.eu-central-1.aws.neon.tech`
+- `AWS_REGION=eu-central-1`
+- `AUDIO_STORAGE_BUCKET=learnwise-private-audio`
+
+The adapter configures S3 path-style addressing. Render's secret values are not readable in the service inspection used for this audit, so it is **not verified** that the live Render environment matches these expected values or that its credentials authenticate successfully. Do not print or paste credentials. Do not upload, delete, rename or make any audio public as part of verification.
+
+The code supports private upload to pending review, separate reviewer approval, authenticated entitlement-checked streaming and byte-range forwarding. Malware scanning and approved audio assets remain release requirements.
+
+## CI status
+
+The latest workflow run for the development branch is [run 41644065826](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/41644065826), on commit `c4f93d300c656e3101f601e131584b0bf48cfe85`. Both `api-tests` and `container-build` passed. The API test job includes unit/security tests, JavaScript syntax checks, disposable PostgreSQL migration rehearsal, schema integration and assessment/payment integration tests.
+
+The first bootstrap-test attempt failed because the test mock returned a row where the database cursor API was expected. The mock was corrected in `test_bootstrap_admin.py`; the subsequent latest run passed. These are CI tests against disposable PostgreSQL and stubbed payment-provider responses, not live Neon migration replay or Paystack sandbox checkout.
 
 ## Email and payments
 
-- Brevo transactional email has been selected, but sender identity and SMTP credentials/delivery are not verified.
-- Student registration remains disabled pending email and safeguarding gates.
-- Paystack checkout remains disabled pending real sandbox credentials and end-to-end sandbox acceptance.
+- Brevo transactional email has been selected, but sender identity, SMTP credentials and real delivery remain unverified.
+- Student registration must remain disabled pending email and safeguarding/privacy release gates.
+- Paystack checkout must remain disabled pending provider sandbox credentials and full sandbox acceptance.
 - No live payment should be attempted.
 
 ## First owner administrator
 
-There is no public administrator sign-up. The one-time script is `backend/bootstrap_admin.py`. From a trusted environment, after confirming the staging database target and selecting the owner's intended email, set:
+There is no public administrator sign-up. The hardened one-time script is `backend/bootstrap_admin.py`. Do not run it until the owner selects the intended email and the operator privately verifies that `DATABASE_URL` targets the Neon staging branch/database above.
+
+Set these variables only in a trusted environment:
 
 - `DATABASE_URL` — staging database only; never paste it into chat.
 - `LEARNWISE_ADMIN_EMAIL`
-- `LEARNWISE_ADMIN_PASSWORD` — unique, strong password of at least 12 characters.
+- `LEARNWISE_ADMIN_PASSWORD` — unique password, at least 12 characters.
 - `LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`
 
-The script hashes the password using scrypt, requires explicit confirmation, acquires a transaction-scoped advisory lock and refuses to run if **any** admin account already exists. It records an audit event. Remove bootstrap variables from the environment immediately after success. Do not run it until the Neon staging branch and database role are independently verified. Never send the password through chat or commit it to Git.
+The script hashes the password using scrypt, requires explicit confirmation, acquires a transaction-scoped advisory lock, refuses to run if **any** administrator already exists, and writes an audit event. The script has not been run. Remove bootstrap variables immediately after a successful run. Never send the password through chat or commit it to Git.
 
 ## Safety and release decision
 
-This is staging only. No production deployment, real student data, public registration, public audio or live payment is approved. Keep PR #1 draft and unmerged, keep `main` untouched, and do not enable auto deploy. Close the external release gates in `RELEASE_GATE_REGISTER.md` before onboarding learners.
+This is staging only. No production deployment, real student data, public registration, public audio or live payment is approved. Keep PR #1 draft and unmerged, keep `main` untouched, keep Render auto deploy disabled, and do not run migrations as part of reconciliation. Close the external release gates in `RELEASE_GATE_REGISTER.md` before onboarding learners.

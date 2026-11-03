@@ -107,8 +107,17 @@ def curriculum_sources():
 
 @admin_data.get("/api/v1/admin/audio-assets")
 def list_audio_assets():
-    session, error = _denied("audio.upload")
-    if error: return error
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    can_review=False
+    try:
+        require(session["principal"],"audio.upload")
+    except PermissionError:
+        try:
+            require(session["principal"],"audio.review")
+            can_review=True
+        except PermissionError:
+            return jsonify({"error":"forbidden"}),403
     try:
         with connection() as conn:
             rows=conn.execute("""SELECT a.id,a.topic_id,t.title AS topic_title,a.asset_type,
@@ -117,7 +126,7 @@ def list_audio_assets():
               WHERE a.asset_type IN ('teacher_audio','podcast_audio')
               ORDER BY a.created_at DESC LIMIT 100""").fetchall()
             _audit(conn,session,"admin.audio_assets.viewed","lesson_assets",len(rows))
-        return jsonify({"items":[{"id":str(r["id"]),"topic_id":str(r["topic_id"]),
+        return jsonify({"can_review":can_review or session["role"]=="owner","items":[{"id":str(r["id"]),"topic_id":str(r["topic_id"]),
           "topic_title":r["topic_title"],"asset_type":r["asset_type"],"mime_type":r["mime_type"],
           "duration_seconds":r["duration_seconds"],"version":r["version"],
           "review_status":r["review_status"],"created_at":r["created_at"].isoformat()} for r in rows]}),200

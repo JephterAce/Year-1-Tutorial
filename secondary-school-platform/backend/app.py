@@ -730,6 +730,27 @@ def student_assessment_page():
 def student_lesson_page():
     return send_from_directory(_FRONTEND_DIR, "lesson.html")
 
+
+@app.get("/index.html")
+def student_home_alias():
+    return send_from_directory(_FRONTEND_DIR, "index.html")
+
+@app.get("/account.html")
+def student_account_alias():
+    return send_from_directory(_FRONTEND_DIR, "account.html")
+
+@app.get("/assessment.html")
+def student_assessment_alias():
+    return send_from_directory(_FRONTEND_DIR, "assessment.html")
+
+@app.get("/lesson.html")
+def student_lesson_alias():
+    return send_from_directory(_FRONTEND_DIR, "lesson.html")
+
+@app.get("/learnwise-ui.css")
+def student_stylesheet():
+    return send_from_directory(_FRONTEND_DIR, "learnwise-ui.css", mimetype="text/css")
+
 @app.get("/assets/<path:filename>")
 def student_assets(filename):
     return send_from_directory(_FRONTEND_DIR, filename)

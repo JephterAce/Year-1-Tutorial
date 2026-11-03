@@ -519,6 +519,8 @@ def admin_logout():
 # Protected admin assessment review endpoints.
 from admin_assessment_reviews import admin_reviews
 app.register_blueprint(admin_reviews)
+from admin_data import admin_data
+app.register_blueprint(admin_data)
 
 
 # Private lesson audio: signed access is scoped to an approved asset and active entitlement.
@@ -735,6 +737,13 @@ def student_assets(filename):
 @app.get("/admin")
 def admin_workspace_page():
     response = send_from_directory(_ADMIN_DIR, "index.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
+@app.get("/admin/operations")
+def admin_operations_page():
+    response = send_from_directory(_ADMIN_DIR, "operations.html")
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     return response
 

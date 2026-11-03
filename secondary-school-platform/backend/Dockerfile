@@ -4,6 +4,8 @@ WORKDIR /app
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./
+COPY frontend/ ./frontend/
+COPY admin/ ./admin/
 RUN useradd --system --uid 10001 learnwise && chown -R learnwise:learnwise /app
 USER learnwise
 EXPOSE 8000

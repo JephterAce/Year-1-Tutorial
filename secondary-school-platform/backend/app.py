@@ -9,7 +9,7 @@ import os
 from decimal import Decimal
 from uuid import UUID
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -690,6 +690,45 @@ def student_assessment_history():
     except Exception:
         app.logger.exception("Student assessment history failed")
         return jsonify({"error": "assessment_history_unavailable"}), 503
+
+
+
+# Same-origin student and administrator web pages.
+# Static assets are copied into the container by backend/Dockerfile.
+_FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "frontend")
+_ADMIN_DIR = os.path.join(os.path.dirname(__file__), "admin")
+
+@app.get("/")
+def student_home():
+    return send_from_directory(_FRONTEND_DIR, "index.html")
+
+@app.get("/account")
+def student_account_page():
+    return send_from_directory(_FRONTEND_DIR, "account.html")
+
+@app.get("/assessment")
+def student_assessment_page():
+    return send_from_directory(_FRONTEND_DIR, "assessment.html")
+
+@app.get("/lesson")
+def student_lesson_page():
+    return send_from_directory(_FRONTEND_DIR, "lesson.html")
+
+@app.get("/assets/<path:filename>")
+def student_assets(filename):
+    return send_from_directory(_FRONTEND_DIR, filename)
+
+@app.get("/admin")
+def admin_workspace_page():
+    response = send_from_directory(_ADMIN_DIR, "index.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+@app.get("/admin/reviews")
+def admin_reviews_page():
+    response = send_from_directory(_ADMIN_DIR, "reviews.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 if __name__ == "__main__":

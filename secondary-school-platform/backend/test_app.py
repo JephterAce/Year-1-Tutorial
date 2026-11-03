@@ -132,5 +132,14 @@ class DatabaseConfigTests(unittest.TestCase):
             self.assertEqual(database.database_url(), "postgresql://example")
 
 
+    def test_student_and_admin_pages_are_served_same_origin(self):
+        for path, marker in (("/", "Learnwise"), ("/account", "account"),
+                             ("/assessment", "assessment"), ("/lesson", "lesson"),
+                             ("/admin", "Learnwise"), ("/admin/reviews", "review")):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200, path)
+            self.assertIn("text/html", response.content_type)
+        self.assertEqual(self.client.get("/admin").headers.get("X-Robots-Tag"), "noindex, nofollow")
+
 if __name__ == "__main__":
     unittest.main()

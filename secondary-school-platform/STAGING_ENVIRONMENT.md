@@ -1,26 +1,26 @@
-# Learnwise staging environment — 2026-11-03
+# Think Tank staging environment — 2026-11-03
 
 ## Resource map
 
 | Component | Provider | Resource | Plan / location |
 |---|---|---|---|
-| PostgreSQL | Neon | `learnwise` / `learnwise-staging-rehearsal` | Free, PostgreSQL 16, AWS Frankfurt |
-| Private audio | Neon Object Storage | `learnwise-private-audio` | Private bucket on staging branch |
-| API + student/admin pages | Render | `learnwise-staging-api` | Free, Docker, Frankfurt |
+| PostgreSQL | Neon | `think_tank` / `think_tank-staging-rehearsal` | Free, PostgreSQL 16, AWS Frankfurt |
+| Private audio | Neon Object Storage | `think_tank-private-audio` | Private bucket on staging branch |
+| API + student/admin pages | Render | `think_tank-staging-api` | Free, Docker, Frankfurt |
 | Transactional email | Brevo (selected) | Not yet provisioned | Free plan intended; 300/day |
 | Payments | Paystack | Existing integration code | Sandbox not yet credentialed |
 | DNS/edge | Cloudflare | Connected account | Not required for the current staging URL |
 
 ## Staging URLs
 
-- Application/API: https://learnwise-staging-api.onrender.com
-- Student home: https://learnwise-staging-api.onrender.com/
-- Account: https://learnwise-staging-api.onrender.com/account
-- Assessment: https://learnwise-staging-api.onrender.com/assessment
-- Lesson: https://learnwise-staging-api.onrender.com/lesson
-- Admin operations: https://learnwise-staging-api.onrender.com/admin/operations
-- Assessment reviews: https://learnwise-staging-api.onrender.com/admin/reviews
-- Health: https://learnwise-staging-api.onrender.com/health
+- Application/API: https://think_tank-staging-api.onrender.com
+- Student home: https://think_tank-staging-api.onrender.com/
+- Account: https://think_tank-staging-api.onrender.com/account
+- Assessment: https://think_tank-staging-api.onrender.com/assessment
+- Lesson: https://think_tank-staging-api.onrender.com/lesson
+- Admin operations: https://think_tank-staging-api.onrender.com/admin/operations
+- Assessment reviews: https://think_tank-staging-api.onrender.com/admin/reviews
+- Health: https://think_tank-staging-api.onrender.com/health
 
 Admin routes return a noindex header and do not expose private data without an authenticated administrator session.
 
@@ -28,17 +28,17 @@ Admin routes return a noindex header and do not expose private data without an a
 
 - Neon project ID: `spring-cloud-84267029`
 - Staging branch ID: `br-still-cherry-baz7g5hk`
-- Database: `learnwise`
+- Database: `think_tank`
 - PostgreSQL: 16
 - Migration baseline: `DATABASE_SCHEMA.sql` followed by `backend/migrations/001`–`013`.
-- Applied versions are recorded in `learnwise_migration_history`.
-- App database role: `learnwise_app`; separate from `learnwise_owner`. The app role is not a superuser and cannot create databases or roles. It cannot update/delete audit events or change administrator roles.
+- Applied versions are recorded in `think_tank_migration_history`.
+- App database role: `think_tank_app`; separate from `think_tank_owner`. The app role is not a superuser and cannot create databases or roles. It cannot update/delete audit events or change administrator roles.
 - Do not point Render at the Neon project default branch; keep staging isolated on the named rehearsal branch.
 - Do not paste connection strings or credentials into Git, tickets, or ChatGPT messages.
 
 ## Private audio
 
-- Bucket: `learnwise-private-audio`
+- Bucket: `think_tank-private-audio`
 - Access: private; no public bucket policy.
 - S3 endpoint and branch-scoped access credentials are injected into Render's secret environment.
 - Backend supports upload to pending review, reviewer approval/rejection and authenticated same-origin streaming with byte-range forwarding.
@@ -48,7 +48,7 @@ Admin routes return a noindex header and do not expose private data without an a
 ## Brevo email setup still required
 
 Render has non-secret configuration for:
-- `PUBLIC_APP_URL=https://learnwise-staging-api.onrender.com`
+- `PUBLIC_APP_URL=https://think_tank-staging-api.onrender.com`
 - `SMTP_HOST=smtp-relay.brevo.com`
 - `SMTP_PORT=587`
 
@@ -70,9 +70,9 @@ These flags are set in Render's environment. Do not enable them for real users u
 
 There is no public administrator sign-up. Use `backend/bootstrap_admin.py` once from a trusted environment after setting:
 - `DATABASE_URL` to the staging database (never paste it into chat).
-- `LEARNWISE_ADMIN_EMAIL`.
-- `LEARNWISE_ADMIN_PASSWORD` (strong unique password).
-- `LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`.
+- `THINK_TANK_ADMIN_EMAIL`.
+- `THINK_TANK_ADMIN_PASSWORD` (strong unique password).
+- `THINK_TANK_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`.
 
 The script refuses to overwrite an existing account, hashes the password with scrypt and writes an audit event. Remove bootstrap environment variables after success. Do not create an admin account until the owner chooses the intended administrator email.
 

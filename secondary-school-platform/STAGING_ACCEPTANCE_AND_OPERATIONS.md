@@ -78,11 +78,11 @@ The staging database had zero administrator accounts at the last count-only audi
 
 After the owner chooses the address:
 
-1. Confirm privately that the Render service's DATABASE_URL points to Neon branch br-still-cherry-baz7g5hk, database learnwise, and role learnwise_app. If the script requires elevated insert privileges, follow the reviewed bootstrap procedure using the correct staging owner role; never grant broad privileges to the app role.
+1. Confirm privately that the Render service's DATABASE_URL points to Neon branch br-still-cherry-baz7g5hk, database learnwise, and the least-privilege application role learnwise_app. Do not replace the service runtime role with an owner credential.
 2. Confirm there is still no administrator account, using a count-only query.
 3. Generate a unique password of at least 12 characters in a password manager. Do not send it through chat or commit it.
-4. Run the script once against staging with LEARNWISE_ADMIN_EMAIL, LEARNWISE_ADMIN_PASSWORD, and LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN.
-5. Confirm exactly one administrator was created and that the audit event exists. Remove bootstrap variables immediately.
+4. Run the script once from a trusted one-time operator environment using a separate staging-only bootstrap connection with the required INSERT privileges (the verified staging owner role learnwise_owner, or a narrowly scoped temporary bootstrap role). That connection must target branch br-still-cherry-baz7g5hk and database learnwise; do not change the Render service's DATABASE_URL. Set LEARNWISE_ADMIN_EMAIL, LEARNWISE_ADMIN_PASSWORD, and LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN only in that ephemeral environment.
+5. Confirm exactly one administrator was created and that the audit event exists. Remove bootstrap variables immediately and discard the temporary connection environment.
 6. Test administrator login, session expiry/logout, CSRF enforcement and role/capability checks in the browser suite or a controlled manual session.
 
 The script is guarded by explicit confirmation, a transaction-scoped advisory lock and an any-existing-admin refusal. Never run it against production or an unverified database. Do not execute it until the owner email is selected and the target is verified.

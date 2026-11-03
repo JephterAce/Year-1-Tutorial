@@ -39,4 +39,20 @@ class AudioTokenTests(unittest.TestCase):
    self.assertEqual(resolve_private_audio_path(root,"lesson.mp3"),p.resolve())
    with self.assertRaises(AudioAccessError): resolve_private_audio_path(root,"../outside.mp3")
 
-if __name__=="__main__": unittest.main()
+
+class NeonS3StorageConfigTests(unittest.TestCase):
+ def test_s3_storage_requires_branch_scoped_environment(self):
+  from audio_storage import storage_config, AudioStorageError
+  with patch.dict("os.environ",{},clear=True):
+   with self.assertRaises(AudioStorageError): storage_config()
+ def test_s3_storage_reads_private_bucket_settings(self):
+  from audio_storage import storage_config
+  env={"AWS_ACCESS_KEY_ID":"id","AWS_SECRET_ACCESS_KEY":"secret",
+       "AWS_ENDPOINT_URL_S3":"https://storage.example","AWS_REGION":"eu-central-1",
+       "AUDIO_STORAGE_BUCKET":"learnwise-private-audio"}
+  with patch.dict("os.environ",env,clear=True):
+   cfg=storage_config()
+  self.assertEqual(cfg["bucket"],"learnwise-private-audio")
+  self.assertEqual(cfg["region"],"eu-central-1")
+
+ unittest.main()

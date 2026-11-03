@@ -93,3 +93,8 @@ Migration `013_admin_sessions_and_audit_guard.sql` adds a separate server-side a
 ## Admin authentication service
 
 admin_auth.py authenticates pre-provisioned admin accounts against the dedicated admin table, applies an HMAC-keyed login rate limit, issues random server-side sessions with only token hashes stored, revokes prior sessions on login, checks active status on every session lookup, validates CSRF tokens, and supports revocation on logout. Flask routes expose admin login, current-session inspection and logout only. There is deliberately no public admin signup or role-change endpoint. Privileged admin business operations must still be wrapped in capability checks and append-only audit events before they are exposed.
+
+
+## Private audio storage adapter
+
+The API supports the local private filesystem for development and Neon branch-scoped S3-compatible storage for staging. Set `AUDIO_STORAGE_BACKEND=neon_s3`, `AUDIO_STORAGE_BUCKET`, and the branch-scoped `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, and `AWS_REGION` values in the host secret manager. The S3 bucket must remain private. Audio requests still require a student session, published topic, approved asset, active entitlement and short-lived Learnwise token; the API streams objects through the same-origin endpoint and forwards byte-range requests. Never expose S3 credentials or object-store URLs to the browser.

@@ -9,7 +9,7 @@ import os
 from decimal import Decimal
 from uuid import UUID
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Response, stream_with_context
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -589,13 +589,27 @@ def stream_private_audio(topic_id, asset_id):
             ).fetchone()
         if not row or claims.get("key") != row["storage_key"]:
             return jsonify({"error": "audio_access_denied"}), 403
-        media_path = resolve_private_audio_path(
-            os.environ.get("AUDIO_STORAGE_ROOT", ""), row["storage_key"]
-        )
-        response = send_file(
-            media_path, mimetype=row["mime_type"] or "application/octet-stream",
-            conditional=True, etag=True, max_age=0,
-        )
+        if os.environ.get("AUDIO_STORAGE_BACKEND", "local").strip().lower() == "neon_s3":
+            from audio_storage import get_private_audio_object
+            stored = get_private_audio_object(row["storage_key"], request.headers.get("Range"))
+            body = stored["Body"]
+            response = Response(
+                stream_with_context(body.iter_chunks(chunk_size=64 * 1024)),
+                status=206 if request.headers.get("Range") else 200,
+                mimetype=stored.get("ContentType") or row["mime_type"] or "application/octet-stream",
+            )
+            response.headers["Content-Length"] = str(stored["ContentLength"])
+            if stored.get("ContentRange"):
+                response.headers["Content-Range"] = stored["ContentRange"]
+            response.headers["Accept-Ranges"] = "bytes"
+        else:
+            media_path = resolve_private_audio_path(
+                os.environ.get("AUDIO_STORAGE_ROOT", ""), row["storage_key"]
+            )
+            response = send_file(
+                media_path, mimetype=row["mime_type"] or "application/octet-stream",
+                conditional=True, etag=True, max_age=0,
+            )
         response.headers["Cache-Control"] = "private, no-store"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Content-Security-Policy"] = "default-src 'none'"

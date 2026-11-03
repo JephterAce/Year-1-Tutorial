@@ -16,7 +16,7 @@
 | Current live deployment | `fe9ff76f7b3b53331bfd4179062d7d38ac273d23` |
 | Current GitHub branch head at audit | `96a4afa508f03e94197326407af6121bacc5ad44` |
 
-The branch is nine commits ahead of the live deployment. The nine-commit comparison contains documentation and student/admin HTML/CSS changes; no backend, migration or storage-adapter files are in that comparison. Do not assume browser acceptance has passed: live HTTP/browser checks remain outstanding. The Flask application exposes `/health`; Render's service-level health-check path is currently blank.
+At the initial comparison, the branch head was nine commits ahead of the live deployment; subsequent audit commits added owner-bootstrap hardening, tests and runbook corrections. The original nine-commit comparison contained documentation and student/admin HTML/CSS changes; no backend, migration or storage-adapter files were in that comparison. The later bootstrap changes are not deployed. Do not assume browser acceptance has passed: live HTTP/browser checks remain outstanding. The Flask application exposes `/health`; Render's service-level health-check path is currently blank.
 
 ## Application URLs
 

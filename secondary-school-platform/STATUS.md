@@ -1,3 +1,51 @@
+# Current execution checkpoint — 2026-11-03 (supersedes older historical status below)
+
+**Development branch:** `secondary-school-platform-foundation`  
+**Latest code commit:** `0675b2f624f03ab2bbbac264307df359a2046c38`  
+**PR #1:** open, draft, unmerged. The current main head is `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`; compare it with the branch before any future sync.  
+**Staging API:** https://learnwise-staging-api.onrender.com  
+**Render service:** `learnwise-staging-api`, Free plan, Frankfurt, Docker, one instance. Latest deployment is live on commit `0675b2f...`.  
+**Neon project:** `learnwise` (`spring-cloud-84267029`), Free plan, PostgreSQL 16, Frankfurt.  
+**Neon staging branch:** `learnwise-staging-rehearsal` (`br-still-cherry-baz7g5hk`).  
+**Private audio bucket:** `learnwise-private-audio` (private, branch-scoped).  
+**CI:** both API test and container-build checks passed on commit `0675b2f624f03ab2bbbac264307df359a2046c38`.
+
+## Verified progress in this checkpoint
+
+- Provisioned the dedicated Neon project and a separate staging branch; applied `DATABASE_SCHEMA.sql` and ordered backend migrations 001–013 to that branch.
+- Added `learnwise_migration_history` with all 13 migration versions and source blob hashes. The database currently contains six subjects and three term labels; no student records or unverified topic mappings have been fabricated.
+- Created a private Neon Object Storage bucket and branch-scoped S3 credentials. Credentials are stored in Render environment variables, not in Git or this document.
+- Render now uses a separate `learnwise_app` database login, not the database owner. It has no superuser, create-database or create-role rights. Audit rows are append-only at the application role level; admin role changes are not permitted through the app role.
+- Deployed the Flask API and student pages from one HTTPS origin. Routes cover the student home, account, lesson, assessment, stylesheet, admin studio, operations and assessment review pages.
+- Added S3-compatible private audio retrieval and upload code, MIME/signature/size validation, pending-review state, entitlement-protected streaming, and separate editor-upload/reviewer-approval capabilities. No real lesson audio has been uploaded or approved.
+- Added protected admin operational views for student records, payment summaries, curriculum source metadata and audio assets. Student/payment data is not exposed to unauthorised roles.
+- Added a one-time owner-admin bootstrap script. No admin account has been created yet; there is no public admin registration.
+- Configured the staging public URL and Brevo SMTP host/port. No Brevo account credentials or verified sender identity have been supplied, so real email delivery remains disabled.
+- Preserved the latest main-branch assessment/profile specification and root-level migration file. `MIGRATION_RECONCILIATION.md` explains why the backend migration sequence is canonical and why the older overlapping root migration must not be applied again.
+
+## Free/low-cost architecture decision
+
+- **Database + private files:** Neon Free. Current published Free limits include 1 GB Postgres storage and 100 CU-hours per project/month, plus 5 GB object storage. Keep compute at 0.25 CU and monitor usage. See https://neon.com/blog/neon-free-plan-1-gb-per-project.
+- **API hosting:** Render Free for staging and early previews. Free services can sleep and have limitations; not suitable for a production SLA or dependable student exam sessions. See https://render.com/docs/free.
+- **Transactional email:** Brevo Free is the preferred next provider because it includes 300 emails/day and transactional email. Verify a sender domain and add SMTP credentials only in Render's secret environment. See https://help.brevo.com/hc/en-us/articles/208589409-About-Brevo-s-pricing-plans.
+- **Storage fallback:** Cloudflare R2 has a 10 GB-month free standard-storage allowance, 1 million Class A and 10 million Class B requests, with no egress charge. It requires R2 subscription activation; stay on Neon Object Storage for the initial 5 GB rather than enabling another service prematurely. See https://developers.cloudflare.com/r2/pricing/.
+- **Payments:** keep Paystack. Standard Nigeria local processing is 1.5% + ₦100, capped at ₦2,000; the ₦100 is waived below ₦2,500. Paystack documents a lower education-institution rate, but eligibility must be confirmed with Paystack before relying on it. See https://paystack.com/pricing and https://support.paystack.com/en/articles/2130306.
+
+## Important remaining gates
+
+1. Create the first owner administrator using the secure bootstrap script from a trusted environment; remove its temporary environment variables immediately afterwards.
+2. Create/verify a Brevo sender identity and place SMTP username/password in Render secrets; then test verification and password-reset emails.
+3. Run real staging HTTP/browser tests across mobile/desktop, including student registration, email verification, assessments, payments sandbox and private audio upload/playback. CI tests are not a substitute for browser acceptance.
+4. Configure Paystack sandbox credentials in Render secrets and test actual sandbox checkout, webhook delivery/retries, refunds and reconciliation. No real payment has been processed.
+5. Populate and verify the 18 SS1–SS3 × six-subject curriculum combinations from authorised NERDC materials, with independent qualified teacher sign-off. No curriculum topics have been invented.
+6. Complete Nigerian privacy/legal review, DPIA, child/guardian consent assessment and safeguarding approval before real learner data.
+7. Configure monitoring/alerts, backup and timed restore evidence; add a custom domain only if/when owner approves.
+8. Inspect the two commits newly added to `main` before any branch sync. Main has not been modified by this work.
+
+**Release decision: NOT READY for public student onboarding or production.** Staging code and infrastructure are live, but external credentials, verified curriculum, formal approvals and real end-to-end acceptance remain outstanding. Keep PR #1 draft and unmerged. Do not deploy production, activate live payments, buy paid resources or merge without owner approval.
+
+---
+
 # Current execution checkpoint — 2026-11-02 (supersedes historical status notes below)
 
 **Branch:** `secondary-school-platform-foundation`  

@@ -3,6 +3,7 @@
 All clocks, ownership checks, snapshots, answer keys and grading remain server-side.
 The service is intentionally database-backed; no demo/fallback attempts are allowed.
 """
+import os
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from psycopg.types.json import Jsonb
@@ -35,6 +36,11 @@ BRIEFING = [
 
 MAX_TEXT_ANSWER = 500
 MAX_SELECTIONS, MAX_OPTION_ID = 20, 100
+
+
+def entitlement_required():
+    """Paid-access gate for assessments. Off by default; set ASSESSMENT_REQUIRES_ENTITLEMENT=1."""
+    return os.environ.get("ASSESSMENT_REQUIRES_ENTITLEMENT", "").strip().lower() in ("1", "true", "yes")
 
 
 def check_answer_size(answer):
@@ -88,6 +94,16 @@ def create_attempt(student_id, assessment_id, question_count):
         student = conn.execute("SELECT class_level FROM students WHERE id=%s", (student_id,)).fetchone()
         if not student or student["class_level"] != assessment["class_level"]:
             raise AttemptError("not_eligible", "You are not eligible for this assessment.", 403)
+        if entitlement_required():
+            owned = conn.execute(
+                """SELECT 1 FROM entitlements e JOIN topics t ON t.id=e.topic_id
+                   WHERE e.student_id=%s AND e.revoked_at IS NULL AND t.status='published'
+                     AND t.subject_id=(SELECT subject_id FROM assessments WHERE id=%s)
+                     AND t.class_level=%s LIMIT 1""",
+                (student_id, assessment_id, assessment["class_level"])).fetchone()
+            if not owned:
+                raise AttemptError("entitlement_required",
+                                   "Unlock a topic in this subject to take this assessment.", 402)
         conn.execute("SELECT id FROM students WHERE id=%s FOR UPDATE", (student_id,))
         existing = conn.execute(
             """SELECT id, time_limit_seconds FROM assessment_attempts

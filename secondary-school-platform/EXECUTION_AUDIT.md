@@ -120,3 +120,8 @@ The repository contains a substantial implementation foundation. It is **not app
 - **UI layer:** `frontend/learnwise-ui.css` adds dark mode, mobile bottom navigation, focus rings, 44px touch targets and reduced-motion support.
 - Tests: `test_attempt_hardening.py`. 153 unit tests pass locally (PostgreSQL tests require CI).
 - **Open:** entitlement enforcement on attempts; admin student/curriculum/payment consoles; per-IP rate limiting; live Paystack sandbox, SMTP, managed PostgreSQL and object storage (Issue #2).
+
+## Entitlement gate (patch 2)
+- `create_attempt` can now require an active, unrevoked entitlement on a published topic of the assessment's subject and class (HTTP 402 `entitlement_required`).
+- Controlled by `ASSESSMENT_REQUIRES_ENTITLEMENT=1`; **off by default** so existing behaviour is unchanged. Decide the product rule (paid-only vs free assessments) before enabling in staging.
+- Unit-tested: flag behaviour only. The SQL path needs the PostgreSQL E2E job (not run locally).

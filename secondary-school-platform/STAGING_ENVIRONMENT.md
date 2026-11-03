@@ -19,10 +19,10 @@ This document distinguishes verified provider state from configuration that is n
 | Auto deploy | Disabled |
 | Health-check path | Not configured |
 | Current live deployment | `fe9ff76f7b3b53331bfd4179062d7d38ac273d23` |
-| Current development branch head | `c4f93d300c656e3101f601e131584b0bf48cfe85` |
-| Branch commits ahead of live deployment | 14 |
+| Current development branch head | `b9d87eef4b27f3de21db8d0720eea1af826e630c` |
+| Branch commits ahead of live deployment | 28 |
 
-The live deployment is running, but it is 14 commits behind the current development branch. The later commits include student/admin presentation updates, runbook corrections and owner-bootstrap hardening/tests. Do not assume these changes are present in the live service. Auto deploy is disabled and no deployment was triggered.
+The live deployment is running, but it is 28 commits behind the current development branch. The later commits include student/admin presentation updates, runbook corrections and owner-bootstrap hardening/tests. Do not assume these changes are present in the live service. Auto deploy is disabled and no deployment was triggered.
 
 The Flask app exposes `/health`, but the Render health-check path is blank. Direct requests to the health, student, assessment, lesson and admin URLs could not be completed from the available external browser/network environment. Render request-log query returned no request entries for the queried range. Therefore HTTP/browser acceptance remains **not verified**; this is not evidence that the service is down.
 
@@ -34,10 +34,11 @@ The Flask app exposes `/health`, but the Render health-check path is blank. Dire
 - Lesson: https://learnwise-staging-api.onrender.com/lesson
 - Admin workspace: https://learnwise-staging-api.onrender.com/admin
 - Admin operations: https://learnwise-staging-api.onrender.com/admin/operations
+- Admin sign-in: https://learnwise-staging-api.onrender.com/admin/login
 - Assessment reviews: https://learnwise-staging-api.onrender.com/admin/reviews
 - Health: https://learnwise-staging-api.onrender.com/health
 
-The app's route and CI tests are not a substitute for browser-level acceptance against the deployed service. Admin API access must remain session-authenticated and capability-checked.
+Student-facing page routes are served normally. Administrator workspace, operations and review pages now redirect anonymous visitors to /admin/login; the administrator identity and data APIs remain session-authenticated and capability-checked. The dedicated browser acceptance workflow checks these boundaries against the live service.
 
 ## Neon PostgreSQL — live state verified read-only
 
@@ -142,3 +143,10 @@ Render's service configuration was rechecked on 2026-11-03: the HTTP health-chec
 Render's secret environment values remain inaccessible through the available service inspection. An authorized operator must privately compare DATABASE_URL with Neon branch `br-still-cherry-baz7g5hk` and database `learnwise`, and verify the private audio settings documented in `STAGING_ACCEPTANCE_AND_OPERATIONS.md`. No environment variables were changed.
 
 The first owner admin remains uncreated. The owner must select the exact administrator email before the guarded bootstrap script is run.
+
+
+## Administrator page access hardening
+
+The current development branch now includes a dedicated administrator sign-in page at `/admin/login`. The `/admin`, `/admin/operations` and `/admin/reviews` pages require a valid administrator session and redirect anonymous visitors to the login page. The login form uses the separate administrator login API; student credentials are not accepted as administrator credentials. Protected pages set no-store and noindex headers.
+
+This change is committed on the development branch and is not present in the existing Render deployment until a separately approved staging deploy. The manual browser acceptance workflow includes assertions for these redirects and the admin login form.

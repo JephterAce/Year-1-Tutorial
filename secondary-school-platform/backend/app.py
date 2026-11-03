@@ -711,8 +711,10 @@ def student_assessment_history():
 
 # Same-origin student and administrator web pages.
 # Static assets are copied into the container by backend/Dockerfile.
-_FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "frontend")
-_ADMIN_DIR = os.path.join(os.path.dirname(__file__), "admin")
+_BACKEND_DIR = os.path.dirname(__file__)
+_PROJECT_DIR = _BACKEND_DIR if os.path.isdir(os.path.join(_BACKEND_DIR, "frontend")) else os.path.dirname(_BACKEND_DIR)
+_FRONTEND_DIR = os.path.join(_PROJECT_DIR, "frontend")
+_ADMIN_DIR = os.path.join(_PROJECT_DIR, "admin")
 
 @app.get("/")
 def student_home():

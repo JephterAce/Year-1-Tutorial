@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: secondary-school-platform/browser-acceptance/package.json
       - name: Install browser test dependencies
         working-directory: secondary-school-platform/browser-acceptance
         run: npm install

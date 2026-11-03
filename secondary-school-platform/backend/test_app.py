@@ -132,14 +132,24 @@ class DatabaseConfigTests(unittest.TestCase):
             self.assertEqual(database.database_url(), "postgresql://example")
 
 
-    def test_student_and_admin_pages_are_served_same_origin(self):
-        for path, marker in (("/", "Learnwise"), ("/account", "account"),
-                             ("/assessment", "assessment"), ("/lesson", "lesson"),
-                             ("/admin", "Learnwise"), ("/admin/operations", "operations"), ("/admin/reviews", "review")):
-            response = app.test_client().get(path)
+    def test_student_pages_are_served_and_admin_pages_require_session(self):
+        client = app.test_client()
+        for path in ("/", "/account", "/assessment", "/lesson"):
+            response = client.get(path)
             self.assertEqual(response.status_code, 200, path)
             self.assertIn("text/html", response.content_type)
-        self.assertEqual(app.test_client().get("/admin").headers.get("X-Robots-Tag"), "noindex, nofollow")
+
+        login_page = client.get("/admin/login")
+        self.assertEqual(login_page.status_code, 200)
+        self.assertIn("noindex, nofollow", login_page.headers.get("X-Robots-Tag", ""))
+        self.assertIn(b"Administrator workspace", login_page.data)
+
+        for path in ("/admin", "/admin/operations", "/admin/reviews"):
+            response = client.get(path)
+            self.assertEqual(response.status_code, 302, path)
+            self.assertEqual(response.headers.get("Location"), "/admin/login")
+
+        self.assertEqual(client.get("/api/v1/admin/auth/me").status_code, 401)
 
 
     def test_staging_signup_and_checkout_are_disabled_by_default(self):

@@ -1,15 +1,15 @@
-# Learnwise — Master Continuation Prompt
+# Think Tank — Master Continuation Prompt
 
 ## Role and working standard
 
-Act as the senior full-stack engineer, backend architect, frontend engineer, database engineer, DevOps/reliability lead, security reviewer and QA lead responsible for continuing the Learnwise senior-secondary learning platform. Work directly in the existing repository. Make changes, run tests, inspect failures and commit working increments. Do not merely produce plans or claim completion without evidence.
+Act as the senior full-stack engineer, backend architect, frontend engineer, database engineer, DevOps/reliability lead, security reviewer and QA lead responsible for continuing the Think Tank senior-secondary learning platform. Work directly in the existing repository. Make changes, run tests, inspect failures and commit working increments. Do not merely produce plans or claim completion without evidence.
 
 ## Repository and protected boundaries
 
 - Repository: `JephterAce/Year-1-Tutorial`
 - Active development branch: `secondary-school-platform-foundation`
 - Existing pull request: #1, targeting `main`
-- Learnwise project directory: `secondary-school-platform/`
+- Think Tank project directory: `secondary-school-platform/`
 - Known baseline to re-check before acting: `8260334d166d47c8615693a1bbfb70806aeb058d` (2026-11-03). Always fetch the live branch head first; do not assume this SHA is still current.
 - Keep PR #1 open, in draft, and unmerged unless the repository owner explicitly approves a change.
 - Never commit to or modify `main`. Never force-push, rewrite history, or modify the separate legacy university Telegram/GitHub integration.
@@ -19,7 +19,7 @@ Act as the senior full-stack engineer, backend architect, frontend engineer, dat
 
 ## Product definition
 
-Build Learnwise as a secure, accessible learning platform for Nigerian senior secondary students SS1–SS3. The initial subject set is:
+Build Think Tank as a secure, accessible learning platform for Nigerian senior secondary students SS1–SS3. The initial subject set is:
 1. English Language
 2. General Mathematics
 3. Further Mathematics

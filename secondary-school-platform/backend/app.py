@@ -9,7 +9,7 @@ import os
 from decimal import Decimal
 from uuid import UUID
 
-from flask import Flask, jsonify, request, send_from_directory, Response, stream_with_context
+from flask import Flask, jsonify, request, send_from_directory, Response, stream_with_context, redirect
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -768,23 +768,42 @@ def student_stylesheet():
 def student_assets(filename):
     return send_from_directory(_FRONTEND_DIR, filename)
 
+@app.get("/admin/login")
+def admin_login_page():
+    if _current_admin():
+        return redirect("/admin")
+    response = send_from_directory(_ADMIN_DIR, "login.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @app.get("/admin")
 def admin_workspace_page():
+    if not _current_admin():
+        return redirect("/admin/login")
     response = send_from_directory(_ADMIN_DIR, "index.html")
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 
 @app.get("/admin/operations")
 def admin_operations_page():
+    if not _current_admin():
+        return redirect("/admin/login")
     response = send_from_directory(_ADMIN_DIR, "operations.html")
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 @app.get("/admin/reviews")
 def admin_reviews_page():
+    if not _current_admin():
+        return redirect("/admin/login")
     response = send_from_directory(_ADMIN_DIR, "reviews.html")
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
     return response
 
 

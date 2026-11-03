@@ -141,5 +141,17 @@ class DatabaseConfigTests(unittest.TestCase):
             self.assertIn("text/html", response.content_type)
         self.assertEqual(app.test_client().get("/admin").headers.get("X-Robots-Tag"), "noindex, nofollow")
 
+
+    def test_staging_signup_and_checkout_are_disabled_by_default(self):
+        with patch.dict("os.environ", {
+            "APP_ENV": "staging",
+            "STUDENT_REGISTRATION_ENABLED": "0",
+            "PAYMENTS_ENABLED": "0",
+        }):
+            client = app.test_client()
+            self.assertEqual(client.post("/api/v1/auth/register", json={}).status_code, 503)
+            self.assertEqual(client.post("/api/v1/topics/00000000-0000-0000-0000-000000000001/checkout", json={}).status_code, 503)
+
+
 if __name__ == "__main__":
     unittest.main()

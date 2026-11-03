@@ -20,7 +20,7 @@ The browser suite checks:
 4. Anonymous student identity, profile, assessment-history, topic and attempt routes return 401.
 5. Anonymous attempt creation, private audio authorization and private audio streaming return 401.
 6. GET /api/v1/admin/auth/me returns 401 without an administrator session.
-7. Admin preview documents carry X-Robots-Tag: noindex.
+7. Anonymous visits to /admin, /admin/operations and /admin/reviews redirect to the dedicated /admin/login page; admin login and preview documents carry X-Robots-Tag: noindex.
 
 ### What the browser suite does not yet prove
 
@@ -28,8 +28,8 @@ The browser suite checks:
 - Successful student login requires a designated staging-only test account. Do not use a real learner account.
 - Full assessment completion requires an approved, published staging assessment and a designated test student.
 - Lesson/audio playback requires a published approved lesson asset, a test entitlement and working private-storage credentials. The staging bucket was empty at the last audit.
-- Admin API authentication can be checked anonymously, but a full administrator sign-in and capability test requires the owner bootstrap and an owner-approved staging administrator.
-- The admin HTML pages are currently labelled as preview shells; the protected boundary is the administrator API/session layer. Do not treat a hidden navigation item or noindex header as authorization.
+- Admin page access and administrator API authentication are checked anonymously. A successful administrator sign-in and capability test still requires the owner bootstrap and an owner-approved staging administrator.
+- The admin workspace remains a non-connected preview shell; protecting its route does not mean that CMS, finance or publishing operations are complete.
 
 A successful workflow run is evidence only for the exact deployed staging target and commit tested. The app's existing Render deployment is behind the current development branch. Do not interpret a browser run against the old live SHA as validation of code that has not been deployed.
 

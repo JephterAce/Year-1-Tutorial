@@ -38,8 +38,8 @@ From this directory:
 ```sh
 docker compose -f docker-compose.rehearsal.yml up -d postgres
 cd backend
-LEARNWISE_REHEARSAL_DATABASE_URL='postgresql://learnwise:rehearsal_only_change_me@localhost:55432/learnwise_rehearsal' python rehearse_migrations.py
-DATABASE_URL='postgresql://learnwise:rehearsal_only_change_me@localhost:55432/learnwise_rehearsal' python -m unittest -v test_postgres_schema_integration test_postgres_end_to_end
+THINK_TANK_REHEARSAL_DATABASE_URL='postgresql://think_tank:rehearsal_only_change_me@localhost:55432/think_tank_rehearsal' python rehearse_migrations.py
+DATABASE_URL='postgresql://think_tank:rehearsal_only_change_me@localhost:55432/think_tank_rehearsal' python -m unittest -v test_postgres_schema_integration test_postgres_end_to_end
 ```
 
 The runner loads the baseline schema, applies numbered migrations in order and records checksums. It refuses remote hosts and default database names. Use only the disposable rehearsal database. GitHub Actions repeats this against PostgreSQL 16 and also runs frontend syntax checks, unit/security tests, database integration/E2E tests and a non-publishing container build.

@@ -101,9 +101,10 @@ The code supports private upload to pending review, separate reviewer approval, 
 
 ## CI status
 
-The latest workflow run for the development branch is [run 41644065826](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/41644065826), on commit `c4f93d300c656e3101f601e131584b0bf48cfe85`. Both `api-tests` and `container-build` passed. The API test job includes unit/security tests, JavaScript syntax checks, disposable PostgreSQL migration rehearsal, schema integration and assessment/payment integration tests.
+The latest workflow run at the time of this update is [run 41644750663](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/41644750663). Both `api-tests` and `container-build` passed. The API test job includes unit/security tests, JavaScript syntax checks, disposable PostgreSQL migration rehearsal, schema integration and assessment/payment integration tests. These are CI tests against disposable PostgreSQL and stubbed payment-provider responses, not live Neon migration replay or Paystack sandbox checkout.
 
-The first bootstrap-test attempt failed because the test mock returned a row where the database cursor API was expected. The mock was corrected in `test_bootstrap_admin.py`; the subsequent latest run passed. These are CI tests against disposable PostgreSQL and stubbed payment-provider responses, not live Neon migration replay or Paystack sandbox checkout.
+The initial bootstrap-test mock failure was corrected in `test_bootstrap_admin.py`; subsequent runs passed.
+
 
 ## Email and payments
 
@@ -128,3 +129,16 @@ The script hashes the password using scrypt, requires explicit confirmation, acq
 ## Safety and release decision
 
 This is staging only. No production deployment, real student data, public registration, public audio or live payment is approved. Keep PR #1 draft and unmerged, keep `main` untouched, keep Render auto deploy disabled, and do not run migrations as part of reconciliation. Close the external release gates in `RELEASE_GATE_REGISTER.md` before onboarding learners.
+
+
+## Browser acceptance and operational follow-through
+
+A manual Playwright workflow has been added at `.github/workflows/think-tank-staging-browser.yml`, with its test suite under `browser-acceptance/`. It runs Chromium against the existing staging URL and checks the health endpoint, student-facing page rendering, account form controls, anonymous student/assessment/private-audio API rejection, administrator identity rejection and noindex headers on admin preview pages. The workflow has not yet been manually dispatched against the live service.
+
+The test suite intentionally does not submit a real registration or create student/admin accounts. Successful registration requires SMTP and a disposable test identity; successful login and assessment completion require owner-approved staging test accounts and published test content. See `STAGING_ACCEPTANCE_AND_OPERATIONS.md` for the complete workflow, environment verification checklist, bootstrap procedure and health-check gate.
+
+Render's service configuration was rechecked on 2026-11-03: the HTTP health-check path remains blank. The deployed service SHA remains the historic live deployment recorded above unless separately verified; the new browser workflow does not deploy code. Do not set Render's health-check path to `/health` until the manual browser workflow confirms HTTP 200 with JSON status `ok`.
+
+Render's secret environment values remain inaccessible through the available service inspection. An authorized operator must privately compare DATABASE_URL with Neon branch `br-still-cherry-baz7g5hk` and database `learnwise`, and verify the private audio settings documented in `STAGING_ACCEPTANCE_AND_OPERATIONS.md`. No environment variables were changed.
+
+The first owner admin remains uncreated. The owner must select the exact administrator email before the guarded bootstrap script is run.

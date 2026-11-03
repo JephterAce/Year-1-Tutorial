@@ -98,3 +98,8 @@ admin_auth.py authenticates pre-provisioned admin accounts against the dedicated
 ## Private audio storage adapter
 
 The API supports the local private filesystem for development and Neon branch-scoped S3-compatible storage for staging. Set `AUDIO_STORAGE_BACKEND=neon_s3`, `AUDIO_STORAGE_BUCKET`, and the branch-scoped `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ENDPOINT_URL_S3`, and `AWS_REGION` values in the host secret manager. The S3 bucket must remain private. Audio requests still require a student session, published topic, approved asset, active entitlement and short-lived Learnwise token; the API streams objects through the same-origin endpoint and forwards byte-range requests. Never expose S3 credentials or object-store URLs to the browser.
+
+
+## One-time owner administrator bootstrap
+
+There is deliberately no public administrator registration. To create the first owner, run `python bootstrap_admin.py` from a trusted environment with the staging `DATABASE_URL`, `LEARNWISE_ADMIN_EMAIL`, and a strong `LEARNWISE_ADMIN_PASSWORD` set in that environment, plus `LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`. The script refuses to overwrite an existing account, hashes the password with scrypt, and records an audit event. Do not put the database URL or password in source control, browser code, or chat. Remove the bootstrap environment variables immediately after successful execution.

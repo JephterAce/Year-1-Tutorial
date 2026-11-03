@@ -135,7 +135,7 @@ class DatabaseConfigTests(unittest.TestCase):
     def test_student_and_admin_pages_are_served_same_origin(self):
         for path, marker in (("/", "Learnwise"), ("/account", "account"),
                              ("/assessment", "assessment"), ("/lesson", "lesson"),
-                             ("/admin", "Learnwise"), ("/admin/reviews", "review")):
+                             ("/admin", "Learnwise"), ("/admin/operations", "operations"), ("/admin/reviews", "review")):
             response = app.test_client().get(path)
             self.assertEqual(response.status_code, 200, path)
             self.assertIn("text/html", response.content_type)

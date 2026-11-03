@@ -1,0 +1,24 @@
+import unittest
+from assessment_attempts import check_answer_size, AttemptError
+from app import app
+
+
+class AttemptHardeningTests(unittest.TestCase):
+    def test_normal_answers_pass(self):
+        for a in ("42", ["a", "b"], True, None):
+            check_answer_size(a)
+
+    def test_oversized_answers_rejected(self):
+        for a in ("x" * 501, ["a"] * 21, ["y" * 101]):
+            with self.assertRaises(AttemptError):
+                check_answer_size(a)
+
+    def test_security_headers_present(self):
+        r = app.test_client().get("/health")
+        self.assertEqual(r.headers["X-Content-Type-Options"], "nosniff")
+        self.assertEqual(r.headers["X-Frame-Options"], "DENY")
+        self.assertEqual(r.headers["Referrer-Policy"], "same-origin")
+
+
+if __name__ == "__main__":
+    unittest.main()

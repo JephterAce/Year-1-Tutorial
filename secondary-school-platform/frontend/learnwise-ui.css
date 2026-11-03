@@ -1,0 +1,43 @@
+/* Learnwise UI layer: loads after each page's own <style>. Tokens, dark mode,
+   accessibility, motion and a mobile-first navigation. No JavaScript required. */
+:root{--blue:#3b5bdb;--radius:16px;--ease:cubic-bezier(.2,.7,.2,1);--shadow:0 1px 2px #0f1a3a0d,0 14px 34px #15264a14}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1,h2,h3{letter-spacing:-.02em;line-height:1.2;text-wrap:balance}
+p{text-wrap:pretty}
+:focus-visible{outline:3px solid #7c9cff;outline-offset:2px;border-radius:8px}
+button,.btn,.primary,a.link{min-height:44px;transition:transform .15s var(--ease),box-shadow .2s var(--ease),background-color .2s}
+button:active,.primary:active{transform:scale(.97)}
+button:disabled{opacity:.55;cursor:not-allowed}
+input,select,textarea{min-height:44px;border-radius:12px;border:1.5px solid var(--line);padding:10px 13px;background:var(--white);color:var(--ink);transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px #3b5bdb26;outline:none}
+.panel,.stat,.subject,.notice{border-radius:var(--radius);box-shadow:var(--shadow);transition:transform .25s var(--ease),box-shadow .25s var(--ease)}
+.subject:hover,.stat:hover{transform:translateY(-3px)}
+.progress{border-radius:99px;overflow:hidden}
+.progress>*{transition:width .8s var(--ease)}
+.primary{background:linear-gradient(135deg,#3b5bdb,#5f7cf5);color:#fff;border:0;border-radius:12px;padding:0 20px;font-weight:700;box-shadow:0 8px 20px #3b5bdb40}
+.primary:hover{box-shadow:0 12px 26px #3b5bdb55}
+.notice{border-left:4px solid var(--blue)}
+@keyframes lw-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.page>*,.panel,.stat,.subject{animation:lw-rise .45s var(--ease) both}
+.subject:nth-child(2){animation-delay:.05s}.subject:nth-child(3){animation-delay:.1s}.subject:nth-child(4){animation-delay:.15s}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (prefers-color-scheme:dark){
+ :root{--ink:#e8edf8;--muted:#9aa8c2;--line:#26324d;--paper:#0b1226;--white:#131c36;--mint:#0f3a2e;--shadow:0 1px 2px #0006,0 14px 34px #0005}
+ .topbar{background:#101a33}.search{background:#0e1730;color:var(--ink)}
+ .panel,.stat,.subject{border:1px solid var(--line)}
+ img{filter:brightness(.92)}
+}
+/* Phones and small tablets: sidebar becomes a thumb-reach bottom tab bar */
+@media (max-width:860px){
+ .sidebar{inset:auto 0 0 0;width:100%;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  justify-content:space-around;border-top:1px solid #2b3a57;overflow-x:auto;gap:2px}
+ .sidebar .brand,.sidebar .navlabel,.sidebar .sidebottom{display:none}
+ .sidebar .nav{flex-direction:column;gap:2px;font-size:11px;padding:7px 10px;min-width:62px;text-align:center;margin:0}
+ .main{margin-left:0;padding-bottom:84px}
+ .topbar{padding:0 16px;height:64px}.search{display:none}
+ .page{padding-left:16px!important;padding-right:16px!important}
+ table{display:block;overflow-x:auto}
+}
+@media (max-width:480px){body{font-size:15.5px}.primary,button{width:100%}.topright{gap:10px}}
+@media print{.sidebar,.topbar{display:none}.main{margin:0}}

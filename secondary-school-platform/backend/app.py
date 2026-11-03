@@ -109,6 +109,18 @@ def paystack_webhook():
         return jsonify({"error": "webhook_unavailable"}), 503
 
 
+@app.after_request
+def security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    if request.path.startswith("/api/"):
+        response.headers.setdefault("Cache-Control", "no-store")
+    if _secure_cookie():
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
+
+
 @app.errorhandler(404)
 def not_found(_error):
     return jsonify({"error": "not_found", "message": "The requested resource was not found."}), 404

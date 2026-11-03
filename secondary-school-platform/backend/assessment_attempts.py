@@ -33,6 +33,19 @@ BRIEFING = [
 ]
 
 
+MAX_TEXT_ANSWER = 500
+MAX_SELECTIONS, MAX_OPTION_ID = 20, 100
+
+
+def check_answer_size(answer):
+    """Reject oversized answers before they reach the database."""
+    if isinstance(answer, str) and len(answer) > MAX_TEXT_ANSWER:
+        raise AttemptError("answer_too_long", "That answer is too long.")
+    if isinstance(answer, list) and (len(answer) > MAX_SELECTIONS or any(
+            isinstance(x, str) and len(x) > MAX_OPTION_ID for x in answer)):
+        raise AttemptError("answer_too_long", "Too many or oversized selections.")
+
+
 def _json(value):
     return value if isinstance(value, dict) else (value or {})
 
@@ -75,6 +88,18 @@ def create_attempt(student_id, assessment_id, question_count):
         student = conn.execute("SELECT class_level FROM students WHERE id=%s", (student_id,)).fetchone()
         if not student or student["class_level"] != assessment["class_level"]:
             raise AttemptError("not_eligible", "You are not eligible for this assessment.", 403)
+        conn.execute("SELECT id FROM students WHERE id=%s FOR UPDATE", (student_id,))
+        existing = conn.execute(
+            """SELECT id, time_limit_seconds FROM assessment_attempts
+               WHERE assessment_id=%s AND student_id=%s AND status='briefing'
+                 AND question_count=%s ORDER BY created_at DESC LIMIT 1""",
+            (assessment_id, student_id, question_count)
+        ).fetchone()
+        if existing:  # reuse the open briefing instead of piling up rows
+            return {"attempt_id": str(existing["id"]), "status": "briefing",
+                    "question_count": question_count,
+                    "time_limit_seconds": existing["time_limit_seconds"],
+                    "policy_version": POLICY_VERSION, "briefing": BRIEFING}
         used = conn.execute(
             """SELECT count(*) AS n FROM assessment_attempts
                WHERE assessment_id=%s AND student_id=%s
@@ -112,6 +137,16 @@ def start_attempt(student_id, attempt_id, accepted, policy_version):
             return _attempt_state(conn, attempt_id, student_id)
         if attempt["status"] != "briefing" or attempt["assessment_status"] != "published":
             raise AttemptError("invalid_state", "This attempt cannot be started.", 409)
+        conn.execute("SELECT id FROM students WHERE id=%s FOR UPDATE", (student_id,))
+        limit = conn.execute("SELECT max_attempts FROM assessments WHERE id=%s",
+                             (attempt["assessment_id"],)).fetchone()["max_attempts"]
+        used = conn.execute(
+            """SELECT count(*) AS n FROM assessment_attempts
+               WHERE assessment_id=%s AND student_id=%s AND status <> 'briefing'
+                 AND id <> %s""", (attempt["assessment_id"], student_id, attempt_id)
+        ).fetchone()["n"]
+        if used >= limit:
+            raise AttemptError("attempt_limit", "The attempt limit has been reached.", 409)
         questions = conn.execute(
             """SELECT id, question_type, prompt, options, answer_key, points,
                       numeric_tolerance, accepted_answers
@@ -176,6 +211,12 @@ def _attempt_state(conn, attempt_id, student_id):
 
 def get_attempt(student_id, attempt_id):
     with connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM assessment_attempts WHERE id=%s AND student_id=%s FOR UPDATE",
+            (attempt_id, student_id)).fetchone()
+        if (row and row["status"] == "in_progress" and row["deadline_at"]
+                and datetime.now(timezone.utc) >= row["deadline_at"]):
+            _finalize(conn, row, "expired")  # overdue attempts are scored once, on first view
         return _attempt_state(conn, attempt_id, student_id)
 
 
@@ -252,6 +293,7 @@ def save_answer(student_id, attempt_id, question_id, answer):
             raise AttemptError("invalid_answer", "Choose true or false.")
         if kind == "numeric" and (answer is not None and (isinstance(answer, bool) or not isinstance(answer, (str, int, float)))):
             raise AttemptError("invalid_answer", "Enter a numeric answer.")
+        check_answer_size(answer)
         conn.execute(
             """INSERT INTO assessment_answers(attempt_id,question_id,answer)
                VALUES (%s,%s,%s) ON CONFLICT (attempt_id,question_id) DO UPDATE

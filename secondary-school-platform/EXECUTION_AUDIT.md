@@ -110,3 +110,13 @@ The repository contains a substantial implementation foundation. It is **not app
 - Do not deploy, run production migrations, activate live payments, buy services, or change production secrets without explicit owner approval.
 - Never commit credentials, student data, or unauthorised curriculum content.
 - Keep the separate legacy university bot and `main` branch untouched.
+
+## Hardening pass (Stage 2, from branch commit 3b232fd)
+
+- **Attempt-limit bypass fixed:** `start_attempt` now takes a per-student lock and rechecks `max_attempts`; `create_attempt` reuses an open briefing instead of creating unlimited rows.
+- **Overdue attempts** are now scored once, on first view (`get_attempt`), not only on save/submit.
+- **Answer size caps** (text 500 chars; 20 selections of 100 chars) in `check_answer_size`.
+- **Security headers** on all responses (nosniff, X-Frame-Options, Referrer-Policy, no-store on /api, HSTS in staging/production).
+- **UI layer:** `frontend/learnwise-ui.css` adds dark mode, mobile bottom navigation, focus rings, 44px touch targets and reduced-motion support.
+- Tests: `test_attempt_hardening.py`. 153 unit tests pass locally (PostgreSQL tests require CI).
+- **Open:** entitlement enforcement on attempts; admin student/curriculum/payment consoles; per-IP rate limiting; live Paystack sandbox, SMTP, managed PostgreSQL and object storage (Issue #2).

@@ -136,10 +136,10 @@ class DatabaseConfigTests(unittest.TestCase):
         for path, marker in (("/", "Learnwise"), ("/account", "account"),
                              ("/assessment", "assessment"), ("/lesson", "lesson"),
                              ("/admin", "Learnwise"), ("/admin/reviews", "review")):
-            response = self.client.get(path)
+            response = app.test_client().get(path)
             self.assertEqual(response.status_code, 200, path)
             self.assertIn("text/html", response.content_type)
-        self.assertEqual(self.client.get("/admin").headers.get("X-Robots-Tag"), "noindex, nofollow")
+        self.assertEqual(app.test_client().get("/admin").headers.get("X-Robots-Tag"), "noindex, nofollow")
 
 if __name__ == "__main__":
     unittest.main()

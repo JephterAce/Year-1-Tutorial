@@ -1,0 +1,46 @@
+name: Think Tank staging browser acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      staging_base_url:
+        description: "Existing staging service base URL (no trailing slash)"
+        required: true
+        default: "https://learnwise-staging-api.onrender.com"
+
+permissions:
+  contents: read
+
+jobs:
+  browser-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out development branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: secondary-school-platform/browser-acceptance/package.json
+      - name: Install browser test dependencies
+        working-directory: secondary-school-platform/browser-acceptance
+        run: npm install
+      - name: Install Chromium
+        working-directory: secondary-school-platform/browser-acceptance
+        run: npx playwright install --with-deps chromium
+      - name: Run staging browser acceptance
+        working-directory: secondary-school-platform/browser-acceptance
+        env:
+          STAGING_BASE_URL: ${{ inputs.staging_base_url }}
+        run: npm test
+      - name: Upload browser report and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: think-tank-staging-browser-acceptance
+          path: |
+            secondary-school-platform/browser-acceptance/playwright-report/
+            secondary-school-platform/browser-acceptance/test-results/
+          if-no-files-found: ignore
+          retention-days: 14

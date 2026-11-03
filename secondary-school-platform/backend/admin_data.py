@@ -2,6 +2,7 @@
 from flask import Blueprint, jsonify, request
 from database import connection
 from admin_policy import require
+from psycopg.types.json import Jsonb
 
 admin_data = Blueprint("admin_data", __name__)
 
@@ -23,7 +24,7 @@ def _audit(conn, session, event, entity, count):
     conn.execute(
         """INSERT INTO audit_events(actor_admin_id,event_type,entity_type,entity_id,details)
            VALUES (%s,%s,%s,'list-view',%s)""",
-        (session["admin_id"], event, entity, {"returned_count": count})
+        (session["admin_id"], event, entity, Jsonb({"returned_count": count}))
     )
 
 @admin_data.get("/api/v1/admin/overview")

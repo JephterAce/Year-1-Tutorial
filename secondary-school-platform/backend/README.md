@@ -26,11 +26,11 @@ Without `DATABASE_URL`, only the clearly labelled demo catalogue is available. I
 ## Ordered database setup
 
 1. Apply `../DATABASE_SCHEMA.sql` using a migration-owner role.
-2. Apply migrations `001_platform_hardening.sql` through `012_assessment_issue_reporting.sql` in numeric order.
+2. Apply migrations `001_platform_hardening.sql` through `013_admin_sessions_and_audit_guard.sql` in numeric order. The dedicated Neon staging branch has already had the baseline schema and migrations 001–013 applied and recorded; do not replay them manually against that branch. Use a disposable database for repeatable rehearsals.
 3. Rehearse on a disposable database, inspect constraints/indexes, and verify rollback/restore before any production migration.
 4. Run the application with a least-privilege database role.
 
-No migration has been applied to a live database.
+The isolated Neon staging branch is migrated. No production database has been provisioned or migrated.
 
 ## Student identity
 
@@ -48,7 +48,7 @@ The callback validates the raw Paystack HMAC signature, looks up a server-create
 
 ## Release gates
 
-- Dedicated PostgreSQL provisioned; migrations 001–012 rehearsed and applied only after approval.
+- Dedicated production PostgreSQL provisioned; staging Neon branch already has baseline schema and migrations 001–013 applied. Production migration plan, backup and restore rehearsal still required.
 - SMTP and HTTPS public app URL configured privately; email delivery/resend and operational monitoring tested.
 - Payment order creation, reconciliation/refunds, outbox scheduling and alerting implemented before live checkout.
 - Revised NERDC curriculum versioning, source capture, cohort applicability and teacher-review workflow implemented; authorised source documents and term schemes still required. No invented topic/term mapping.
@@ -64,7 +64,7 @@ Learnwise targets the revised 2025 NERDC Senior Secondary Education Curriculum a
 
 Use `../CURRICULUM_WORKFLOW.md` and `../CURRICULUM_IMPORT_TEMPLATE.csv` to capture source-grounded curriculum metadata. `curriculum_import.py` parses the CSV template, supports a dry-run validation report and blocks publication unless the source, exact source section, teacher approval and rights status are present. The published catalogue now requires the target curriculum version, an approved source record and an explicitly published curriculum review state. Topics with unknown term placement must not be presented as term-specific lessons.
 
-Migrations 009–012 are authored only; no database has been migrated. The validator has unit tests, but CI and a disposable PostgreSQL migration rehearsal are still required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
+Migrations 009–013 are applied on the isolated Neon staging branch and rehearsed in disposable PostgreSQL CI. No production database has been migrated. The validator has unit tests, and CI rehearses all migrations on disposable PostgreSQL. The dedicated Neon staging branch also has migrations 001–013 recorded. Authorised source acquisition and teacher review remain required. NERDC portal access must not be bypassed, and public metadata does not grant permission to reproduce full curriculum documents.
 
 
 Migration 011 makes source records immutable once referenced by a published topic and prevents material changes to a curriculum version while published topics use it. Corrections must use a replacement source/version and pass review; migration execution and PostgreSQL trigger behaviour still require disposable-database rehearsal.
@@ -87,7 +87,7 @@ Migration 012 adds student-owned reports for integrity appeals, question errors 
 
 ## Admin security foundation (migration 013)
 
-Migration `013_admin_sessions_and_audit_guard.sql` adds a separate server-side admin session table with hashed session and CSRF tokens, expiry/revocation fields and active-session indexes. It also makes audit events append-only and adds case/space-insensitive admin email lookup. The migration does not enable admin login or grant access by itself. A dedicated admin authentication service, secure cookie/CSRF routes, capability enforcement, audit-writing wrappers and controlled owner provisioning are still required. Rehearse this migration on disposable PostgreSQL before any deployment.
+Migration `013_admin_sessions_and_audit_guard.sql` adds a separate server-side admin session table with hashed session and CSRF tokens, expiry/revocation fields and active-session indexes. It also makes audit events append-only and adds case/space-insensitive admin email lookup. The migration does not enable admin login or grant access by itself. The staging database has the migration applied; no owner account has been bootstrapped yet. A dedicated admin authentication service, secure cookie/CSRF routes, capability enforcement, audit-writing wrappers and controlled owner provisioning are still required. Rehearse this migration on disposable PostgreSQL before any deployment.
 
 
 ## Admin authentication service

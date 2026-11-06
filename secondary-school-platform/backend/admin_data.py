@@ -227,3 +227,143 @@ def review_audio_asset(asset_id):
         return jsonify({"asset":{"id":str(row["id"]),"review_status":row["review_status"]}}),200
     except Exception:
         return jsonify({"error":"audio_review_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/podcast-scripts")
+def create_podcast_script_draft():
+    from admin_auth import validate_admin_csrf
+    from podcast_production import create_podcast_script, PodcastProductionError
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"audio.upload")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    data=request.get_json(silent=True) or {}
+    try:
+        result=create_podcast_script(data.get("topic_id"),session["admin_id"])
+        with connection() as conn:
+            _audit(conn,session,"admin.podcast_script.created","podcast_script",1)
+        return jsonify({"script":result}),201
+    except PodcastProductionError as exc:
+        return jsonify({"error":exc.code,"message":str(exc)}),exc.status
+    except Exception:
+        return jsonify({"error":"podcast_script_unavailable"}),503
+
+
+@admin_data.get("/api/v1/admin/podcast-scripts")
+def list_podcast_scripts():
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    try:
+        require(session["principal"],"audio.upload")
+    except PermissionError:
+        try:
+            require(session["principal"],"audio.review")
+        except PermissionError:
+            return jsonify({"error":"forbidden"}),403
+    try:
+        with connection() as conn:
+            rows=conn.execute(
+                """SELECT p.id,p.topic_id,t.title AS topic_title,p.version,p.title,
+                          p.status,p.script_text,p.audio_asset_id,p.created_at,
+                          a.review_status AS audio_review_status
+                   FROM podcast_scripts p JOIN topics t ON t.id=p.topic_id
+                   LEFT JOIN lesson_assets a ON a.id=p.audio_asset_id
+                   ORDER BY p.created_at DESC LIMIT 100"""
+            ).fetchall()
+            _audit(conn,session,"admin.podcast_scripts.viewed","podcast_scripts",len(rows))
+        return jsonify({"items":[{
+            "id":str(r["id"]),"topic_id":str(r["topic_id"]),
+            "topic_title":r["topic_title"],"version":r["version"],
+            "title":r["title"],"status":r["status"],"script_text":r["script_text"],
+            "audio_asset_id":str(r["audio_asset_id"]) if r["audio_asset_id"] else None,
+            "audio_review_status":r["audio_review_status"],
+            "created_at":r["created_at"].isoformat()
+        } for r in rows]}),200
+    except Exception:
+        return jsonify({"error":"podcast_script_list_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/podcast-scripts/<script_id>/attach-audio")
+def attach_podcast_audio(script_id):
+    from uuid import UUID
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"audio.upload")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        script_id=str(UUID(script_id))
+        asset_id=str(UUID((request.get_json(silent=True) or {}).get("asset_id","")))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_identifier"}),400
+    try:
+        with connection() as conn:
+            row=conn.execute(
+                """UPDATE podcast_scripts p SET audio_asset_id=a.id,status='teacher_review'
+                   FROM lesson_assets a
+                   WHERE p.id=%s AND a.id=%s AND a.topic_id=p.topic_id
+                     AND a.asset_type='podcast_audio' AND a.review_status='pending'
+                     AND p.status IN ('draft','teacher_review')
+                   RETURNING p.id,p.audio_asset_id,p.status""",
+                (script_id,asset_id),
+            ).fetchone()
+            if not row: return jsonify({"error":"matching_pending_podcast_audio_required"}),409
+            _audit(conn,session,"admin.podcast_audio.attached","podcast_script",1)
+        return jsonify({"script":{"id":str(row["id"]),"audio_asset_id":str(row["audio_asset_id"]),
+                                  "status":row["status"]}}),200
+    except Exception:
+        return jsonify({"error":"podcast_audio_attach_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/podcast-scripts/<script_id>/review")
+def review_podcast_script(script_id):
+    from uuid import UUID
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"audio.review")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        script_id=str(UUID(script_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_script_id"}),400
+    status=(request.get_json(silent=True) or {}).get("status")
+    if status not in {"approved","rejected"}:
+        return jsonify({"error":"invalid_review_status"}),400
+    try:
+        with connection() as conn:
+            if status=="approved":
+                row=conn.execute(
+                    """UPDATE podcast_scripts p SET status='approved',reviewed_by=%s,reviewed_at=now()
+                       WHERE p.id=%s AND p.audio_asset_id IS NOT NULL
+                         AND EXISTS (SELECT 1 FROM lesson_assets a WHERE a.id=p.audio_asset_id
+                           AND a.topic_id=p.topic_id AND a.asset_type='podcast_audio'
+                           AND a.review_status='approved')
+                       RETURNING p.id,p.status,p.reviewed_at""",
+                    (session["email"],script_id),
+                ).fetchone()
+            else:
+                row=conn.execute(
+                    """UPDATE podcast_scripts SET status='rejected',reviewed_by=%s,reviewed_at=now()
+                       WHERE id=%s AND status IN ('draft','teacher_review')
+                       RETURNING id,status,reviewed_at""",
+                    (session["email"],script_id),
+                ).fetchone()
+            if not row: return jsonify({"error":"approved_audio_and_script_required"}),409
+            _audit(conn,session,"admin.podcast_script.reviewed","podcast_script",1)
+        return jsonify({"script":{"id":str(row["id"]),"status":row["status"],
+                                  "reviewed_at":row["reviewed_at"].isoformat()}}),200
+    except Exception:
+        return jsonify({"error":"podcast_script_review_unavailable"}),503

@@ -397,6 +397,39 @@ def create_topic_checkout(topic_id):
         return jsonify({"error": "checkout_unavailable"}), 503
 
 
+@app.post("/api/v1/tutor/answer")
+def answer_tutor_question():
+    """Authenticated, CSRF-protected AI tutoring; disabled until explicitly configured."""
+    if not _feature_enabled("AI_TUTOR_ENABLED"):
+        return jsonify({"error": "ai_tutor_temporarily_disabled"}), 503
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+
+    data = request.get_json(silent=True) or {}
+    try:
+        from ai_tutor import (
+            generate_tutor_answer, TutorConfigurationError, TutorProviderError
+        )
+        answer = generate_tutor_answer(
+            student.get("class_level"),
+            data.get("question"),
+            data.get("topic_context"),
+        )
+        return jsonify({"answer": answer}), 200
+    except ValueError as exc:
+        return jsonify({"error": "invalid_tutor_request", "message": str(exc)}), 400
+    except TutorConfigurationError:
+        app.logger.warning("AI tutor is enabled but provider configuration is incomplete or invalid")
+        return jsonify({"error": "ai_tutor_unavailable"}), 503
+    except TutorProviderError:
+        app.logger.warning("AI tutor provider request failed")
+        return jsonify({"error": "ai_tutor_unavailable"}), 503
+    except Exception:
+        app.logger.exception("AI tutor request failed unexpectedly")
+        return jsonify({"error": "ai_tutor_unavailable"}), 503
+
+
 @app.get("/api/v1/student/profile")
 def read_student_profile():
     from student_profiles import get_profile, ProfileError

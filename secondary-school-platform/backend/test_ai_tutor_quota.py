@@ -29,6 +29,10 @@ class FakeConnection:
             return FakeCursor(self.daily)
         if "SELECT COALESCE(sum(request_count)" in sql:
             return FakeCursor(self.monthly)
+        if "FROM ai_tutor_platform_usage WHERE usage_date=" in sql:
+            return FakeCursor({"request_count":0,"estimated_cost_microusd":0})
+        if "FROM ai_tutor_platform_usage" in sql:
+            return FakeCursor({"cost":0})
         return FakeCursor(None)
 
 
@@ -65,6 +69,8 @@ class TutorReservationTests(unittest.TestCase):
             "AI_TUTOR_MONTHLY_REQUEST_LIMIT": "10",
             "AI_TUTOR_DAILY_BUDGET_MICROUSD": "2000",
             "AI_TUTOR_MONTHLY_BUDGET_MICROUSD": "10000",
+            "AI_TUTOR_PLATFORM_DAILY_BUDGET_MICROUSD": "5000",
+            "AI_TUTOR_PLATFORM_MONTHLY_BUDGET_MICROUSD": "20000",
         }
         self.patch_env = patch.dict(os.environ, self.env, clear=True)
         self.patch_env.start()
@@ -81,6 +87,7 @@ class TutorReservationTests(unittest.TestCase):
         self.assertGreater(result["reserved_cost_microusd"], 0)
         self.assertTrue(any("pg_advisory_xact_lock" in sql for sql, _ in fake.calls))
         self.assertTrue(any("INSERT INTO student_ai_tutor_usage" in sql for sql, _ in fake.calls))
+        self.assertTrue(any("INSERT INTO ai_tutor_platform_usage" in sql for sql, _ in fake.calls))
 
     def test_daily_request_limit_blocks_before_write(self):
         fake = FakeConnection(daily={"request_count": 2, "estimated_cost_microusd": 0})
@@ -89,6 +96,28 @@ class TutorReservationTests(unittest.TestCase):
                 reserve_tutor_usage("student-1", "Explain cells", today=date(2026, 11, 6))
         self.assertEqual(caught.exception.code, "request_limit_reached")
         self.assertFalse(any("INSERT INTO student_ai_tutor_usage" in sql for sql, _ in fake.calls))
+
+
+    def test_platform_budget_limit_blocks_before_any_usage_write(self):
+        class PlatformLimitedConnection(FakeConnection):
+            def execute(self, sql, params=()):
+                self.calls.append((sql, params))
+                if "FROM student_ai_tutor_usage" in sql and "SELECT request_count" in sql:
+                    return FakeCursor(None)
+                if "FROM student_ai_tutor_usage" in sql and "COALESCE(sum" in sql:
+                    return FakeCursor({"requests":0,"cost":0})
+                if "FROM ai_tutor_platform_usage WHERE usage_date=" in sql:
+                    return FakeCursor({"request_count":0,"estimated_cost_microusd":5000})
+                if "FROM ai_tutor_platform_usage" in sql:
+                    return FakeCursor({"cost":5000})
+                return FakeCursor(None)
+        fake=PlatformLimitedConnection()
+        with patch.object(ai_tutor_quota,"connection",return_value=fake):
+            with self.assertRaises(TutorQuotaError) as caught:
+                reserve_tutor_usage("student-1","Explain cells",today=date(2026,11,6))
+        self.assertEqual(caught.exception.code,"platform_budget_reached")
+        self.assertFalse(any("INSERT INTO student_ai_tutor_usage" in sql for sql,_ in fake.calls))
+        self.assertFalse(any("INSERT INTO ai_tutor_platform_usage" in sql for sql,_ in fake.calls))
 
     def test_monthly_spend_limit_blocks_before_write(self):
         fake = FakeConnection(monthly={"requests": 0, "cost": 9999})

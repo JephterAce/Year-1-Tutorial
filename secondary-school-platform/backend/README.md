@@ -112,3 +112,11 @@ There is deliberately no public administrator registration. To create the first 
 - Configure `AI_API_URL`, `AI_API_ALLOWED_HOSTS`, `AI_API_KEY` and `AI_MODEL` privately in the host. Never commit or paste the key into chat.
 - `AI_TUTOR_ENABLED` is a strict opt-in and defaults to disabled. **Do not enable it for staging learners or production yet:** durable per-student request quotas, spend limits/budget alerts, retention controls and the complete learner UI have not been implemented or reviewed. The provider adapter and protected API route are an initial foundation, not a launch-ready AI tutor.
 - AI answers are educational assistance only. They do not grade assessments, grant paid access, publish curriculum or replace qualified teacher review. Provider responses must be evaluated for factual accuracy, age suitability, bias and curriculum alignment before wider use.
+
+
+### AI tutor usage limits and cost reservations
+
+- Migration `014_ai_tutor_usage_limits.sql` adds per-student UTC daily usage accounting. The service serializes concurrent reservations per student with a PostgreSQL advisory transaction lock and checks daily/monthly request limits plus daily/monthly estimated-spend caps before a provider request.
+- The reservation is conservative: it estimates input tokens from the bounded prompt and reserves the full configured output-token ceiling. Failed provider attempts remain counted, preventing retry loops from bypassing quotas. This is an upper-bound reservation, not a provider invoice reconciliation.
+- Configure the request/budget caps and exact selected-model input/output price rates privately. Price values are integer micro-USD per one million tokens. Missing/invalid pricing fails closed. Revisit price rates whenever the model/provider tariff changes.
+- The database migration has been added to the development branch but has **not** been applied to managed staging. The feature flag remains disabled. Do not enable learner access until migration rehearsal, rate/pricing configuration, privacy review, concurrency tests and monitoring are complete.

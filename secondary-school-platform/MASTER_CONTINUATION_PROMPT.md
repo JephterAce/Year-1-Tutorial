@@ -522,3 +522,90 @@ The available GitHub integration supports repository file reads/writes but expos
 - No chat-history persistence, tutor frontend UI, streaming, content retrieval/grounding, teacher moderation workflow or independent answer-quality evaluation exists yet.
 - AI answers must not be treated as verified curriculum, marking authority or a replacement for qualified teachers.
 - Next engineering increment: implement database-backed usage quotas and cost controls with a new migration plus disposable-PostgreSQL tests; then integrate a learner-facing tutor interface and add authenticated browser acceptance. Keep the feature disabled until those controls and privacy review are complete.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (approved full-product implementation, increment 2)
+
+## Owner direction
+The owner explicitly approved proceeding with all seven workstreams: database-backed AI usage/cost limits; student-facing AI tutor; live student dashboard/progress; lesson notes and interactive practice; podcast production/private audio; curriculum population across six subjects and SS1–SS3; and registration-to-results acceptance testing. Continue on `secondary-school-platform-foundation`. This does not authorize production deployment, public onboarding, live payments, or unreviewed managed-database mutations.
+
+## Development branch
+- Repository: `JephterAce/Year-1-Tutorial`
+- Branch: `secondary-school-platform-foundation`
+- Head at this checkpoint: `aa2ddb80ebf550136f41084615aed47c80f3d823`
+- PR #1 remains draft/unmerged; `main` untouched.
+- Render staging remains on previously verified app commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; auto deploy is off. No new staging deployment was triggered.
+- No managed Neon migration was applied. Migrations below exist only in the development branch until reviewed/rehearsed.
+
+## Implemented application changes
+
+### AI tutor and spend controls
+- `backend/ai_tutor.py`: OpenAI-compatible provider adapter, class-level system instructions, bounded question/context/history, redirect blocking, HTTPS endpoint/host allow-list, 20-second timeout, 600-token output ceiling, sanitised provider errors.
+- `POST /api/v1/tutor/answer`: requires an authenticated student and CSRF; class level comes from the student session, not the browser; accepts bounded multi-turn user/assistant history. AI output cannot change marks, entitlements, payments or curriculum state.
+- `backend/ai_tutor_quota.py`: UTC per-student daily/monthly request limits and estimated-spend reservations, plus platform-wide daily/monthly spend caps. Uses PostgreSQL advisory transaction locks to serialize concurrent reservations. Reserves the full output-token ceiling and estimates input tokens from bounded prompt length. Failed calls remain counted to prevent retry abuse.
+- Migration `014_ai_tutor_usage_limits.sql`: per-student daily usage table.
+- Migration `017_ai_tutor_platform_budget.sql`: platform-wide daily usage table.
+- Provider pricing is required in private environment variables as integer micro-USD per million input/output tokens; missing pricing fails closed. These are conservative estimates/reservations, not invoice reconciliation.
+- `AI_TUTOR_ENABLED` remains false by default. No provider key, model tariff, external request or learner prompt has been configured/sent. Do not enable until private provider config, pricing verification, privacy review and QA pass.
+
+### Student dashboard and lesson learning
+- `GET /api/v1/student/dashboard` returns authenticated, database-backed student class, completed lessons, saved practice attempts, assessment attempts/passes/average score, class-specific published subject counts and recent completed lessons.
+- `frontend/index.html` now loads real dashboard data, shows an AI tutor conversation interface and keeps tutor history in page memory only. Empty/signed-out state does not fabricate progress.
+- Migration `015_reviewed_lesson_content_and_progress.sql` adds versioned lesson content, teacher-reviewed practice questions, topic completion progress and student practice-attempt history. Composite foreign keys bind progress and practice questions to the correct topic.
+- `backend/lesson_content.py` enforces entitlement and publication checks, returns no answer keys to students, grades practice server-side, persists attempts, and records explicit lesson completion.
+- Student routes:
+  - `GET /api/v1/topics/<topic_id>/lesson-content`
+  - `POST /api/v1/topics/<topic_id>/practice/<question_id>`
+  - `POST /api/v1/topics/<topic_id>/progress/complete`
+- `frontend/lesson.html` renders reviewed notes, worked examples, key terms and interactive practice, and can mark a lesson complete.
+- Admin authoring/review routes in `backend/admin_data.py` allow curriculum editors to save draft content and practice questions; publishing-capable admins record the qualified teacher reviewer name before approval. Topic publication remains a separate evidence-gated operation.
+- Admin UI `admin/index.html` now has source capture, topic draft, lesson draft/review and publication controls.
+
+### Podcast production and private delivery
+- Migration `016_podcast_script_workflow.sql` creates versioned podcast script records linked to the matching topic and lesson version.
+- `backend/podcast_production.py` generates an original two-presenter script draft from approved lesson notes only; it does not invent lesson facts.
+- Admin routes generate/list scripts, attach a pending private podcast audio asset and approve/reject the script. Script approval requires the linked audio asset to have passed its separate review.
+- Admin UI includes script generation, private audio upload, attachment and review controls.
+- Existing private audio storage and entitlement-checked streaming remain the student delivery path.
+- This is a controlled script/record/upload/review pipeline, not an automatic TTS service. No voice provider was configured, and no audio file was generated or uploaded during this increment.
+
+### Curriculum research and draft content
+- `CURRICULUM_SOURCE_REGISTER.csv` records all 18 class/subject combinations (six subjects x SS1–SS3), their official source entry points and current capture status.
+- `CURRICULUM_POPULATION_PLAN.md` records evidence, cohort transition and publication rules.
+- Captured official October 2025 NERDC PDFs:
+  - English Language SSS1: `https://lmis.nerdcportals.com.ng/sss_1/necurrdc/1.pdf`; 40 topic headings indexed in `content/curriculum-drafts/english-language/SS1_TOPIC_MAP.md`.
+  - Biology SSS1: `https://lmis.nerdcportals.com.ng/sss_1/necurrdc/6.pdf`; 20 topic headings indexed in `content/curriculum-drafts/biology/SS1_TOPIC_MAP.md`.
+- Original draft lesson packs created (not imported/published):
+  - `content/curriculum-drafts/english-language/SS1/debate.lesson.json`
+  - `content/curriculum-drafts/biology/SS1/laboratory-safety-rules.lesson.json`
+- SSS2 official subject viewer links were found for English Language, General Mathematics, Biology, Chemistry and Physics, but their PDF text could not be extracted in this audit; Further Mathematics link needs repair. SSS3 class-specific subject documents remain outstanding. The register marks these honestly as viewer-link-only or pending.
+- Do not infer term placement from topic order. Confirm cohort applicability and term mapping; get source/rights review and qualified subject-teacher approval before publication. No topics have been seeded in managed staging and no draft content is published to students.
+
+## Automated verification added
+- `backend/test_ai_tutor.py`: prompt/history bounds, provider host and credential validation, redirects, disabled-by-default, auth/CSRF and session-derived class.
+- `backend/test_ai_tutor_quota.py`: estimated cost, missing pricing fail-closed, request/spend limits and platform budget limits.
+- `backend/test_lesson_content.py`: entitlement enforcement, no answer-key leakage, practice feedback/history, completion and admin route auth.
+- `backend/test_postgres_student_journey.py`: disposable PostgreSQL test registers a synthetic student through the HTTP route, mocks identity email delivery, verifies email, logs in, creates a synthetic published lesson and entitlement, reads notes, answers practice, records completion, checks dashboard progress, starts/submits an assessment and checks results. A second test exercises concurrent database quota reservations.
+- `backend/test_postgres_schema_integration.py` updated to check all 17 numbered migrations plus baseline and new tables.
+- Workflow `.github/workflows/secondary-school-platform.yml` now runs the PostgreSQL student journey test.
+- A prior run showed the registration-to-results test body reached teardown successfully; teardown failed because published assessments are intentionally immutable. The fixture cleanup was corrected to leave the immutable synthetic assessment in the disposable CI database. Await the new run before declaring the suite green.
+- No arbitrary local shell/Codespaces execution tool is exposed in this session. GitHub Actions is the executable verification source; source inspection alone is not a test pass.
+
+## Outstanding work and gates
+1. Wait for current CI on head `aa2ddb80ebf550136f41084615aed47c80f3d823`; inspect failed job logs and fix failures. Do not claim current head passed before success.
+2. Add independent authenticated browser acceptance using synthetic test fixtures and a disposable database. Existing staging Playwright suite remains eight anonymous checks only.
+3. Complete AI provider pricing verification and add provider-specific budget reconciliation/alerts; keep AI disabled until private credentials are set by the owner and tests pass.
+4. Complete AI content retrieval/grounding against approved lesson sources, teacher moderation, accessibility and answer-quality evaluation.
+5. Add automatic TTS only after selecting a provider, confirming pricing and implementing spend/retention controls. Until then use recorded or externally generated audio uploads through the private review workflow.
+6. Capture actual subject PDFs and topic sequences for all six subjects and all applicable class cohorts. Resolve the SSS2 viewer extraction issue and SSS3 source gap. Produce original lesson packs, practice banks, answer keys and podcasts, with teacher review and verified term allocation.
+7. Finish the student UI for lesson catalogue, history, progress detail, tutor conversation, podcast library and results; test all states on mobile.
+8. Complete admin UI usability, role/CSRF negative tests, private audio playback tests and content lifecycle tests.
+9. Rehearse migrations 014–017 on a disposable Neon branch; inspect migration hashes and idempotency before any managed staging application.
+10. Run controlled SMTP and Paystack sandbox tests, verify the notification outbox worker is scheduled/monitored, and keep live payments disabled.
+11. Complete NDPA/privacy, guardian consent, child safeguarding, security, accessibility, backup/restore and release reviews.
+12. No production deployment or public student onboarding without separate explicit authorization.
+
+## Current state
+This increment is committed to the development branch only. It is not yet a complete populated student product, not deployed to staging, and not production-ready. Last managed staging database snapshot remains six subjects, zero topics, zero students and one owner admin; no managed database writes were made during this increment.

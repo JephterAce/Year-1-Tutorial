@@ -143,14 +143,16 @@ class TutorRouteTests(unittest.TestCase):
             with patch("app._current_student", return_value={
                 "student_id": "synthetic-student-id", "class_level": "SS2"
             }):
-                with patch("ai_tutor.generate_tutor_answer", return_value="A cell is...") as generate:
-                    response = self.client.post(
+                with patch("ai_tutor_quota.reserve_tutor_usage", return_value={"reserved_cost_microusd": 1}) as reserve:
+                    with patch("ai_tutor.generate_tutor_answer", return_value="A cell is...") as generate:
+                        response = self.client.post(
                         "/api/v1/tutor/answer",
                         json={"question": "Explain cells", "topic_context": "Biology"},
-                    )
+                        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["answer"], "A cell is...")
         generate.assert_called_once_with("SS2", "Explain cells", "Biology")
+        reserve.assert_called_once()
 
 
 if __name__ == "__main__":

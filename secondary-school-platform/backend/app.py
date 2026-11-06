@@ -409,8 +409,15 @@ def answer_tutor_question():
     data = request.get_json(silent=True) or {}
     try:
         from ai_tutor import (
-            generate_tutor_answer, TutorConfigurationError, TutorProviderError
+            generate_tutor_answer, build_tutor_messages,
+            TutorConfigurationError, TutorProviderError
         )
+        from ai_tutor_quota import reserve_tutor_usage, TutorQuotaError
+        messages = build_tutor_messages(
+            student.get("class_level"), data.get("question"), data.get("topic_context")
+        )
+        bounded_prompt = "\\n".join(item["content"] for item in messages)
+        reserve_tutor_usage(student["student_id"], bounded_prompt)
         answer = generate_tutor_answer(
             student.get("class_level"),
             data.get("question"),
@@ -419,6 +426,8 @@ def answer_tutor_question():
         return jsonify({"answer": answer}), 200
     except ValueError as exc:
         return jsonify({"error": "invalid_tutor_request", "message": str(exc)}), 400
+    except TutorQuotaError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
     except TutorConfigurationError:
         app.logger.warning("AI tutor is enabled but provider configuration is incomplete or invalid")
         return jsonify({"error": "ai_tutor_unavailable"}), 503

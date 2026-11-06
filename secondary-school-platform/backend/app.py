@@ -414,7 +414,7 @@ def answer_tutor_question():
         )
         from ai_tutor_quota import reserve_tutor_usage, TutorQuotaError
         messages = build_tutor_messages(
-            student.get("class_level"), data.get("question"), data.get("topic_context")
+            student.get("class_level"), data.get("question"), data.get("topic_context"), data.get("history")
         )
         bounded_prompt = "\\n".join(item["content"] for item in messages)
         reserve_tutor_usage(student["student_id"], bounded_prompt)
@@ -422,6 +422,7 @@ def answer_tutor_question():
             student.get("class_level"),
             data.get("question"),
             data.get("topic_context"),
+            data.get("history"),
         )
         return jsonify({"answer": answer}), 200
     except TutorQuotaError as exc:

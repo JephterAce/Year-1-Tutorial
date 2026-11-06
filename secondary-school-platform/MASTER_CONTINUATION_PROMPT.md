@@ -371,3 +371,32 @@ Paste the following instruction, then attach the Render screenshot:
   ```
   This runs only the existing read-only browser checks. Do not add credentials, submit forms, or enable registration.
 - Remaining gates include authenticated owner-admin browser testing (owner-controlled session only), controlled SMTP delivery, Paystack sandbox, private audio E2E, curriculum provenance/teacher review, privacy/safeguarding/legal review, and backup/restore/operational readiness. No production release is authorised.
+
+
+## Staging browser acceptance — 6 November 2026 (owner reports all checks passed)
+
+- Owner ran the existing Playwright suite from the Codespaces terminal on the development branch, targeting `https://learnwise-staging-api.onrender.com`, and reported **all 8 tests passed**.
+- Test suite: `secondary-school-platform/browser-acceptance/staging.spec.js`; command used:
+  ```bash
+  cd secondary-school-platform/browser-acceptance && npm install && npx playwright install chromium && STAGING_BASE_URL=https://learnwise-staging-api.onrender.com npm test
+  ```
+- The eight checks cover: staging health response; student-facing pages; account registration/login/recovery controls without submitting forms; anonymous student/private API authorization; anonymous assessment/audio access denial; anonymous admin identity denial; admin route redirects/noindex; and admin login form separation.
+- Evidence classification: **owner-reported execution result** (owner confirmed “All 8 passed” in chat; the terminal output, Playwright HTML report and trace files were not shared or independently retrieved). Do not represent this as a GitHub Actions run or attach a workflow-run ID.
+- The suite is read-only by design. No account creation, form submission, payment, audio upload, or database mutation was performed by this test run.
+- Render recheck after test: service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) remains on `secondary-school-platform-foundation`, auto-deploy off, not suspended. Latest deployment `dep-dbn2dcrl550s73f9ahag` remains `live`, deployed application commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`. The previous deployment was deactivated as expected. No redeploy was triggered after the browser suite.
+- Neon staging recheck (project `spring-cloud-84267029`, branch `br-still-cherry-baz7g5hk`, database `learnwise`, read-only `learnwise_app` query): 6 subjects, 0 topics, 0 students, 1 administrator, 1 audit event, 13 recorded migrations. The private `learnwise-private-audio` bucket exists and contains zero objects. The database contains the expected core tables for students, sessions, subjects/topics, lessons/progress, assessments/attempts/answers/integrity, payment transactions/webhooks/outbox, identity tokens, consent and data exports.
+- The staging `/health` endpoint was previously externally confirmed by the owner to return `{"mode":"database","service":"secondary-school-api","status":"ok"}`; this is evidence of runtime PostgreSQL connectivity at that time, not proof that every feature or schema path is correct.
+- No application source, schema, secret, deployment setting, production environment, `main` branch, or PR state was changed for this milestone. PR #1 remains protected: keep it open, draft and unmerged.
+
+## Next engineering sequence after public browser acceptance
+
+1. Inspect and complete owner-controlled authenticated admin login and authorization UAT. Owner enters credentials only in their browser; never request or transmit the password in chat. Verify admin dashboard, operations/reviews pages, CSRF, role/capability restrictions and audit events. Do not bootstrap another admin.
+2. Verify Brevo sender identity and perform controlled SMTP delivery to an owner-controlled mailbox. SMTP variable presence/effective values and sender verification remain unverified through the available Render connector. Keep student registration disabled unless a separate short staging test is explicitly approved; do not expose or request SMTP secrets.
+3. Complete Paystack sandbox checkout, signed webhook verification, idempotency, retries and reconciliation using test credentials only. Live payments remain disabled.
+4. Complete private audio upload/playback authorization and signed URL/streaming E2E in staging. Bucket is private and currently empty; no upload or object mutation is authorized by the prior browser suite.
+5. Audit student lifecycle, assessment attempt integrity/grading, admin content-management and support/reporting workflows. Add targeted tests and fix gaps on the development branch only; deploy reviewed staging changes with explicit staging authorization and verify each deployment.
+6. Obtain authoritative NERDC source materials and reuse rights, map all 18 class/subject combinations, and secure qualified Nigerian subject-teacher review before publishing curriculum content.
+7. Complete NDPA/privacy impact assessment, child/guardian consent, safeguarding, legal review, accessibility, independent security review, monitoring, backup/restore and rollback evidence.
+8. Prepare a release-readiness report. Production remains blocked until all applicable gates are evidenced and the owner separately authorizes production deployment.
+
+Owner-only actions should be batched and requested only when a genuine account, credential, sender verification, provider transaction, legal/teacher approval, spend or deployment approval is required. Continue all safe code review, tests and documentation autonomously in the meantime. Never claim the platform is production-ready based only on the eight anonymous/public browser checks.

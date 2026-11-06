@@ -121,6 +121,21 @@ class StudentLearningRouteSecurityTests(unittest.TestCase):
             response = self.client.get("/api/v1/topics/topic-1/lesson-content")
         self.assertEqual(response.status_code, 401)
 
+
+    def test_admin_lesson_authoring_requires_admin_session(self):
+        response = self.client.post(
+            "/api/v1/admin/topics/00000000-0000-0000-0000-000000000001/lesson-content",
+            json={"content": {}, "practice_questions": []}
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_admin_lesson_review_requires_admin_session(self):
+        response = self.client.post(
+            "/api/v1/admin/lesson-content/00000000-0000-0000-0000-000000000001/review",
+            json={"review_status": "approved", "teacher_reviewer_name": "Qualified reviewer"}
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_practice_submission_requires_session_and_csrf(self):
         with patch("app._current_student", return_value=None) as current:
             response = self.client.post(

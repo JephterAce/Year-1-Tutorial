@@ -40,14 +40,6 @@ def get_lesson_content(student_id, topic_id):
                ORDER BY sort_order,id""",
             (topic_id, row["id"]),
         ).fetchall()
-        conn.execute(
-            """INSERT INTO student_topic_progress(student_id,topic_id,lesson_content_id,last_accessed_at)
-               VALUES (%s,%s,%s,now())
-               ON CONFLICT(student_id,topic_id) DO UPDATE SET
-                 lesson_content_id=EXCLUDED.lesson_content_id,
-                 last_accessed_at=now(),updated_at=now()""",
-            (student_id, topic_id, row["id"]),
-        )
     return {
         "content_id": str(row["id"]),
         "version": row["version"],

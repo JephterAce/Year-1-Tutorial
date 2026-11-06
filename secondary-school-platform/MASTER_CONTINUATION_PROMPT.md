@@ -265,3 +265,10 @@ Paste the following instruction, then attach the Render screenshot:
 - Completed: full master prompt read; screenshot identified; current GitHub/Render/Neon state reconciled; owner bootstrap independently verified in Neon; current exact-head CI verified green.
 - Not completed: Environment Group linkage, HTTP/browser staging acceptance, SMTP delivery, Paystack sandbox, audio E2E, curriculum/legal/teacher gates, production readiness.
 - Next checkpoint: resume after the owner saves the group and opens the staging service's Environment page. Continue without rebuilding completed foundations.
+
+
+## Post-checkpoint reconciliation note — 6 November 2026
+- The prior checkpoint was committed as a documentation-only change at branch head 53d5f36851fbdac3ec7c93bc21403593ce837eec. No application source, migration, deployment configuration or secret was changed by that commit.
+- GitHub currently reports PR #1 as open, draft and unmerged, but its mergeable field is false. The reason is not established. Do not attempt a merge, rebase, branch sync or main update. The default main branch has two commits beyond the PR merge base; the only two files in those main-only commits have identical blob SHAs on main and the development branch. This confirms those two file contents match, but does not explain GitHub's mergeable=false status.
+- CI run 42270003444 remains the latest verified full code-test run and passed on the immediately preceding code head d35bebf6faa7690fd0412445d4fff5017126b70e. No new workflow run was returned for the docs-only commit 53d5f36851fbdac3ec7c93bc21403593ce837eec. Treat the source-code CI evidence as green on d35; do not claim a new exact-head test on the documentation commit.
+- Re-fetch the live PR head and CI before the next repository write. The next handover update itself will create a new documentation commit; obtain its resulting SHA from GitHub after the update.

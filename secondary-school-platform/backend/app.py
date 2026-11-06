@@ -529,14 +529,16 @@ def student_dashboard():
                 (student["class_level"], student["student_id"]),
             ).fetchall()
             recent = conn.execute(
-                """SELECT DISTINCT ON (t.id) t.id,t.title,s.name AS subject,lp.updated_at
-                   FROM student_topic_progress lp
-                   JOIN topics t ON t.id=lp.topic_id
-                   JOIN subjects s ON s.id=t.subject_id
-                   WHERE lp.student_id=%s AND t.status='published'
-                     AND t.curriculum_status='published'
-                   ORDER BY t.id,lp.updated_at DESC
-                   LIMIT 8""",
+                """SELECT id,title,subject,updated_at FROM (
+                     SELECT DISTINCT ON (t.id) t.id,t.title,s.name AS subject,lp.updated_at
+                     FROM student_topic_progress lp
+                     JOIN topics t ON t.id=lp.topic_id
+                     JOIN subjects s ON s.id=t.subject_id
+                     WHERE lp.student_id=%s AND t.status='published'
+                       AND t.curriculum_status='published'
+                     ORDER BY t.id,lp.updated_at DESC
+                   ) recent_lessons
+                   ORDER BY updated_at DESC LIMIT 8""",
                 (student["student_id"],),
             ).fetchall()
         return jsonify({

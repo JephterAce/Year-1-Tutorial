@@ -439,6 +439,83 @@ def answer_tutor_question():
         return jsonify({"error": "ai_tutor_unavailable"}), 503
 
 
+@app.get("/api/v1/student/dashboard")
+def student_dashboard():
+    """Return authenticated, database-backed learning progress without invented metrics."""
+    from database import connection
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        with connection() as conn:
+            summary = conn.execute(
+                """SELECT
+                     (SELECT count(DISTINCT lp.topic_id)
+                        FROM lesson_progress lp
+                        JOIN topics t ON t.id=lp.topic_id
+                       WHERE lp.student_id=%s AND lp.completed_at IS NOT NULL
+                         AND t.status='published' AND t.curriculum_status='published') AS completed_lessons,
+                     (SELECT count(*) FROM assessment_attempts
+                       WHERE student_id=%s AND status <> 'briefing') AS assessment_attempts,
+                     (SELECT count(*) FROM assessment_attempts
+                       WHERE student_id=%s AND passed IS TRUE) AS assessments_passed,
+                     (SELECT round(avg(percentage),1) FROM assessment_attempts
+                       WHERE student_id=%s AND percentage IS NOT NULL) AS average_score""",
+                (student["student_id"], student["student_id"],
+                 student["student_id"], student["student_id"]),
+            ).fetchone()
+            subjects = conn.execute(
+                """SELECT s.slug,s.name,
+                     count(DISTINCT t.id) AS published_lessons,
+                     count(DISTINCT CASE WHEN lp.completed_at IS NOT NULL THEN t.id END) AS completed_lessons
+                   FROM subjects s
+                   LEFT JOIN topics t ON t.subject_id=s.id AND t.class_level=%s
+                     AND t.status='published' AND t.curriculum_status='published'
+                   LEFT JOIN lesson_progress lp ON lp.topic_id=t.id
+                     AND lp.student_id=%s AND lp.completed_at IS NOT NULL
+                   WHERE s.is_active=true
+                   GROUP BY s.id,s.slug,s.name,s.sort_order
+                   ORDER BY s.sort_order,s.name""",
+                (student["class_level"], student["student_id"]),
+            ).fetchall()
+            recent = conn.execute(
+                """SELECT DISTINCT ON (t.id) t.id,t.title,s.name AS subject,lp.updated_at
+                   FROM lesson_progress lp
+                   JOIN topics t ON t.id=lp.topic_id
+                   JOIN subjects s ON s.id=t.subject_id
+                   WHERE lp.student_id=%s AND t.status='published'
+                     AND t.curriculum_status='published'
+                   ORDER BY t.id,lp.updated_at DESC
+                   LIMIT 8""",
+                (student["student_id"],),
+            ).fetchall()
+        return jsonify({
+            "student": {
+                "display_name": student.get("display_name"),
+                "class_level": student.get("class_level"),
+            },
+            "summary": {
+                "completed_lessons": int(summary["completed_lessons"] or 0),
+                "assessment_attempts": int(summary["assessment_attempts"] or 0),
+                "assessments_passed": int(summary["assessments_passed"] or 0),
+                "average_score": str(summary["average_score"]) if summary["average_score"] is not None else None,
+            },
+            "subjects": [{
+                "slug": row["slug"], "name": row["name"],
+                "published_lessons": int(row["published_lessons"]),
+                "completed_lessons": int(row["completed_lessons"]),
+            } for row in subjects],
+            "recent_lessons": [{
+                "id": str(row["id"]), "title": row["title"],
+                "subject": row["subject"], "updated_at": row["updated_at"].isoformat(),
+            } for row in recent],
+            "source": "database",
+        }), 200
+    except Exception:
+        app.logger.exception("Student dashboard query failed")
+        return jsonify({"error": "dashboard_unavailable"}), 503
+
+
 @app.get("/api/v1/student/profile")
 def read_student_profile():
     from student_profiles import get_profile, ProfileError

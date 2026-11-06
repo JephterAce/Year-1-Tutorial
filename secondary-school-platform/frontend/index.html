@@ -33,12 +33,21 @@
  <header class="topbar"><div class="crumb">Learning space&nbsp; / &nbsp;<b id="crumb">Overview</b></div><div class="topright"><input class="search" id="globalSearch" placeholder="⌕  Search topics..."><a class="primary" href="account.html" style="text-decoration:none">Account</a><div class="avatar">S</div></div></header>
  <div class="content">
  <section class="page active" id="home">
-  <div class="welcome"><div><div class="eyebrow">Your next chapter starts here</div><h1>Small steps. Strong results.</h1><p>Explore clear audio lessons, expert explanations and practice designed for your senior secondary journey.</p></div><button class="cta" onclick="showPage('catalog')">Explore lessons&nbsp; →</button></div>
+  <div class="welcome"><div><div class="eyebrow">Your next chapter starts here</div><h1 id="welcomeTitle">Small steps. Strong results.</h1><p id="welcomeSubtitle">Explore clear audio lessons, expert explanations and practice designed for your senior secondary journey.</p></div><button class="cta" onclick="showPage('catalog')">Explore lessons&nbsp; →</button></div>
+  <div class="panel" style="margin-top:18px">
+   <div class="panelhead"><div><h3>Ask your AI teacher</h3><small style="color:var(--muted)">A guided explanation for your class level. AI assistance can make mistakes.</small></div><span class="tag lock">Preview · gated</span></div>
+   <label for="tutorQuestion" style="display:block;font-weight:700;font-size:13px;margin-bottom:7px">What would you like help understanding?</label>
+   <textarea id="tutorQuestion" maxlength="2000" rows="3" placeholder="Example: Explain how ionic bonding forms, step by step." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical"></textarea>
+   <label for="tutorContext" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional lesson or subject context</label>
+   <input id="tutorContext" maxlength="1200" placeholder="e.g. SS1 Chemistry — atomic structure" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
+   <div class="actions"><button class="primary" id="askTutorButton" onclick="askThinkTankTutor()">Ask Think Tank</button><small id="tutorStatus" aria-live="polite" style="color:var(--muted)">Sign in required. AI service remains disabled until budget controls and provider settings are approved.</small></div>
+   <div id="tutorAnswer" hidden style="margin-top:14px;padding:14px;background:#f6f8fc;border-radius:10px;white-space:pre-wrap"></div>
+  </div>
   <div class="stats">
-   <div class="stat"><small>Learning streak</small><strong>— days</strong><span>Start your first lesson</span></div>
-   <div class="stat"><small>Lessons completed</small><strong>0</strong><span>Your progress begins here</span></div>
-   <div class="stat"><small>Subjects available</small><strong>6</strong><span>Across SS1–SS3</span></div>
-   <div class="stat"><small>Your class</small><strong>SS2</strong><span>Demo profile · change later</span></div>
+   <div class="stat"><small>Completed lessons</small><strong id="dashCompleted">—</strong><span id="dashCompletedNote">Sign in to load progress</span></div>
+   <div class="stat"><small>Assessment attempts</small><strong id="dashAttempts">—</strong><span id="dashAttemptsNote">Your saved results</span></div>
+   <div class="stat"><small>Assessments passed</small><strong id="dashPassed">—</strong><span>Based on recorded results</span></div>
+   <div class="stat"><small>Your class</small><strong id="dashClass">—</strong><span id="dashName">Sign in to view your profile</span></div>
   </div>
   <div class="sectionhead"><div><h2>Explore your subjects</h2><p>Choose a subject to discover its lessons</p></div><button class="link" onclick="showPage('catalog')">View catalogue →</button></div>
   <div class="subjects" id="subjectTiles">
@@ -94,6 +103,53 @@ async function studentApi(path,body,method='GET'){const headers={'Accept':'appli
 async function loadStudentProfile(){try{const data=await studentApi('/api/v1/student/profile');const p=data.profile;document.getElementById('profileName').value=p.display_name||'';document.getElementById('profileUsername').value=p.username||'';document.getElementById('profileEmail').value=p.email||'';document.getElementById('profileClass').value=p.class_level||'SS1';document.getElementById('profileBio').value=p.bio||'';document.getElementById('profileVisibility').value=p.profile_visibility||'private';document.getElementById('profilePreviewMessage').textContent='Profile loaded from your private account.';document.getElementById('profileAvatar').textContent=(p.display_name||'S').slice(0,1).toUpperCase()}catch(e){document.getElementById('profilePreviewMessage').textContent=e.message}}
 async function saveStudentProfile(){const changes={display_name:document.getElementById('profileName').value.trim(),username:document.getElementById('profileUsername').value.trim(),bio:document.getElementById('profileBio').value};try{const data=await studentApi('/api/v1/student/profile',changes,'PATCH');document.getElementById('profilePreviewMessage').textContent='Profile saved successfully. Your email and class remain account-controlled.';document.getElementById('profileName').value=data.profile.display_name;document.getElementById('profileUsername').value=data.profile.username||''}catch(e){document.getElementById('profilePreviewMessage').textContent=e.message}}
 async function loadAssessmentHistory(){const target=document.getElementById('assessmentHistory');target.textContent='Loading your assessment history…';try{const data=await studentApi('/api/v1/student/assessment-history');const items=data.items||[];document.getElementById('assessmentCount').textContent=items.length;const scored=items.filter(x=>x.percentage!==null);const avg=scored.length?scored.reduce((sum,x)=>sum+Number(x.percentage),0)/scored.length:null;document.getElementById('assessmentAverage').textContent=avg===null?'—':avg.toFixed(1)+'%';document.getElementById('assessmentPassed').textContent=items.filter(x=>x.passed===true).length;document.getElementById('assessmentPending').textContent=items.filter(x=>['in_progress','under_review'].includes(x.status)).length;target.replaceChildren();if(!items.length){target.textContent='No submitted assessment attempts yet. Open assessments to begin.';return}items.forEach(item=>{const row=document.createElement('div');row.style.cssText='padding:12px 0;border-top:1px solid #e7ebf2';const title=document.createElement('strong');title.textContent=item.title+' · '+item.subject+' · '+item.class_level;const detail=document.createElement('p');detail.style.cssText='margin:4px 0;color:#68758b;font-size:12px';detail.textContent='Status: '+item.status+' · '+(item.percentage===null?'Result pending':item.percentage+'%')+(item.passed===true?' · Passed':item.passed===false?' · Not passed':'')+(item.integrity_review_required?' · Review requested':'');row.append(title,detail);target.append(row)})}catch(e){target.textContent=e.message}}
+
+
+async function loadDashboard(){
+ try{
+  const data=await studentApi('/api/v1/student/dashboard');
+  const s=data.summary||{};
+  document.getElementById('welcomeTitle').textContent='Welcome back, '+(data.student.display_name||'student')+'.';
+  document.getElementById('welcomeSubtitle').textContent='Your '+data.student.class_level+' learning space is connected to your saved lessons and assessment records.';
+  document.getElementById('dashCompleted').textContent=s.completed_lessons;
+  document.getElementById('dashCompletedNote').textContent='Completed lessons recorded';
+  document.getElementById('dashAttempts').textContent=s.assessment_attempts;
+  document.getElementById('dashAttemptsNote').textContent=s.average_score===null?'No graded attempts yet':'Average score: '+s.average_score+'%';
+  document.getElementById('dashPassed').textContent=s.assessments_passed;
+  document.getElementById('dashClass').textContent=data.student.class_level;
+  document.getElementById('dashName').textContent='Your private student account';
+  const bySlug=new Map((data.subjects||[]).map(x=>[x.slug,x]));
+  document.querySelectorAll('#subjectTiles .subject').forEach(card=>{
+   const title=card.querySelector('h3')?.textContent||'';
+   const slug=title.toLowerCase().replaceAll(' ','-');
+   const item=bySlug.get(slug);
+   if(!item)return;
+   const p=card.querySelector('p');
+   if(p)p.textContent=item.completed_lessons+' of '+item.published_lessons+' published lessons completed';
+   const bar=card.querySelector('.progress i');
+   if(bar)bar.style.width=(item.published_lessons?Math.round(100*item.completed_lessons/item.published_lessons):0)+'%';
+  });
+  const classFilter=document.getElementById('classFilter');
+  if(classFilter)classFilter.value=data.student.class_level;
+ }catch(e){
+  document.getElementById('dashCompletedNote').textContent=e.message;
+  document.getElementById('dashAttemptsNote').textContent='Sign in to load private progress';
+ }
+}
+async function askThinkTankTutor(){
+ const question=document.getElementById('tutorQuestion').value.trim();
+ const context=document.getElementById('tutorContext').value.trim();
+ const status=document.getElementById('tutorStatus');
+ const answer=document.getElementById('tutorAnswer');
+ const button=document.getElementById('askTutorButton');
+ if(!question){status.textContent='Write a question first.';return}
+ button.disabled=true;status.textContent='Checking your account and AI availability…';answer.hidden=true;
+ try{
+  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context},'POST');
+  answer.textContent=data.answer;answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
+ }catch(e){status.textContent=e.message}
+ finally{button.disabled=false}
+}
 
 function clearProfilePreview(){['profileName','profileUsername','profileEmail','profileBio'].forEach(id=>document.getElementById(id).value='');document.getElementById('profilePhoto').value='';document.getElementById('profileAvatar').style.backgroundImage='';document.getElementById('profileAvatar').textContent='S';document.getElementById('profilePreviewMessage').textContent=''}
 function filterSubject(s){showPage('catalog');document.getElementById('subjectFilter').value=s;renderCatalog()}
@@ -158,5 +214,6 @@ function previewTopic(index){
 }
 document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('catalog');document.getElementById('topicSearch').value=e.target.value;renderCatalog()}});
 renderCatalog();
+loadDashboard();
 </script>
 </body></html>

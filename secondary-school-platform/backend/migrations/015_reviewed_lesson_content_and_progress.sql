@@ -61,3 +61,20 @@ CREATE TABLE IF NOT EXISTS student_topic_progress (
 );
 CREATE INDEX IF NOT EXISTS student_topic_progress_recent_idx
   ON student_topic_progress(student_id,updated_at DESC);
+
+ALTER TABLE lesson_practice_questions
+  ADD CONSTRAINT lesson_practice_question_topic_unique UNIQUE(id,topic_id);
+
+CREATE TABLE IF NOT EXISTS student_lesson_practice_attempts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL,
+  submitted_answer JSONB NOT NULL,
+  is_correct BOOLEAN NOT NULL,
+  attempted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  FOREIGN KEY (question_id,topic_id)
+    REFERENCES lesson_practice_questions(id,topic_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS student_lesson_practice_attempts_recent_idx
+  ON student_lesson_practice_attempts(student_id,attempted_at DESC);

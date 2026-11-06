@@ -9,6 +9,8 @@ The initial product catalogue contains six subjects across SS1, SS2 and SS3: Eng
 - NERDC revised Senior Secondary Education Curriculum home: https://www.nerdc.gov.ng/content_manager/new_senior_curriculum_home.html
 - Revised SSS1 core and compulsory subject listing: https://lmis.nerdcportals.com.ng/s1_core
 - Revised SSS1 science subject listing: https://lmis.nerdcportals.com.ng/s1_science
+- Revised SSS2 core and compulsory subject listing: https://lmis.nerdcportals.com.ng/s2_core
+- Revised SSS2 science subject listing: https://lmis.nerdcportals.com.ng/s2_science
 - NERDC e-Curriculum subject/class browse: https://www.nerdc.org.ng/CurriculumView.aspx
 - NERDC approved subject offering notice: https://nerdc.gov.ng/content_manager/Basic%20and%20Senior%20Secondary%20Education%20Curriculum%20Offerings.pdf
 
@@ -16,7 +18,7 @@ The SSS1 revised portal lists English Language and General Mathematics under cor
 
 ## Important cohort/transition control
 
-The Federal Ministry of Education/NERDC announcement dated 3 September 2025 states that the revised curriculum is introduced at the beginning of a three-year education cycle, including SS1. Therefore the platform must not automatically label every SS1, SS2 and SS3 learner as following the same revised 2025 sequence. Confirm the learner cohort and the applicable curriculum version for each class before assigning topics. The revised SSS2 and SSS3 entry links are listed by NERDC, but were not retrievable during this source audit; they remain pending capture and confirmation.
+The Federal Ministry of Education/NERDC announcement dated 3 September 2025 states that the revised curriculum is introduced at the beginning of a three-year education cycle, including SS1. Therefore the platform must not automatically label every SS1, SS2 and SS3 learner as following the same revised 2025 sequence. Confirm the learner cohort and the applicable curriculum version for each class before assigning topics. The revised SSS2 core/science subject listing pages are now accessible and have been added to the register, but their individual subject curriculum PDFs still require capture. NERDC lists SSS3 as a revised curriculum level on its official home page, but a class-specific SSS3 subject page/PDF was not retrievable during this audit; that track remains pending.
 
 ## Publication rules
 

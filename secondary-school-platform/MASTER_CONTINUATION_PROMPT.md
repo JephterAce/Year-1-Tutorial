@@ -609,3 +609,35 @@ The owner explicitly approved proceeding with all seven workstreams: database-ba
 
 ## Current state
 This increment is committed to the development branch only. It is not yet a complete populated student product, not deployed to staging, and not production-ready. Last managed staging database snapshot remains six subjects, zero topics, zero students and one owner admin; no managed database writes were made during this increment.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (AI lesson grounding and verified CI)
+
+## Additional implementation
+- AI tutor can now accept an optional published lesson topic ID. `lesson_content.get_tutor_context` checks the student's entitlement and retrieves only approved content attached to a published topic. It bounds the retrieved reference to 4,000 characters and keeps it separate from unverified learner-provided context.
+- AI tutor spend reservation includes the retrieved lesson reference before the provider call, so the cost estimate covers the actual bounded prompt.
+- Student home UI now lets the learner optionally supply an unlocked topic ID; changing topic clears the in-page conversation history to avoid mixing lesson contexts.
+- Added tests for entitlement-gated lesson retrieval and route-level tutor grounding.
+- Admin lesson studio status label now reflects that draft authoring is connected.
+
+## Verification evidence
+- GitHub Actions run `42298238045` for commit `3456ef8531c9f95960f153464e981528616a9afa` completed successfully:
+  - Unit/security tests passed.
+  - Student and admin frontend JavaScript syntax checks passed.
+  - All numbered migrations rehearsed successfully on disposable PostgreSQL.
+  - PostgreSQL schema integration tests passed.
+  - Existing assessment/payment end-to-end tests passed.
+  - Synthetic student registration → email verification (mail sender mocked) → login → lesson entitlement/content → practice answer → progress → assessment submission → result-history journey passed.
+  - Concurrent database AI quota reservation test passed.
+  - Container image build passed without publishing.
+- The current branch head at this checkpoint is `a16ad096487215d3fa379aa84eb7b43870cfa8bb`. The only commit after the fully passing code/test commit `3456ef8531c9f95960f153464e981528616a9afa` is an admin UI status-label text correction; its own CI was still running when recorded. Await that run before calling the latest head green.
+
+## Evidence boundaries
+- CI tests run against disposable PostgreSQL and synthetic fixtures. The email-verification delivery was mocked; no real email was sent.
+- No external AI provider request was made; no provider key/model pricing has been configured. The tutor remains disabled by default.
+- No actual TTS audio was generated; private podcast workflow requires a recorded or externally generated file upload, followed by review.
+- No NERDC topics/lesson drafts were inserted into managed staging. Two SS1 source documents (English Language and Biology) have topic maps and one original draft lesson each; all remain unreviewed and unpublished.
+- SSS2 official viewer links for several subjects are identified but PDF text remains unavailable; SSS3 class-specific sources are still outstanding.
+- No managed Neon migrations 014–017 were applied, no Render deployment was triggered, and production/main remain untouched.

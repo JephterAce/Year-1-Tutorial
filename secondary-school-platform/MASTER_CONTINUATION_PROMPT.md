@@ -440,3 +440,51 @@ Owner-only actions should be batched and requested only when a genuine account, 
 - Existing unit-test files cover Paystack initialization, webhook signatures/event validation, and server-side transaction verification. Source files were inspected; these tests have not been independently executed in this review and no real Paystack transaction was attempted.
 - Important remaining runtime gates: verify staging uses Paystack test credentials only; complete a controlled sandbox checkout/webhook/idempotency/reconciliation test; verify SMTP sender identity and a test delivery to the owner-controlled mailbox; and confirm a deployed/scheduled worker actually drains the payment notification outbox. No SMTP send, payment, database write, or worker trigger was performed.
 - No application code was changed during this source review. The only change is this handover documentation update.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (full-product build authorization and student/AI audit)
+
+## Owner direction
+The owner confirmed that the intended product is the complete AI-powered secondary-school learning ecosystem: AI teaching/explanations, structured lessons, student Q&A, educational podcasts/audio, practice and timed assessments, marking/feedback, progress tracking, paid resources and personalized recommendations. The owner authorized continuing development toward that full scope. This is not authorization for production deployment, live payments, destructive database operations, public student onboarding, or spending.
+
+## Repository baseline verified for this checkpoint
+- Repository: `JephterAce/Year-1-Tutorial`
+- Development branch: `secondary-school-platform-foundation`
+- Branch head at audit start: `7f10947ec85fd183b5b7630efe448afd8d731288`
+- PR #1 remains open/draft/unmerged per the current handover; recheck before future changes.
+- Render staging currently runs older app commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; Render auto-deploy remains off. Documentation-only commits are not deployed automatically.
+- No application source, environment configuration, database, production branch, or staging deployment was changed during this audit.
+
+## Student and learning experience audit (source inspection)
+- Existing frontend files: `frontend/index.html`, `account.html`, `lesson.html`, and `assessment.html`.
+- Existing account routes include registration (feature-flag gated), email verification, login/logout, current-session lookup and password reset. Tests in `test_identity_routes.py` mock identity/email services; they do not establish real SMTP delivery or full student lifecycle against the managed staging database.
+- Student homepage has a substantial visual dashboard/catalogue/profile experience, but source contains illustrative/static dashboard counters and should not be treated as proof that all dashboard widgets are populated from live student records.
+- Lesson page fetches a topic, checks entitlement, offers checkout and requests private audio access. No approved topic rows or audio objects were present in the last verified staging DB/storage snapshot; lesson/audio journey is therefore not end-to-end proven.
+- Assessment page contains catalogue, briefing, answer-save, timer, submit/result and report/appeal UI. Backend assessment services and unit/contract tests exist, but the full authenticated student journey against real staging content has not been run.
+- Current staging browser suite covers eight anonymous/unauthenticated access and page-shell checks; it does not cover registration, email, authenticated student dashboard, paid entitlement, live checkout, audio playback or a complete assessment.
+
+## AI teaching and content audit
+- Recursive development-branch tree inspection found no AI tutor/provider adapter, AI chat route, prompt orchestration service, model configuration module, or AI-specific tests.
+- Existing audio delivery/storage infrastructure and one General Mathematics algebraic-expressions two-presenter script draft exist. That script explicitly remains unassigned to class/term and unreviewed; it is not a published curriculum asset.
+- No podcast generation/transcription/voice-production pipeline was found in the backend tree. The existing outbox worker is for payment alert email only, and backend README says it is not scheduled or monitored.
+- Last verified Neon staging snapshot had six subject rows but zero topics, zero students and one owner admin. Thus the six subjects do not yet constitute a populated SS1–SS3 curriculum.
+- No AI API/provider credential or external AI provider integration was inspected or configured. Do not ask the owner to paste credentials into chat.
+
+## Immediate engineering priorities
+1. Implement a secure, provider-abstracted AI tutor backend with authenticated student ownership, request limits, prompt-injection boundaries, age-appropriate tutoring policy, provider timeouts, cost/token limits, and tests using mocked provider responses. Keep AI output clearly labelled as assistance and do not let it change grades, entitlements or curriculum publication state.
+2. Integrate the student frontend with real session/catalogue/profile/progress APIs and remove misleading hardcoded progress values for signed-out/empty accounts. Add explicit loading, empty, error and locked states.
+3. Add a complete authenticated student browser journey using synthetic test data in an isolated test environment; do not create test accounts or mutate managed staging without owner approval.
+4. Implement the learning-content and podcast production workflow as a reviewed, versioned process. Keep scripts/audio unpublished until source rights, qualified subject review and technical QA are recorded.
+5. Schedule and monitor the payment notification outbox only after staging SMTP is verified; this worker must not be confused with AI/audio generation workers.
+
+## Tooling constraint and evidence boundary
+The available GitHub integration supports repository file reads/writes but exposes no Codespaces terminal or arbitrary repository shell execution in this session. Consequently this checkpoint records source inspection only; no Python tests, lint, browser tests, or AI-provider integration tests were executed here. Use Codespaces/CI for executable verification before treating any implementation as complete.
+
+## Owner-only gates still outstanding
+- Confirm staging provider configuration privately (AI provider, SMTP, Paystack sandbox); never disclose values in chat.
+- Complete real controlled SMTP and Paystack sandbox tests, with separate approvals for any operation that creates test data or transactions.
+- Obtain official curriculum source materials and reuse rights, plus qualified Nigerian teacher review.
+- Complete privacy, NDPA, child/guardian consent, safeguarding, independent security, accessibility and recovery reviews.
+- Keep production deployment and public student onboarding blocked until explicit separate authorization and evidence-backed release approval.

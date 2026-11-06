@@ -53,6 +53,29 @@
  <div class="heading"><div><h1>Curriculum register</h1><p>Track source-backed mapping for each class, subject and term.</p></div><span class="status">0 verified topics</span></div>
  <div class="notice">No topic should be published as NERDC-aligned until its class, subject, learning outcomes and source evidence have been checked. The six subjects are the product scope, not the complete national curriculum.</div>
  <div class="card" style="margin-bottom:15px"><div class="cardhead"><h2>Planned coverage</h2><span class="muted">18 class-subject combinations · 54 term containers</span></div><div class="subjectchips"><span class="chip">SS1</span><span class="chip">SS2</span><span class="chip">SS3</span><span class="chip">First term</span><span class="chip">Second term</span><span class="chip">Third term</span></div><p class="muted" style="font-size:11px">These are catalogue containers only; they do not confirm that topics have been assigned to terms.</p></div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Capture official source</h2><span class="status info">Draft evidence</span></div>
+   <div class="formgrid"><div class="field"><label for="sourceClass">Class</label><select id="sourceClass"><option>SS1</option><option>SS2</option><option>SS3</option></select></div><div class="field"><label for="sourceSubject">Subject</label><select id="sourceSubject"><option value="english-language">English Language</option><option value="general-mathematics">General Mathematics</option><option value="further-mathematics">Further Mathematics</option><option value="biology">Biology</option><option value="chemistry">Chemistry</option><option value="physics">Physics</option></select></div></div>
+   <div class="field"><label for="sourceTitle">Source title</label><input id="sourceTitle" placeholder="Exact official curriculum document title"></div>
+   <div class="field"><label for="sourceUrl">HTTPS source URL</label><input id="sourceUrl" placeholder="https://…"></div>
+   <div class="formgrid"><div class="field"><label for="sourceVersion">Version / date</label><input id="sourceVersion" placeholder="e.g. October 2025"></div><div class="field"><label for="sourceSection">Page / section reference</label><input id="sourceSection" placeholder="e.g. printed page 1"></div></div>
+   <div class="field"><label for="sourceNotes">Evidence notes</label><textarea id="sourceNotes" placeholder="What was captured and checked?"></textarea></div>
+   <button class="btn" onclick="captureCurriculumSource()">Save source record</button>
+   <p class="muted" id="sourceCaptureStatus" aria-live="polite"></p>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Create topic draft</h2><span class="status">Not published</span></div>
+   <div class="field"><label for="topicSourceId">Captured source ID</label><input id="topicSourceId" placeholder="Paste source ID returned above"></div>
+   <div class="formgrid"><div class="field"><label for="topicClass">Class</label><select id="topicClass"><option>SS1</option><option>SS2</option><option>SS3</option></select></div><div class="field"><label for="topicSubject">Subject</label><select id="topicSubject"><option value="english-language">English Language</option><option value="general-mathematics">General Mathematics</option><option value="further-mathematics">Further Mathematics</option><option value="biology">Biology</option><option value="chemistry">Chemistry</option><option value="physics">Physics</option></select></div></div>
+   <div class="field"><label for="topicSlug">Topic slug</label><input id="topicSlug" placeholder="e.g. laboratory-safety-rules"></div>
+   <div class="field"><label for="topicTitle">Topic title</label><input id="topicTitle" placeholder="Exact topic heading"></div>
+   <div class="field"><label for="topicSummary">Original lesson summary</label><textarea id="topicSummary"></textarea></div>
+   <div class="field"><label for="topicObjectives">Learning objectives (JSON array)</label><textarea id="topicObjectives" placeholder='["Explain…","Identify…"]'></textarea></div>
+   <div class="formgrid"><div class="field"><label for="topicTheme">Curriculum theme</label><input id="topicTheme"></div><div class="field"><label for="topicSubtopic">Subtopic</label><input id="topicSubtopic"></div></div>
+   <button class="btn" onclick="createCurriculumTopic()">Save topic draft</button>
+   <p class="muted" id="topicCreateStatus" aria-live="polite"></p>
+  </section>
+ </div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Live topic register</h2><button class="btn secondary" onclick="loadCurriculumTopics()">Refresh</button></div><div id="curriculumTopicList" class="empty">Load the current topic register after admin sign-in.</div></div>
  <div class="tablewrap"><table><thead><tr><th>Subject</th><th>Offering group</th><th>Class mapping</th><th>Term mapping</th><th>Source status</th></tr></thead><tbody>
  <tr><td>English Language</td><td>Core / compulsory</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
  <tr><td>General Mathematics</td><td>Core / compulsory</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>

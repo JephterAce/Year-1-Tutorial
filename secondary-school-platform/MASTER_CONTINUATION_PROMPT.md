@@ -167,3 +167,35 @@ Real SMTP delivery and sender verification; controlled browser acceptance; verif
 
 ## Owner communication rule
 The owner explicitly requests substantial autonomous progress, minimal narration, and contact only for a genuine owner-only action, credential, account selection, legal/teacher authorization, spend or deployment approval. Do not ask routine questions or request repeated information. At every successful milestone, refresh this master prompt with the exact verified branch SHA, CI evidence, provider state, completed work, outstanding gates and next handoff instructions. Keep the prompt free of secrets and personal student data.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (Render environment-group UI issue and account handoff)
+
+## Latest owner report
+- Owner says they created a Render environment group named **THINK TANK**.
+- On checking its linked services, the owner sees an empty/blank linked-services area and cannot find a link control or pathway. They report that the page only shows explanatory write-up and a blank box.
+- Owner has run out of attachment capacity in the current account and intends to continue in another ChatGPT account to upload a screenshot.
+- Do not tell the owner to delete/recreate the group or repeatedly ask them to navigate blindly. Wait for the screenshot in the continuation account and inspect the exact page before giving UI instructions.
+- The owner says SMTP variables have been added, but do not claim their presence, values, sender verification or successful delivery are independently confirmed.
+
+## Verified Render documentation for linking an Environment Group
+Official Render documentation: https://render.com/docs/configure-environment-variables
+The documented route is: open the target **service** (not the Environment Group details page) → **Environment** in the left pane → find **Linked Environment Groups** → choose the group from the dropdown → click **Link**. Render says linking triggers a deploy to incorporate the group values.
+If the service's Environment page does not show that section/dropdown, do not guess. Inspect the screenshot and establish whether the owner is in the group details page, a project/environment-scoped page, or the service page. Check whether group/service are in different workspaces or project-environment scopes. The official docs state a group scoped to a project environment cannot be linked to a service outside that environment; unscoped groups can be linked to services in the same team.
+Important: a service-level variable overrides a same-named variable from a linked group. Avoid duplicate keys across multiple groups.
+Do not cause a deployment or configuration mutation without explaining the effect and respecting the existing approval gates. Render's current dashboard save/link behavior may trigger deployment; this service has auto-deploy disabled, but verify current state.
+
+## Immediate continuation instructions for the next AI account
+1. Read this entire file first and continue from this checkpoint; do not restart the project or repeat completed work.
+2. Owner will provide a screenshot showing the Render page where the THINK TANK group has no visible linked-service control. Identify the exact page from visible headings/navigation, then provide precise next clicks only if supported by the screenshot and current Render docs.
+3. If UI remains ambiguous, inspect the Render account/service/group through available Render app tools. Do not claim access to group details or secret values unless the tool actually returns them. Never ask owner to reveal SMTP key/password.
+4. Resolve the group/service linkage only if it is appropriate and owner has approved the resulting deployment. If the dashboard truly offers no linking option, document the evidence and use a supported Render workflow; do not invent a hidden button or API.
+5. Once linked/configured, verify controlled SMTP delivery to an owner-controlled test mailbox, first ensuring Brevo sender verification and correct SMTP login/key. Registration must remain disabled except for a tightly controlled, owner-approved staging test; disable it immediately afterward.
+6. Continue the engineering work autonomously after this issue: verify current repo head, PR #1, CI, Render deployment SHA and staging health; then progress through the unfinished release gates in the main prompt. Keep PR #1 draft/open/unmerged and keep main untouched.
+7. Update this master prompt at every meaningful milestone with exact verified links, commit SHA, test results, provider state, remaining owner-only gates and next action. Never include secrets.
+
+## Transfer message for a fresh ChatGPT account
+Paste the following instruction, then attach the Render screenshot:
+“Continue my Think Tank platform project from this master continuation file. Read it fully and inspect the current GitHub/Render/Neon state before acting. I am attaching a screenshot of the Render Environment Group named THINK TANK because the Linked Services area appears blank and I cannot find a link option. Diagnose the exact screen and guide me through only the necessary next step. Then continue the build autonomously from the recorded checkpoint, preserving all repository and deployment safety rules. Do not restart, do not ask me to repeat recorded details, and do not expose or request secrets.”

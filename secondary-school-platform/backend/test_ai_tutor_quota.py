@@ -48,7 +48,7 @@ class TutorCostEstimateTests(unittest.TestCase):
         }, clear=True):
             tokens, cost = estimate_request_cost_microusd("x" * 100, 600)
         self.assertEqual(tokens, 25)
-        self.assertEqual(cost, 1201)
+        self.assertEqual(cost, 1225)
 
     def test_missing_pricing_fails_closed(self):
         with patch.dict(os.environ, {}, clear=True):

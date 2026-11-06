@@ -65,8 +65,8 @@ class StudentUiContractTests(unittest.TestCase):
     def test_student_dashboard_shows_exact_six_subjects(self):
         frontend = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
         html = frontend.read_text(encoding="utf-8")
-        self.assertIn('<small>Subjects available</small><strong>6</strong>', html)
-        self.assertNotIn('<small>Subjects available</small><strong>5</strong>', html)
+        self.assertIn('<small>Subjects available</small><strong id="dashSubjects">—</strong>', html)
+        self.assertIn("dashSubjects').textContent=(data.subjects||[]).filter(x=>x.published_lessons>0).length", html)
         for subject in (
             "English Language",
             "General Mathematics",

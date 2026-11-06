@@ -186,7 +186,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const labels={overview:"Overview",curriculum:"Curriculum",studio:"Lesson studio",audio:"Audio library",announcements:"Announcements",students:"Students & payments",settings:"Settings"};
-function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.page===id));document.getElementById("crumb").textContent=labels[id]||"Overview";window.scrollTo(0,0)}
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.page===id));document.getElementById("crumb").textContent=labels[id]||"Overview";window.scrollTo(0,0);if(id==="curriculum"){loadCurriculumSources();loadCurriculumTopics()}if(id==="audio"){loadAudioAssets();loadPodcastScripts()}}
 document.querySelectorAll(".nav").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
 
 function adminCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}

@@ -116,7 +116,7 @@ There is deliberately no public administrator registration. To create the first 
 
 ### AI tutor usage limits and cost reservations
 
-- Migration `014_ai_tutor_usage_limits.sql` adds per-student UTC daily usage accounting. The service serializes concurrent reservations per student with a PostgreSQL advisory transaction lock and checks daily/monthly request limits plus daily/monthly estimated-spend caps before a provider request.
+- Migration `014_ai_tutor_usage_limits.sql` adds per-student UTC daily usage accounting; migration `017_ai_tutor_platform_budget.sql` adds platform-wide daily usage accounting. The service serializes reservations with PostgreSQL advisory transaction locks and checks per-student daily/monthly request limits, per-student spend caps, and global platform daily/monthly spend caps before a provider request.
 - The reservation is conservative: it estimates input tokens from the bounded prompt and reserves the full configured output-token ceiling. Failed provider attempts remain counted, preventing retry loops from bypassing quotas. This is an upper-bound reservation, not a provider invoice reconciliation.
 - Configure the request/budget caps and exact selected-model input/output price rates privately. Price values are integer micro-USD per one million tokens. Missing/invalid pricing fails closed. Revisit price rates whenever the model/provider tariff changes.
 - The database migration has been added to the development branch but has **not** been applied to managed staging. The feature flag remains disabled. Do not enable learner access until migration rehearsal, rate/pricing configuration, privacy review, concurrency tests and monitoring are complete.

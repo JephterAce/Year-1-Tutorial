@@ -63,7 +63,7 @@ def _provider_endpoint():
     return raw
 
 
-def build_tutor_messages(class_level, question, topic_context=None):
+def build_tutor_messages(class_level, question, topic_context=None, history=None):
     """Build bounded prompts; user-supplied text is always untrusted input."""
     if class_level not in {"SS1", "SS2", "SS3"}:
         raise ValueError("A valid student class level is required.")
@@ -96,10 +96,19 @@ def build_tutor_messages(class_level, question, topic_context=None):
         f"Lesson context (unverified learner-provided context): {topic_context or 'Not supplied'}\n"
         f"Learner question:\n{question}"
     )
-    return [
-        {"role": "system", "content": system},
-        {"role": "user", "content": user},
-    ]
+    messages = [{"role": "system", "content": system}]
+    if history is not None:
+        if not isinstance(history, list):
+            raise ValueError("Conversation history must be a list.")
+        for item in history[-8:]:
+            if not isinstance(item, dict) or item.get("role") not in {"user", "assistant"}:
+                raise ValueError("Conversation history contains an invalid message.")
+            content = item.get("content")
+            if not isinstance(content, str) or not content.strip() or len(content) > 1500:
+                raise ValueError("Conversation history message is invalid or too long.")
+            messages.append({"role": item["role"], "content": content.strip()})
+    messages.append({"role": "user", "content": user})
+    return messages
 
 
 class _NoRedirect(HTTPRedirectHandler):
@@ -109,12 +118,12 @@ class _NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def generate_tutor_answer(class_level, question, topic_context=None):
+def generate_tutor_answer(class_level, question, topic_context=None, history=None):
     """Call a configured OpenAI-compatible chat-completions endpoint."""
     api_key = _required_env("AI_API_KEY")
     model = _required_env("AI_MODEL")
     endpoint = _provider_endpoint()
-    messages = build_tutor_messages(class_level, question, topic_context)
+    messages = build_tutor_messages(class_level, question, topic_context, history)
 
     payload = json.dumps({
         "model": model,

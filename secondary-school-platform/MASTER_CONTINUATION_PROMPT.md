@@ -334,3 +334,23 @@ Paste the following instruction, then attach the Render screenshot:
 - Do not copy/add this workflow to `main` without the owner's explicit approval; owner has explicitly prohibited main modifications.
 - Safe alternative under consideration: execute the existing Playwright browser-acceptance suite from a Codespaces terminal checked out on `secondary-school-platform-foundation`, targeting the existing staging URL. This is a read-only browser test suite, but inspect package/test files and confirm the staging service/database environment first. Do not deploy, change main, or submit forms/transactions.
 - Owner was not at fault; there is no missing Run workflow button to find on the current page.
+
+
+## Staging deployment — 6 November 2026 (Render deployment succeeded)
+- Owner explicitly confirmed the Render workspace **Emmanuel's workspace** (workspace ID `tea-da2svh0ae00c73cs4qq0`) for this Think Tank staging operation.
+- Manually triggered Render deployment for service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) using the service's configured development branch `secondary-school-platform-foundation`. Auto-deploy remains disabled.
+- Deployment ID: `dep-dbn2dcrl550s73f9ahag`.
+- Deployed commit: `0f343fff800b619fdaff76f5ee97225ec6c3dbdf` — `docs(think-tank): record browser workflow dispatch blocker`.
+- Render build completed successfully; Docker image export/push succeeded. Gunicorn 23.0.0 started, bound to `0.0.0.0:8000`, and booted workers. Render logged **Your service is live** at 2026-11-06T19:13:13Z. Render deploy API subsequently returned status `live` with finishedAt `2026-11-06T19:13:13.356186Z`.
+- Staging URL: https://learnwise-staging-api.onrender.com
+- Dockerfile includes a container health probe for `/health`. Source inspection confirms Flask implements `GET /health`: it returns demo-mode OK if `DATABASE_URL` is absent, checks `database_ready()` when `DATABASE_URL` is present, and returns HTTP 503 if the database is unavailable. This route has **not yet been externally exercised**; the web retrieval client could not access the endpoint, and Render HTTP request metrics returned no samples in the inspected interval. Do not claim database connectivity or application readiness solely from Render's generic live status.
+- No database migrations, database writes, admin bootstrap, payment transactions, audio uploads, production changes, PR merge, or main-branch changes were performed during this deployment.
+- Owner stated that the required environment variables are already captured in the Render environment configuration. The Render service API does not expose the effective secret values or Environment Group linkage, so those remain owner-reported and are not independently verified. No secret values were read or disclosed.
+- Browser acceptance test source was inspected: Playwright suite has eight read-only checks covering health, student pages, account form controls without submission, anonymous student/private API denial, assessment/audio denial, admin identity denial, admin redirects, and admin login form separation. It deliberately does not create users or submit transactions. The GitHub Actions workflow remains undispatchable through the available connector and absent from `main` (which must remain untouched). The suite has **not** been run against staging yet.
+
+## Next staging verification steps
+1. Independently request `https://learnwise-staging-api.onrender.com/health` and confirm JSON `status: ok` with `mode: database` (not demo). If it reports 503/degraded, inspect the staging database connection and effective Render `DATABASE_URL` privately; do not paste secrets into chat.
+2. Run the existing Playwright suite from Codespaces on `secondary-school-platform-foundation` with base URL `https://learnwise-staging-api.onrender.com`. The suite is read-only; do not submit registration, payment, or other state-changing actions.
+3. Verify student/admin pages and anonymous authorization behaviour. Test authenticated admin login only through the owner-controlled browser session; never request or print the password.
+4. Verify SMTP delivery and Paystack sandbox separately using test credentials; no live payment. Private audio storage remains unpopulated and private.
+5. Keep production release gated on privacy/safeguarding/legal/teacher/curriculum, backup/restore, security and operational approvals. No production release is authorised.

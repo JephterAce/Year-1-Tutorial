@@ -709,3 +709,83 @@ def review_curriculum_source_record(source_id):
                         "reviewed_at":row["reviewed_at"].isoformat()}),200
     except Exception:
         return jsonify({"error":"curriculum_source_review_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/topics/<topic_id>/publish")
+def publish_curriculum_topic(topic_id):
+    from uuid import UUID
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.publish")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        topic_id=str(UUID(topic_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_topic_id"}),400
+    data=request.get_json(silent=True) or {}
+    reviewer=(data.get("teacher_reviewer_name") or "").strip()
+    evidence=(data.get("curriculum_evidence_note") or "").strip()
+    mapping=data.get("term_mapping_status","not_assigned")
+    term_number=data.get("term_number")
+    scheme=(data.get("school_scheme_name") or "").strip()
+    if not 2<=len(reviewer)<=120 or not 10<=len(evidence)<=2000:
+        return jsonify({"error":"teacher_review_and_evidence_required"}),400
+    if mapping not in {"official_term_allocation","school_scheme_verified","school_scheme_required","not_assigned","not_applicable"}:
+        return jsonify({"error":"invalid_term_mapping_status"}),400
+    if mapping=="school_scheme_verified" and not 2<=len(scheme)<=180:
+        return jsonify({"error":"school_scheme_name_required"}),400
+    if mapping in {"official_term_allocation","school_scheme_verified"} and term_number not in {1,2,3}:
+        return jsonify({"error":"valid_term_number_required"}),400
+    if mapping in {"school_scheme_required","not_assigned","not_applicable"} and term_number is not None:
+        return jsonify({"error":"unverified_term_must_not_be_assigned"}),400
+    try:
+        with connection() as conn:
+            row=conn.execute(
+                """SELECT t.id,t.subject_id,t.class_level,t.curriculum_source_record_id,
+                          c.source_kind,c.verification_status,c.licence_status,c.curriculum_version_id,
+                          v.version_code,v.status AS version_status,
+                          EXISTS (SELECT 1 FROM topic_lesson_content lc
+                                  WHERE lc.topic_id=t.id AND lc.review_status='approved') AS has_approved_content
+                   FROM topics t
+                   JOIN curriculum_source_records c ON c.id=t.curriculum_source_record_id
+                   JOIN curriculum_versions v ON v.id=t.curriculum_version_id
+                   WHERE t.id=%s AND t.status IN ('draft','review')""",
+                (topic_id,),
+            ).fetchone()
+            if not row: return jsonify({"error":"draft_topic_with_source_required"}),409
+            if not row["has_approved_content"]:
+                return jsonify({"error":"teacher_approved_lesson_content_required"}),409
+            if row["verification_status"]!="approved" or row["version_code"]!="nerdc_ssec_2025" or row["version_status"]!="active":
+                return jsonify({"error":"approved_active_curriculum_source_required"}),409
+            if row["licence_status"] not in {"metadata_only","permission_granted"}:
+                return jsonify({"error":"source_rights_review_required"}),409
+            if mapping=="official_term_allocation" and row["source_kind"]!="official_nerdc":
+                return jsonify({"error":"official_term_mapping_requires_official_source"}),409
+            if mapping=="school_scheme_verified" and row["source_kind"]!="school_scheme":
+                return jsonify({"error":"school_scheme_mapping_requires_school_source"}),409
+            term_id=None
+            if term_number is not None:
+                term=conn.execute("SELECT id FROM terms WHERE term_number=%s",(term_number,)).fetchone()
+                if not term:return jsonify({"error":"term_not_found"}),404
+                term_id=term["id"]
+            published=conn.execute(
+                """UPDATE topics SET status='published',curriculum_status='published',
+                     curriculum_evidence_note=%s,curriculum_approved_by=%s,
+                     curriculum_approved_at=now(),term_mapping_status=%s,
+                     term_id=%s,school_scheme_name=%s
+                   WHERE id=%s AND status IN ('draft','review')
+                   RETURNING id,status,curriculum_status,term_mapping_status""",
+                (evidence,reviewer,mapping,term_id,scheme or None,topic_id),
+            ).fetchone()
+            if not published:return jsonify({"error":"topic_state_changed"}),409
+            _audit(conn,session,"admin.curriculum_topic.published","topic",1)
+        return jsonify({"topic_id":str(published["id"]),"status":published["status"],
+                        "curriculum_status":published["curriculum_status"],
+                        "term_mapping_status":published["term_mapping_status"]}),200
+    except Exception:
+        return jsonify({"error":"curriculum_topic_publish_failed"}),503

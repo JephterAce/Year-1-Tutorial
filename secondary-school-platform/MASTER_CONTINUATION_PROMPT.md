@@ -409,3 +409,14 @@ Owner-only actions should be batched and requested only when a genuine account, 
 - Owner-only verification still required: use the owner's own browser to sign in at `https://learnwise-staging-api.onrender.com/admin/login`, then confirm the dashboard, operations page and review page load without errors. Do not send credentials, cookies, CSRF tokens or one-time links through chat. If sign-in fails, report only the visible error message; do not repeatedly retry because the endpoint is rate-limited.
 - The read-only database recheck after the browser suite remains 6 subjects, 0 topics, 0 students, 1 administrator, 1 audit event and 13 migrations. Thus the staging portal currently has no student or topic content to display; this is an empty-content state, not a failed database connection.
 - SMTP, Paystack sandbox, private audio upload/playback, full authenticated admin UAT, content/curriculum rights and teacher review, privacy/safeguarding/legal approval, accessibility/security review, monitoring, backup/restore and production release remain open gates. No production deployment is authorised.
+
+## Authenticated admin staging UAT — 2026-11-06
+- Owner confirmed successful sign-in to the staging administrator portal.
+- Owner then confirmed that both authenticated pages loaded successfully:
+  - `/admin/operations`: overview and sections for students, payments, curriculum sources, and audio assets rendered.
+  - `/admin/reviews`: assessment review queue rendered.
+- Evidence classification: owner-reported visual/browser verification. No screenshots, session cookies, passwords, or tokens were requested or received.
+- No administrative mutations were performed: no student creation, payment action, content edits, review decisions, audio uploads, or settings changes.
+- This confirms authenticated page access and dashboard rendering only. It does not yet verify individual write operations, CSRF enforcement, fine-grained role restrictions, email delivery, Paystack sandbox, or private audio end-to-end.
+- Existing staging safety boundaries remain unchanged: no production deployment, no main-branch changes, no PR merge, no destructive DB/object-storage actions, and no live payments.
+- Next verification: complete a read-only review of the authenticated admin UI/API permissions and audit behavior; then batch any owner-only provider checks (sender verification, sandbox payment, and private audio workflow) before requesting additional manual steps.

@@ -1,6 +1,8 @@
 """Disposable-PostgreSQL registration-to-results student journey acceptance test."""
 import os
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from uuid import uuid4
 from unittest.mock import patch
 
@@ -8,6 +10,7 @@ import psycopg
 from psycopg.types.json import Jsonb
 
 from database import connection
+from ai_tutor_quota import reserve_tutor_usage, TutorQuotaError
 
 
 class StudentRegistrationToResultsJourney(unittest.TestCase):
@@ -22,6 +25,7 @@ class StudentRegistrationToResultsJourney(unittest.TestCase):
         self.student_id = None
         self.topic_id = str(uuid4())
         self.source_id = str(uuid4())
+        self.usage_day = date(2026, 11, 6)
         self.assessment_id = str(uuid4())
         self.email = f"journey-{uuid4().hex[:12]}@integration.invalid"
         self.username = f"journey_{uuid4().hex[:10]}"
@@ -46,7 +50,50 @@ class StudentRegistrationToResultsJourney(unittest.TestCase):
             conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment_id,))
             conn.execute("DELETE FROM topics WHERE id=%s", (self.topic_id,))
             conn.execute("DELETE FROM curriculum_source_records WHERE id=%s", (self.source_id,))
+            conn.execute("DELETE FROM ai_tutor_platform_usage WHERE usage_date=%s", (self.usage_day,))
         self.env.stop()
+
+
+    def test_database_ai_quota_serializes_concurrent_requests(self):
+        self.student_id = str(uuid4())
+        with connection() as conn:
+            conn.execute(
+                """INSERT INTO students(id,email,display_name,class_level,account_status,email_verified_at)
+                   VALUES (%s,%s,'Quota Integration Learner','SS1','active',now())""",
+                (self.student_id,self.email),
+            )
+        settings={
+            "AI_INPUT_COST_MICROUSD_PER_1M_TOKENS":"1000000",
+            "AI_OUTPUT_COST_MICROUSD_PER_1M_TOKENS":"1000000",
+            "AI_TUTOR_DAILY_REQUEST_LIMIT":"2",
+            "AI_TUTOR_MONTHLY_REQUEST_LIMIT":"10",
+            "AI_TUTOR_DAILY_BUDGET_MICROUSD":"100000",
+            "AI_TUTOR_MONTHLY_BUDGET_MICROUSD":"1000000",
+            "AI_TUTOR_PLATFORM_DAILY_BUDGET_MICROUSD":"1000000",
+            "AI_TUTOR_PLATFORM_MONTHLY_BUDGET_MICROUSD":"10000000",
+        }
+        def reserve_one(_):
+            try:
+                reserve_tutor_usage(self.student_id,"Explain a cell.",today=self.usage_day)
+                return "reserved"
+            except TutorQuotaError as exc:
+                return exc.code
+        with patch.dict(os.environ,settings):
+            with ThreadPoolExecutor(max_workers=5) as pool:
+                outcomes=list(pool.map(reserve_one,range(5)))
+        self.assertEqual(outcomes.count("reserved"),2)
+        self.assertEqual(outcomes.count("request_limit_reached"),3)
+        with connection() as conn:
+            row=conn.execute(
+                "SELECT request_count FROM student_ai_tutor_usage WHERE student_id=%s AND usage_date=%s",
+                (self.student_id,self.usage_day),
+            ).fetchone()
+            platform=conn.execute(
+                "SELECT request_count FROM ai_tutor_platform_usage WHERE usage_date=%s",
+                (self.usage_day,),
+            ).fetchone()
+        self.assertEqual(row["request_count"],2)
+        self.assertEqual(platform["request_count"],2)
 
     def test_registration_to_lesson_practice_progress_and_results(self):
         from app import app

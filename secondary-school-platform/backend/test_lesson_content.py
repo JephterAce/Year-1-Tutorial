@@ -73,6 +73,7 @@ class LessonContentServiceTests(unittest.TestCase):
             result = check_practice_answer("student-1", "topic-1", "q-1", "B")
         self.assertTrue(result["correct"])
         self.assertNotIn("answer_key", result)
+        self.assertTrue(any("INSERT INTO student_lesson_practice_attempts" in sql for sql, _ in fake.calls))
 
     def test_mark_complete_requires_entitlement_and_approved_content(self):
         fake = FakeConnection([

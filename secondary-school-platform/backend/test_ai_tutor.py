@@ -21,6 +21,15 @@ class TutorPromptTests(unittest.TestCase):
         self.assertIn("untrusted", messages[0]["content"].lower())
 
 
+
+    def test_teacher_reviewed_lesson_context_is_included_and_bounded(self):
+        messages = build_tutor_messages(
+            "SS1", "Explain this topic", trusted_lesson_context="Approved Biology lesson: Cell structure."
+        )
+        self.assertIn("Approved Biology lesson: Cell structure.", messages[-1]["content"])
+        with self.assertRaises(ValueError):
+            build_tutor_messages("SS1", "Explain", trusted_lesson_context="x" * 4001)
+
     def test_bounded_conversation_history_is_preserved_as_user_and_assistant_turns(self):
         messages = build_tutor_messages(
             "SS1", "Why?", "Biology",
@@ -169,7 +178,7 @@ class TutorRouteTests(unittest.TestCase):
                         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["answer"], "A cell is...")
-        generate.assert_called_once_with("SS2", "Explain cells", "Biology", None)
+        generate.assert_called_once_with("SS2", "Explain cells", "Biology", None, None)
         reserve.assert_called_once()
 
 

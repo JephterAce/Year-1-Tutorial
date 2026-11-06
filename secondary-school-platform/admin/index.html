@@ -75,6 +75,14 @@
    <p class="muted" id="topicCreateStatus" aria-live="polite"></p>
   </section>
  </div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Captured source register</h2><button class="btn secondary" onclick="loadCurriculumSources()">Refresh sources</button></div><div id="curriculumSourceList" class="empty">Load source records after admin sign-in.</div></div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Publish reviewed topic</h2><span class="status">Separate approval</span></div>
+  <div class="formgrid"><div class="field"><label for="publishTopicId">Topic ID</label><input id="publishTopicId" placeholder="Select a draft topic"></div><div class="field"><label for="publishReviewer">Teacher reviewer name</label><input id="publishReviewer" placeholder="Qualified subject reviewer"></div></div>
+  <div class="field"><label for="publishEvidence">Curriculum evidence note</label><textarea id="publishEvidence" placeholder="Describe source section, topic mapping and review evidence"></textarea></div>
+  <div class="formgrid"><div class="field"><label for="publishTermMapping">Term mapping status</label><select id="publishTermMapping"><option value="not_assigned">Not assigned</option><option value="official_term_allocation">Official term allocation</option><option value="school_scheme_verified">Verified school scheme</option><option value="school_scheme_required">School scheme required</option><option value="not_applicable">Not applicable</option></select></div><div class="field"><label for="publishTermNumber">Term number (only if verified)</label><select id="publishTermNumber"><option value="">No term</option><option value="1">First term</option><option value="2">Second term</option><option value="3">Third term</option></select></div></div>
+  <div class="field"><label for="publishSchemeName">School scheme name (if applicable)</label><input id="publishSchemeName"></div>
+  <button class="btn" onclick="publishCurriculumTopic()">Publish approved topic</button><p class="muted" id="topicPublishStatus" aria-live="polite"></p>
+ </div>
  <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Live topic register</h2><button class="btn secondary" onclick="loadCurriculumTopics()">Refresh</button></div><div id="curriculumTopicList" class="empty">Load the current topic register after admin sign-in.</div></div>
  <div class="tablewrap"><table><thead><tr><th>Subject</th><th>Offering group</th><th>Class mapping</th><th>Term mapping</th><th>Source status</th></tr></thead><tbody>
  <tr><td>English Language</td><td>Core / compulsory</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>

@@ -45,6 +45,7 @@
   </div>
   <div class="stats">
    <div class="stat"><small>Completed lessons</small><strong id="dashCompleted">—</strong><span id="dashCompletedNote">Sign in to load progress</span></div>
+   <div class="stat"><small>Subjects available</small><strong id="dashSubjects">—</strong><span>Published for your class</span></div>
    <div class="stat"><small>Assessment attempts</small><strong id="dashAttempts">—</strong><span id="dashAttemptsNote">Your saved results</span></div>
    <div class="stat"><small>Assessments passed</small><strong id="dashPassed">—</strong><span>Based on recorded results</span></div>
    <div class="stat"><small>Your class</small><strong id="dashClass">—</strong><span id="dashName">Sign in to view your profile</span></div>
@@ -112,6 +113,7 @@ async function loadDashboard(){
   document.getElementById('welcomeTitle').textContent='Welcome back, '+(data.student.display_name||'student')+'.';
   document.getElementById('welcomeSubtitle').textContent='Your '+data.student.class_level+' learning space is connected to your saved lessons and assessment records.';
   document.getElementById('dashCompleted').textContent=s.completed_lessons;
+  document.getElementById('dashSubjects').textContent=(data.subjects||[]).filter(x=>x.published_lessons>0).length;
   document.getElementById('dashCompletedNote').textContent='Completed lessons recorded';
   document.getElementById('dashAttempts').textContent=s.assessment_attempts;
   document.getElementById('dashAttemptsNote').textContent=s.average_score===null?'No graded attempts yet':'Average score: '+s.average_score+'%';

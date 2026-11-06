@@ -40,7 +40,7 @@
    <textarea id="tutorQuestion" maxlength="2000" rows="3" placeholder="Example: Explain how ionic bonding forms, step by step." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical"></textarea>
    <label for="tutorContext" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional lesson or subject context</label>
    <input id="tutorContext" maxlength="1200" placeholder="e.g. SS1 Chemistry — atomic structure" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
-   <div class="actions"><button class="primary" id="askTutorButton" onclick="askThinkTankTutor()">Ask Think Tank</button><small id="tutorStatus" aria-live="polite" style="color:var(--muted)">Sign in required. AI service remains disabled until budget controls and provider settings are approved.</small></div>
+   <div class="actions"><button class="primary" id="askTutorButton" onclick="askThinkTankTutor()">Ask Think Tank</button><button class="link" type="button" onclick="clearTutorConversation()">Clear conversation</button><small id="tutorStatus" aria-live="polite" style="color:var(--muted)">Sign in required. AI service remains disabled until budget controls and provider settings are approved.</small></div>
    <div id="tutorAnswer" hidden style="margin-top:14px;padding:14px;background:#f6f8fc;border-radius:10px;white-space:pre-wrap"></div>
   </div>
   <div class="stats">
@@ -138,6 +138,8 @@ async function loadDashboard(){
   document.getElementById('dashAttemptsNote').textContent='Sign in to load private progress';
  }
 }
+let tutorHistory=[];
+function clearTutorConversation(){tutorHistory=[];document.getElementById("tutorAnswer").replaceChildren();document.getElementById("tutorAnswer").hidden=true;document.getElementById("tutorStatus").textContent="Conversation cleared from this page."}
 async function askThinkTankTutor(){
  const question=document.getElementById('tutorQuestion').value.trim();
  const context=document.getElementById('tutorContext').value.trim();
@@ -147,8 +149,9 @@ async function askThinkTankTutor(){
  if(!question){status.textContent='Write a question first.';return}
  button.disabled=true;status.textContent='Checking your account and AI availability…';answer.hidden=true;
  try{
-  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context},'POST');
-  answer.textContent=data.answer;answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
+  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context,history:tutorHistory.slice(-8)},'POST');
+  tutorHistory.push({role:'user',content:question},{role:'assistant',content:data.answer});tutorHistory=tutorHistory.slice(-8);
+  answer.textContent=tutorHistory.map(item=>(item.role==='user'?'You: ':'Think Tank: ')+item.content).join('\\n\\n');answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
  }catch(e){status.textContent=e.message}
  finally{button.disabled=false}
 }

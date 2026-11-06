@@ -424,10 +424,10 @@ def answer_tutor_question():
             data.get("topic_context"),
         )
         return jsonify({"answer": answer}), 200
-    except ValueError as exc:
-        return jsonify({"error": "invalid_tutor_request", "message": str(exc)}), 400
     except TutorQuotaError as exc:
         return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except ValueError as exc:
+        return jsonify({"error": "invalid_tutor_request", "message": str(exc)}), 400
     except TutorConfigurationError:
         app.logger.warning("AI tutor is enabled but provider configuration is incomplete or invalid")
         return jsonify({"error": "ai_tutor_unavailable"}), 503

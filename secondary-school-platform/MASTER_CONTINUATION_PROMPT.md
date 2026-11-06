@@ -420,3 +420,13 @@ Owner-only actions should be batched and requested only when a genuine account, 
 - This confirms authenticated page access and dashboard rendering only. It does not yet verify individual write operations, CSRF enforcement, fine-grained role restrictions, email delivery, Paystack sandbox, or private audio end-to-end.
 - Existing staging safety boundaries remain unchanged: no production deployment, no main-branch changes, no PR merge, no destructive DB/object-storage actions, and no live payments.
 - Next verification: complete a read-only review of the authenticated admin UI/API permissions and audit behavior; then batch any owner-only provider checks (sender verification, sandbox payment, and private audio workflow) before requesting additional manual steps.
+
+## Admin authorization and audit source review — 2026-11-06
+- Reviewed `backend/admin_policy.py`, `backend/admin_auth.py`, `backend/admin_data.py`, and `backend/admin_assessment_reviews.py` on `secondary-school-platform-foundation`.
+- Authorization is default-deny: unknown/inactive/malformed principals and unknown capabilities are rejected. Roles are mapped to explicit capability sets; owner has all declared capabilities, while editor, reviewer, support, and analyst have narrower sets.
+- Admin sessions are database-backed, hashed at rest, expire after eight hours, and are checked against active admin status. Login uses a generic credential error and a six-attempt/15-minute rate limit. CSRF validation is required for review decisions and audio upload/review mutations.
+- Operations API endpoints gate student, payment, curriculum, and audio data by capability. Read views write audit events with returned-record counts. Assessment review decisions update the report and insert the corresponding audit event in the same database transaction.
+- Audio upload/review endpoints are state-changing and require CSRF plus the relevant capability. They were not exercised; no upload or review mutation was attempted.
+- Source review is not a substitute for runtime negative tests across each role. Only the owner account is currently provisioned, so editor/reviewer/support/analyst role behavior remains code-reviewed, not live-verified.
+- Owner's successful dashboard rendering confirms the authenticated UI path and the relevant read views returned sufficiently to render. It does not establish all role boundaries, CSRF rejection behavior, or mutation/audit behavior end-to-end.
+- No application code was changed during this review. The only change is this handover documentation update.

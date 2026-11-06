@@ -316,3 +316,11 @@ Paste the following instruction, then attach the Render screenshot:
 - Completed: owner reports Link only action; Render deployment state rechecked; exact-head GitHub CI verified green; PR state rechecked; Neon aggregate counts rechecked.
 - Not independently verified: environment-group linkage in Render UI, effective variable values, service-to-Neon connection, live health endpoint, authenticated browser acceptance.
 - Not performed: deploy, migration, payment activation, PR merge, main update, production change.
+
+
+## Follow-on verification — 6 November 2026
+- GitHub Actions produced two successful exact-head CI runs on `072790914bf656d1c175a33d9eedcac2fb23c98c`: PR run `42271262201` and push run `42271251648`. Both `api-tests` and `container-build` passed. The API job completed unit/security tests, JS syntax checks, disposable PostgreSQL migration rehearsal, schema integration and assessment/payment database E2E.
+- The staging browser-acceptance workflow was inspected. It is a manual `workflow_dispatch` and performs read-only HTTP/browser checks: health, public pages, registration/login/recovery form controls without submitting data, anonymous API authorization, private audio denial, and anonymous admin redirects. It does not create student/admin records or submit real payments. The connected GitHub integration has no workflow-dispatch action; owner/operator must start it in the GitHub Actions UI. Direct workflow URL: https://github.com/JephterAce/Year-1-Tutorial/actions/workflows/think-tank-staging-browser.yml
+- The current PR API observation subsequently returned `mergeable=false` again (PR remains open, draft and unmerged). GitHub's mergeability field has varied between reads; cause is unknown. Do not merge, rebase, sync main, or take action on this field without a separate review.
+- A latest deployment-list recheck still shows only the existing live deployment `dep-dbmf0h8ae00c73fcf1sg` on commit `26d83096b0fd89812b5a1c749798293a2ad1e2b1`. No new Render build/deployment occurred after the owner-reported Link only action. Auto-deploy remains off.
+- The owner-reported group link remains not independently visible through the connected Render service API. Verify visually that `Think Tank` appears in Linked Environment Groups.

@@ -439,6 +439,56 @@ def answer_tutor_question():
         return jsonify({"error": "ai_tutor_unavailable"}), 503
 
 
+@app.get("/api/v1/topics/<topic_id>/lesson-content")
+def read_lesson_content(topic_id):
+    from lesson_content import get_lesson_content, LessonContentError
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        return jsonify(get_lesson_content(student["student_id"], topic_id)), 200
+    except LessonContentError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Lesson content fetch failed")
+        return jsonify({"error": "lesson_content_unavailable"}), 503
+
+
+@app.post("/api/v1/topics/<topic_id>/practice/<question_id>")
+def answer_lesson_practice(topic_id, question_id):
+    from lesson_content import check_practice_answer, LessonContentError
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    data = request.get_json(silent=True) or {}
+    if "answer" not in data:
+        return jsonify({"error": "answer_required"}), 400
+    try:
+        return jsonify(check_practice_answer(
+            student["student_id"], topic_id, question_id, data["answer"]
+        )), 200
+    except LessonContentError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Lesson practice answer failed")
+        return jsonify({"error": "practice_unavailable"}), 503
+
+
+@app.post("/api/v1/topics/<topic_id>/progress/complete")
+def complete_lesson_topic(topic_id):
+    from lesson_content import mark_topic_complete, LessonContentError
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        return jsonify(mark_topic_complete(student["student_id"], topic_id)), 200
+    except LessonContentError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
+    except Exception:
+        app.logger.exception("Lesson progress update failed")
+        return jsonify({"error": "progress_unavailable"}), 503
+
+
 @app.get("/api/v1/student/dashboard")
 def student_dashboard():
     """Return authenticated, database-backed learning progress without invented metrics."""

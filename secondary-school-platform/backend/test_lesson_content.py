@@ -136,6 +136,24 @@ class StudentLearningRouteSecurityTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 401)
 
+
+    def test_curriculum_source_capture_requires_admin_session(self):
+        response = self.client.post(
+            "/api/v1/admin/curriculum-sources",
+            json={"class_level":"SS1","subject_slug":"biology",
+                  "source_title":"NERDC Biology SSS1","source_url":"https://example.invalid/source",
+                  "source_section":"Page 1"}
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_curriculum_topic_publication_requires_admin_session(self):
+        response = self.client.post(
+            "/api/v1/admin/topics/00000000-0000-0000-0000-000000000001/publish",
+            json={"teacher_reviewer_name":"Qualified teacher",
+                  "curriculum_evidence_note":"Evidence checked."}
+        )
+        self.assertEqual(response.status_code, 401)
+
     def test_practice_submission_requires_session_and_csrf(self):
         with patch("app._current_student", return_value=None) as current:
             response = self.client.post(

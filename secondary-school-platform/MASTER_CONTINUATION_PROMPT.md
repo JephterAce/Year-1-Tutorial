@@ -272,3 +272,47 @@ Paste the following instruction, then attach the Render screenshot:
 - GitHub currently reports PR #1 as open, draft and unmerged, but its mergeable field is false. The reason is not established. Do not attempt a merge, rebase, branch sync or main update. The default main branch has two commits beyond the PR merge base; the only two files in those main-only commits have identical blob SHAs on main and the development branch. This confirms those two file contents match, but does not explain GitHub's mergeable=false status.
 - CI run 42270003444 remains the latest verified full code-test run and passed on the immediately preceding code head d35bebf6faa7690fd0412445d4fff5017126b70e. No new workflow run was returned for the docs-only commit 53d5f36851fbdac3ec7c93bc21403593ce837eec. Treat the source-code CI evidence as green on d35; do not claim a new exact-head test on the documentation commit.
 - Re-fetch the live PR head and CI before the next repository write. The next handover update itself will create a new documentation commit; obtain its resulting SHA from GitHub after the update.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (Owner linked THINK TANK group; exact-head CI green)
+
+## Render environment group action
+- Owner reports selecting **Link only** for the existing Render environment group named **Think Tank** on service `learnwise-staging-api`.
+- The Render service page showed the Link only option selected in the owner screenshot. The owner subsequently confirmed the action was completed.
+- The connected Render app integration does not expose environment-group list/retrieve/link APIs, and the available service-detail response does not include linked environment group IDs. Therefore the linkage is **owner-reported, not independently API-verified**. Confirm in the dashboard that Think Tank appears under Linked Environment Groups before treating the link as verified.
+- Render service API recheck: `autoDeploy=no`, `autoDeployTrigger=off`; latest deployment remains `dep-dbmf0h8ae00c73fcf1sg`, commit `26d83096b0fd89812b5a1c749798293a2ad1e2b1`, status `live`. No new deployment/build event appeared after the owner-reported Link only action.
+- No deployment was triggered by the assistant. Do not assume the group is correctly configured simply because it was linked. Service-level variables override matching group variables; avoid collisions and verify that the effective `DATABASE_URL` privately targets the Neon staging branch/database and least-privilege `learnwise_app` role before any deployment. Never reveal secret values in chat or handover.
+- The Render integration currently does not expose environment-group contents or secret readback. Do not attempt to infer the actual values from masked screenshots.
+
+## Latest GitHub and CI verification
+- Branch head at start of this checkpoint: `072790914bf656d1c175a33d9eedcac2fb23c98c`.
+- PR #1 remains open, draft and unmerged. GitHub currently reports `mergeable=true` (this supersedes the previous checkpoint's transient `mergeable=false` observation). Do not merge.
+- Two current-head workflow runs completed successfully:
+  - Pull request run `42271262201`: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42271262201
+  - Push run `42271251648`: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42271251648
+- Both runs executed `api-tests` and `container-build`, both successful. API job steps passed: unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL migration rehearsal, schema integration, assessment/payment database E2E. Container build completed without publishing.
+- This is a verified green CI result on the exact branch head above. Provider integrations in CI are not a substitute for real SMTP, Paystack sandbox, private object storage or live browser tests.
+
+## Current Render deployment / live test status
+- Service: `learnwise-staging-api`, ID `srv-dbkqcmt9fdbs73c2kdpg`.
+- Auto-deploy remains disabled.
+- Latest deployment remains `dep-dbmf0h8ae00c73fcf1sg` on commit `26d83096b0fd89812b5a1c749798293a2ad1e2b1`; it has not been advanced to the current branch.
+- The public `/health` URL could not be fetched by the web retrieval client; this is an access/tool limitation and does not prove the service is down.
+- Do not set Render's health-check path or deploy current branch until the manual browser acceptance workflow and private staging environment verification are complete.
+
+## Next required owner action
+- In GitHub Actions, manually run **Think Tank staging browser acceptance** from `.github/workflows/think-tank-staging-browser.yml`, using the default staging URL. The workflow dispatch is not exposed by the connected GitHub integration. Review its full result and uploaded Playwright report/traces before proceeding.
+- Separately, verify in Render that Think Tank appears under Linked Environment Groups and privately confirm the effective staging database and storage configuration. If the group does not appear, stop and report the exact dashboard state; do not try to link repeatedly.
+- Deployment approval is still required before advancing the staging service to the newer branch. No production deployment or main-branch change is authorised.
+
+## Neon recheck
+- Staging branch remains `think-tank-staging`.
+- Read-only counts remain: 1 administrator, 0 students, 1 audit event, 13 migration records.
+- No database writes, migrations, object writes/deletes, or credential changes were performed in this checkpoint.
+
+## Session outcome
+- Completed: owner reports Link only action; Render deployment state rechecked; exact-head GitHub CI verified green; PR state rechecked; Neon aggregate counts rechecked.
+- Not independently verified: environment-group linkage in Render UI, effective variable values, service-to-Neon connection, live health endpoint, authenticated browser acceptance.
+- Not performed: deploy, migration, payment activation, PR merge, main update, production change.

@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import lesson_content
 from lesson_content import (
-    LessonContentError, check_practice_answer, get_lesson_content, mark_topic_complete
+    LessonContentError, check_practice_answer, get_lesson_content, mark_topic_complete, get_tutor_context
 )
 from podcast_production import build_podcast_script, PodcastProductionError
 

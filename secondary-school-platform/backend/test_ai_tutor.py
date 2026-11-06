@@ -111,5 +111,47 @@ class TutorProviderTests(unittest.TestCase):
         self.assertIsNone(handler.redirect_request(None, None, 302, "Found", {}, "https://other.example/"))
 
 
+class TutorRouteTests(unittest.TestCase):
+    def setUp(self):
+        from app import app
+        self.client = app.test_client()
+
+    def test_tutor_route_is_disabled_by_default_in_staging(self):
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"APP_ENV": "staging"}, clear=True):
+            response = self.client.post(
+                "/api/v1/tutor/answer",
+                json={"question": "Explain cells"},
+            )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.get_json()["error"], "ai_tutor_temporarily_disabled")
+
+    def test_tutor_route_requires_authenticated_csrf_session(self):
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"AI_TUTOR_ENABLED": "true"}, clear=True):
+            with patch("app._current_student", return_value=None) as current:
+                response = self.client.post(
+                    "/api/v1/tutor/answer",
+                    json={"question": "Explain cells"},
+                )
+        self.assertEqual(response.status_code, 401)
+        current.assert_called_once_with(require_csrf=True)
+
+    def test_tutor_route_uses_class_from_authenticated_session(self):
+        from unittest.mock import patch
+        with patch.dict(os.environ, {"AI_TUTOR_ENABLED": "true"}, clear=True):
+            with patch("app._current_student", return_value={
+                "student_id": "synthetic-student-id", "class_level": "SS2"
+            }):
+                with patch("ai_tutor.generate_tutor_answer", return_value="A cell is...") as generate:
+                    response = self.client.post(
+                        "/api/v1/tutor/answer",
+                        json={"question": "Explain cells", "topic_context": "Biology"},
+                    )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["answer"], "A cell is...")
+        generate.assert_called_once_with("SS2", "Explain cells", "Biology")
+
+
 if __name__ == "__main__":
     unittest.main()

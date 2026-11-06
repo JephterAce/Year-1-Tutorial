@@ -663,3 +663,11 @@ This increment is committed to the development branch only. It is not yet a comp
 - Complete automatic TTS only after selecting a provider/API workflow that is supported beyond the near-term deprecation of the currently documented Speech endpoint; implement provider-specific price accounting, quota reservations, private storage and review before enabling it.
 - Finish the student-facing results/history and podcast library experiences, then run mobile browser checks.
 - Do not claim staging-ready or production-ready until these gates, privacy/safeguarding review, provider configuration and staging migration/deploy checks are complete.
+
+
+## CI result — 6 November 2026
+- Development code commit `d6177d616ecab8201217665d14a1760806e6e36a` passed GitHub Actions run `42299148536`.
+- Unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL migration rehearsal, schema integration, assessment/payment end-to-end, and synthetic registration-to-results journey all passed.
+- Container build completed successfully without publishing an image.
+- Run: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42299148536
+- The registration journey remains API-level with mocked email delivery; this does not substitute for authenticated browser testing or real SMTP.

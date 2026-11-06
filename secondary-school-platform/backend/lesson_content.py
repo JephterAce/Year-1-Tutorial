@@ -116,3 +116,43 @@ def mark_topic_complete(student_id, topic_id):
             (student_id, topic_id, content["id"]),
         )
     return {"completed": True}
+
+
+def get_tutor_context(student_id, topic_id, max_chars=4000):
+    """Retrieve only published, teacher-approved lesson material the student may access."""
+    with connection() as conn:
+        _require_entitlement(conn, student_id, topic_id)
+        row=conn.execute(
+            """SELECT t.title,s.name AS subject,t.class_level,c.content_json
+               FROM topic_lesson_content c
+               JOIN topics t ON t.id=c.topic_id
+               JOIN subjects s ON s.id=t.subject_id
+               WHERE c.topic_id=%s AND c.review_status='approved'
+                 AND t.status='published' AND t.curriculum_status='published'
+               ORDER BY c.version DESC LIMIT 1""",
+            (topic_id,),
+        ).fetchone()
+        if not row:
+            raise LessonContentError("lesson_content_unavailable","Reviewed lesson notes are not available yet.",404)
+    content=row["content_json"] if isinstance(row["content_json"],dict) else {}
+    parts=[
+        f"Approved lesson: {row['title']}",
+        f"Subject: {row['subject']}; class: {row['class_level']}",
+    ]
+    intro=content.get("intro")
+    if isinstance(intro,str):parts.append(intro)
+    for section in content.get("sections",[])[:10]:
+        if isinstance(section,dict):
+            heading=section.get("heading","")
+            body=section.get("body","")
+            if isinstance(heading,str) and isinstance(body,str):
+                parts.append(f"{heading}: {body}")
+    for term in content.get("key_terms",[])[:10]:
+        if isinstance(term,dict) and isinstance(term.get("term"),str) and isinstance(term.get("definition"),str):
+            parts.append(f"{term['term']}: {term['definition']}")
+    for example in content.get("worked_examples",[])[:4]:
+        if isinstance(example,dict):
+            parts.append("Worked example: "+str(example.get("problem",""))+" Steps: "+"; ".join(
+                x for x in example.get("steps",[])[:5] if isinstance(x,str)
+            ))
+    return "\\n".join(parts)[:max_chars]

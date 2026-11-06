@@ -45,3 +45,12 @@ The official October 2025 Biology SSS1 curriculum PDF has now been captured and 
 Its overview/table of contents identifies 20 Biology SSS1 topic headings across Biology and Scientific Enquiry, Organization of Life and Biochemical Processes, Society and Environmental Biology, and Health and Diseases. The topic map is in `content/curriculum-drafts/biology/SS1_TOPIC_MAP.md`. One original lesson draft, Laboratory Safety Rules, has been prepared in `content/curriculum-drafts/biology/SS1/laboratory-safety-rules.lesson.json`. Both are drafts; no term allocation is inferred and no student-facing lesson has been published.
 
 The other five subject PDFs and the SS2/SS3 cohort-specific documents still need to be captured and indexed. Do not infer their topic sequences from the Biology file or from an older curriculum edition.
+
+
+The official October 2025 English Language SSS1 curriculum PDF has also been captured:
+
+- https://lmis.nerdcportals.com.ng/sss_1/necurrdc/1.pdf
+
+Its overview/table of contents identifies 40 topic headings across Listening and Speaking, Vocabulary Development, Grammatical Accuracy, Reading and Writing. The topic map is in `content/curriculum-drafts/english-language/SS1_TOPIC_MAP.md`; one original lesson draft, Debate, is in `content/curriculum-drafts/english-language/SS1/debate.lesson.json`. Both remain drafts pending teacher review and term mapping.
+
+SSS2 subject-specific viewer links are now identified for English Language, General Mathematics, Biology, Chemistry and Physics. The viewer pages load, but the individual PDF text was not extractable in this audit; Further Mathematics' SSS2 link also needs repair. These entries are marked as viewer-link-only rather than source-captured. SSS3 class-specific subject documents remain outstanding.

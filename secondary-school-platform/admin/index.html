@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b35">
+<title>Think Tank Studio — Admin Preview</title>
+<style>
+:root{--navy:#101b35;--navy2:#1c2d4e;--ink:#172033;--muted:#69768b;--line:#e5eaf2;--bg:#f5f7fb;--white:#fff;--blue:#4564e8;--mint:#dff7ed;--amber:#fff4df;--green:#21815b;--shadow:0 10px 30px #1423440c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{min-height:100vh}.side{position:fixed;inset:0 auto 0 0;width:246px;background:var(--navy);color:#dce5f7;padding:22px 15px;display:flex;flex-direction:column;z-index:4}.brand{display:flex;align-items:center;gap:10px;padding:0 10px 30px;color:#fff;font-weight:850;font-size:19px}.mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#75e2bd;color:#10213a;font-style:normal}.navlabel{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#8291ad;padding:13px 12px 7px}.nav{width:100%;border:0;background:transparent;color:#b8c4d9;border-radius:9px;padding:11px 12px;text-align:left;margin:2px 0;display:flex;gap:12px;align-items:center}.nav:hover,.nav.active{background:#263958;color:#fff}.nav .ico{width:20px;text-align:center}.sidefoot{margin-top:auto;border-top:1px solid #2c3c5a;padding:16px 10px 0;color:#9baac4;font-size:11px}.main{margin-left:246px;min-height:100vh}.top{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:3}.crumb{font-size:13px;color:var(--muted)}.crumb b{color:var(--ink)}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:6px 10px;background:var(--amber);color:#8c611b;font-size:10px;font-weight:850;letter-spacing:.3px}.wrap{max-width:1320px;margin:auto;padding:30px 32px 65px}.page{display:none}.page.active{display:block}.heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}.heading h1{font-size:25px;letter-spacing:-.6px;margin:0 0 4px}.heading p{color:var(--muted);margin:0;font-size:13px}.btn{border:0;border-radius:9px;padding:10px 14px;background:var(--navy);color:#fff;font-weight:750}.btn.secondary{background:#edf1ff;color:#3c58ca}.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn:disabled{opacity:.45;cursor:not-allowed}.notice{background:#fff8e9;border:1px solid #f0e0bf;color:#75551d;padding:12px 14px;border-radius:10px;font-size:12px;margin:0 0 19px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 2px 8px #10203e05}.card small{color:var(--muted)}.card strong{display:block;font-size:25px;margin:5px 0 1px}.layout{display:grid;grid-template-columns:1.35fr 1fr;gap:15px;margin-top:16px}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.cardhead h2{font-size:15px;margin:0}.muted{color:var(--muted)}.row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-top:1px solid var(--line)}.row:first-of-type{border-top:0}.status{font-size:10px;font-weight:800;border-radius:20px;padding:5px 8px;background:var(--amber);color:#946318;white-space:nowrap}.status.ok{background:#e4f7ed;color:var(--green)}.status.info{background:#edf1ff;color:#405bd1}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px;background:#fff}table{border-collapse:collapse;width:100%;font-size:12px;min-width:640px}th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);vertical-align:middle}th{background:#f8f9fc;color:var(--muted);font-weight:700}tr:last-child td{border-bottom:0}.field{display:grid;gap:6px;margin-bottom:13px}.field label{font-size:12px;font-weight:750}.field input,.field select,.field textarea{width:100%;border:1px solid #dfe5ee;border-radius:9px;padding:10px 11px;background:#fff;color:var(--ink);outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#8297f3;box-shadow:0 0 0 3px #4564e81a}.field textarea{min-height:120px;resize:vertical}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:9px;flex-wrap:wrap}.subjectchips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 15px}.chip{font-size:11px;padding:6px 9px;border-radius:20px;background:#eef2ff;color:#3d59ca}.pipeline{display:grid;gap:10px}.step{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px}.stepnum{width:27px;height:27px;flex:0 0 27px;border-radius:9px;background:#edf1ff;color:#425fd4;display:grid;place-items:center;font-weight:850}.step b{display:block;font-size:12px}.step small{color:var(--muted);font-size:11px}.empty{padding:25px;text-align:center;color:var(--muted);font-size:12px}.toast{position:fixed;right:22px;bottom:22px;background:var(--navy);color:white;padding:12px 16px;border-radius:10px;box-shadow:var(--shadow);display:none;z-index:10}.toast.show{display:block}.mobilebrand{display:none}
+@media(max-width:900px){.side{width:72px;padding:18px 8px}.brand{padding:0 9px 25px}.brand span,.navlabel,.nav .labeltext,.sidefoot{display:none}.nav{justify-content:center;padding:12px 8px}.main{margin-left:72px}.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.wrap{padding:22px 16px}.top{padding:0 17px}}
+@media(max-width:560px){.heading{display:block}.heading .btn{margin-top:14px}.grid{gap:9px}.card{padding:13px}.card strong{font-size:21px}.formgrid{grid-template-columns:1fr}.top{height:62px}.wrap{padding:19px 12px 45px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side">
+ <div class="brand"><i class="mark">T</i><span>Think Tank</span></div>
+ <div class="navlabel">Workspace</div>
+ <button class="nav active" data-page="overview"><span class="ico">▦</span><span class="labeltext">Overview</span></button>
+ <button class="nav" data-page="curriculum"><span class="ico">▤</span><span class="labeltext">Curriculum</span></button>
+ <button class="nav" data-page="studio"><span class="ico">✎</span><span class="labeltext">Lesson studio</span></button>
+ <button class="nav" data-page="audio"><span class="ico">♫</span><span class="labeltext">Audio library</span></button>
+ <div class="navlabel">Communication</div>
+ <button class="nav" data-page="announcements"><span class="ico">◉</span><span class="labeltext">Announcements</span></button>
+ <div class="navlabel">Operations</div>
+ <button class="nav" data-page="students"><span class="ico">♙</span><span class="labeltext">Students & payments</span></button>
+ <button class="nav" data-page="settings"><span class="ico">⚙</span><span class="labeltext">Settings</span></button>
+ <div class="sidefoot">Think Tank Studio<br>Administrative preview · Not connected</div>
+</aside>
+<main class="main">
+<header class="top"><div class="crumb">Workspace / <b id="crumb">Overview</b></div><div style="display:flex;gap:10px;align-items:center"><a href="/admin/operations" style="font-size:12px;font-weight:750;color:#405bd1;text-decoration:none">Admin operations ↗</a><a href="/admin/reviews" style="font-size:12px;font-weight:750;color:#405bd1;text-decoration:none">Protected assessment reviews ↗</a><span class="pill">DEMO · LOCAL PREVIEW ONLY</span></div></header>
+<div class="wrap">
+<section class="page active" id="overview">
+ <div class="heading"><div><h1>Good work starts with a clear view.</h1><p>Plan curriculum, produce lessons and prepare content for review.</p></div><button class="btn" onclick="showPage('curriculum')">Review curriculum →</button></div>
+ <div class="notice">This is an interactive design prototype only. Changes made here are temporary and are not saved to a database. It has no login, student records, payment access or publishing authority.</div>
+ <div class="grid">
+  <div class="card"><small>Subjects in scope</small><strong>6</strong><small>Across SS1–SS3</small></div>
+  <div class="card"><small>Class-subject sections</small><strong>18</strong><small>Planned catalogue structure</small></div>
+  <div class="card"><small>Verified topics</small><strong>0</strong><small>Awaiting source capture and review</small></div>
+  <div class="card"><small>Production lessons</small><strong>0</strong><small>No approved scripts or audio yet</small></div>
+ </div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Content production workflow</h2><span class="status">Not started</span></div><div class="pipeline">
+   <div class="step"><span class="stepnum">1</span><div><b>Curriculum verification</b><small>Capture class-specific NERDC topics, outcomes and evidence</small></div></div>
+   <div class="step"><span class="stepnum">2</span><div><b>Script development</b><small>Prepare teacher narration and two-presenter podcast scripts</small></div></div>
+   <div class="step"><span class="stepnum">3</span><div><b>Audio production and QA</b><small>Generate, review pronunciation and approve transcripts</small></div></div>
+   <div class="step"><span class="stepnum">4</span><div><b>Pricing and publication</b><small>Set topic price, approve content and publish to students</small></div></div>
+  </div></section>
+  <section class="card"><div class="cardhead"><h2>Approved subject scope</h2><span class="status ok">6 subjects</span></div><div class="subjectchips"><span class="chip">English Language</span><span class="chip">General Mathematics</span><span class="chip">Further Mathematics</span><span class="chip">Biology</span><span class="chip">Chemistry</span><span class="chip">Physics</span></div><p class="muted" style="font-size:11px">SS1 · SS2 · SS3. Term placement remains pending until supported by official allocation or a verified school scheme of work.</p></section>
+ </div>
+</section>
+<section class="page" id="curriculum">
+ <div class="heading"><div><h1>Curriculum register</h1><p>Track source-backed mapping for each class, subject and term.</p></div><span class="status">0 verified topics</span></div>
+ <div class="notice">No topic should be published as NERDC-aligned until its class, subject, learning outcomes and source evidence have been checked. The six subjects are the product scope, not the complete national curriculum.</div>
+ <div class="card" style="margin-bottom:15px"><div class="cardhead"><h2>Planned coverage</h2><span class="muted">18 class-subject combinations · 54 term containers</span></div><div class="subjectchips"><span class="chip">SS1</span><span class="chip">SS2</span><span class="chip">SS3</span><span class="chip">First term</span><span class="chip">Second term</span><span class="chip">Third term</span></div><p class="muted" style="font-size:11px">These are catalogue containers only; they do not confirm that topics have been assigned to terms.</p></div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Capture official source</h2><span class="status info">Draft evidence</span></div>
+   <div class="formgrid"><div class="field"><label for="sourceClass">Class</label><select id="sourceClass"><option>SS1</option><option>SS2</option><option>SS3</option></select></div><div class="field"><label for="sourceSubject">Subject</label><select id="sourceSubject"><option value="english-language">English Language</option><option value="general-mathematics">General Mathematics</option><option value="further-mathematics">Further Mathematics</option><option value="biology">Biology</option><option value="chemistry">Chemistry</option><option value="physics">Physics</option></select></div></div>
+   <div class="field"><label for="sourceTitle">Source title</label><input id="sourceTitle" placeholder="Exact official curriculum document title"></div>
+   <div class="field"><label for="sourceUrl">HTTPS source URL</label><input id="sourceUrl" placeholder="https://…"></div>
+   <div class="formgrid"><div class="field"><label for="sourceVersion">Version / date</label><input id="sourceVersion" placeholder="e.g. October 2025"></div><div class="field"><label for="sourceSection">Page / section reference</label><input id="sourceSection" placeholder="e.g. printed page 1"></div></div>
+   <div class="field"><label for="sourceNotes">Evidence notes</label><textarea id="sourceNotes" placeholder="What was captured and checked?"></textarea></div>
+   <button class="btn" onclick="captureCurriculumSource()">Save source record</button>
+   <p class="muted" id="sourceCaptureStatus" aria-live="polite"></p>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Create topic draft</h2><span class="status">Not published</span></div>
+   <div class="field"><label for="topicSourceId">Captured source ID</label><input id="topicSourceId" placeholder="Paste source ID returned above"></div>
+   <div class="formgrid"><div class="field"><label for="topicClass">Class</label><select id="topicClass"><option>SS1</option><option>SS2</option><option>SS3</option></select></div><div class="field"><label for="topicSubject">Subject</label><select id="topicSubject"><option value="english-language">English Language</option><option value="general-mathematics">General Mathematics</option><option value="further-mathematics">Further Mathematics</option><option value="biology">Biology</option><option value="chemistry">Chemistry</option><option value="physics">Physics</option></select></div></div>
+   <div class="field"><label for="topicSlug">Topic slug</label><input id="topicSlug" placeholder="e.g. laboratory-safety-rules"></div>
+   <div class="field"><label for="topicTitle">Topic title</label><input id="topicTitle" placeholder="Exact topic heading"></div>
+   <div class="field"><label for="topicSummary">Original lesson summary</label><textarea id="topicSummary"></textarea></div>
+   <div class="field"><label for="topicObjectives">Learning objectives (JSON array)</label><textarea id="topicObjectives" placeholder='["Explain…","Identify…"]'></textarea></div>
+   <div class="formgrid"><div class="field"><label for="topicTheme">Curriculum theme</label><input id="topicTheme"></div><div class="field"><label for="topicSubtopic">Subtopic</label><input id="topicSubtopic"></div></div>
+   <button class="btn" onclick="createCurriculumTopic()">Save topic draft</button>
+   <p class="muted" id="topicCreateStatus" aria-live="polite"></p>
+  </section>
+ </div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Captured source register</h2><button class="btn secondary" onclick="loadCurriculumSources()">Refresh sources</button></div><div id="curriculumSourceList" class="empty">Load source records after admin sign-in.</div></div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Publish reviewed topic</h2><span class="status">Separate approval</span></div>
+  <div class="formgrid"><div class="field"><label for="publishTopicId">Topic ID</label><input id="publishTopicId" placeholder="Select a draft topic"></div><div class="field"><label for="publishReviewer">Teacher reviewer name</label><input id="publishReviewer" placeholder="Qualified subject reviewer"></div></div>
+  <div class="field"><label for="publishEvidence">Curriculum evidence note</label><textarea id="publishEvidence" placeholder="Describe source section, topic mapping and review evidence"></textarea></div>
+  <div class="formgrid"><div class="field"><label for="publishTermMapping">Term mapping status</label><select id="publishTermMapping"><option value="not_assigned">Not assigned</option><option value="official_term_allocation">Official term allocation</option><option value="school_scheme_verified">Verified school scheme</option><option value="school_scheme_required">School scheme required</option><option value="not_applicable">Not applicable</option></select></div><div class="field"><label for="publishTermNumber">Term number (only if verified)</label><select id="publishTermNumber"><option value="">No term</option><option value="1">First term</option><option value="2">Second term</option><option value="3">Third term</option></select></div></div>
+  <div class="field"><label for="publishSchemeName">School scheme name (if applicable)</label><input id="publishSchemeName"></div>
+  <button class="btn" onclick="publishCurriculumTopic()">Publish approved topic</button><p class="muted" id="topicPublishStatus" aria-live="polite"></p>
+ </div>
+ <div class="card" style="margin:15px 0"><div class="cardhead"><h2>Live topic register</h2><button class="btn secondary" onclick="loadCurriculumTopics()">Refresh</button></div><div id="curriculumTopicList" class="empty">Load the current topic register after admin sign-in.</div></div>
+ <div class="tablewrap"><table><thead><tr><th>Subject</th><th>Offering group</th><th>Class mapping</th><th>Term mapping</th><th>Source status</th></tr></thead><tbody>
+ <tr><td>English Language</td><td>Core / compulsory</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ <tr><td>General Mathematics</td><td>Core / compulsory</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ <tr><td>Further Mathematics</td><td>Science field</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ <tr><td>Biology</td><td>Science field</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ <tr><td>Chemistry</td><td>Science field</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ <tr><td>Physics</td><td>Science field</td><td>Pending</td><td>Pending</td><td><span class="status">Needs capture</span></td></tr>
+ </tbody></table></div>
+</section>
+<section class="page" id="studio">
+ <div class="heading"><div><h1>Lesson studio</h1><p>Prepare the two approved narration formats for each verified topic.</p></div><span class="status info">Draft workflow connected</span></div>
+ <div class="notice">Authenticated draft authoring is connected. Lesson content remains private and unpublished until a qualified subject reviewer approves it and the curriculum topic passes its separate evidence and publication checks.</div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>New lesson brief</h2><span class="status info">Draft preview</span></div>
+   <div class="field"><label for="lessonTitle">Lesson title</label><input id="lessonTitle" placeholder="Enter a verified topic title"></div>
+   <div class="formgrid"><div class="field"><label for="lessonClass">Class</label><select id="lessonClass"><option>SS1</option><option>SS2</option><option>SS3</option></select></div><div class="field"><label for="lessonSubject">Subject</label><select id="lessonSubject"><option>English Language</option><option>General Mathematics</option><option>Further Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select></div></div>
+   <div class="field"><label for="lessonObjectives">Learning outcomes / verified source notes</label><textarea id="lessonObjectives" placeholder="Add source-backed learning outcomes and notes"></textarea></div>
+   <div class="actions"><button class="btn" onclick="previewBrief()">Preview brief</button><button class="btn secondary" onclick="clearBrief()">Clear</button></div>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Production formats</h2></div>
+   <div class="row"><div><b>Professional teacher narration</b><div class="muted">Structured educator-led explanation</div></div><span class="status">Not produced</span></div>
+   <div class="row"><div><b>Two-presenter podcast</b><div class="muted">Conversational educational dialogue</div></div><span class="status">Not produced</span></div>
+   <div class="row"><div><b>Transcript and learning notes</b><div class="muted">Accessible lesson companion</div></div><span class="status">Not produced</span></div>
+   <div id="briefPreview" class="notice" style="display:none;margin-top:14px"></div>
+  </section>
+ </div>
+ <div class="layout" style="margin-top:16px">
+   <section class="card"><div class="cardhead"><h2>Save reviewed lesson draft</h2><span class="status">Draft only</span></div>
+    <div class="field"><label for="contentTopicId">Topic ID</label><input id="contentTopicId" placeholder="Paste topic ID from curriculum register"></div>
+    <div class="field"><label for="lessonPayload">Lesson content and practice questions (JSON)</label><textarea id="lessonPayload" rows="14" placeholder='{"content":{"intro":"…","learning_objectives":[],"sections":[],"key_terms":[],"worked_examples":[]},"practice_questions":[]}'></textarea></div>
+    <button class="btn" onclick="saveLessonContentDraft()">Save lesson draft</button>
+    <p class="muted" id="lessonDraftStatus" aria-live="polite"></p>
+    <div class="field"><label for="lessonReviewerName">Teacher reviewer name</label><input id="lessonReviewerName" placeholder="Name of qualified subject reviewer"></div>
+    <button class="btn secondary" onclick="loadLessonDrafts()">Load topic drafts</button>
+    <div id="lessonDraftList" class="empty">No lesson drafts loaded.</div>
+   </section>
+   <section class="card"><div class="cardhead"><h2>Generate podcast script</h2><span class="status">Draft script</span></div>
+    <div class="field"><label for="podcastTopicId">Topic ID</label><input id="podcastTopicId" placeholder="Topic with approved lesson notes"></div>
+    <button class="btn" onclick="generatePodcastScript()">Generate two-presenter script</button>
+    <div class="field"><label for="podcastScriptOutput">Generated script</label><textarea id="podcastScriptOutput" rows="14" readonly></textarea></div>
+    <p class="muted" id="podcastScriptStatus" aria-live="polite"></p>
+   </section>
+  </div>
+</section>
+<section class="page" id="audio">
+ <div class="heading"><div><h1>Audio library</h1><p>Manage teacher narration, podcast audio and transcripts.</p></div><span class="status">No assets uploaded</span></div>
+ <div class="notice">Audio uploads are sent to private object storage. An audio reviewer must approve the asset, then approve the podcast script. Student playback is still protected by topic entitlement and the private streaming endpoint.</div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Upload private podcast audio</h2><span class="status">Pending review</span></div>
+   <div class="field"><label for="audioTopicId">Topic ID</label><input id="audioTopicId" placeholder="Topic ID"></div>
+   <div class="field"><label for="audioFile">Audio file (MP3, M4A, WAV, OGG or WebM; max 100 MB)</label><input id="audioFile" type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/webm"></div>
+   <button class="btn" onclick="uploadPodcastAudio()">Upload to private storage</button>
+   <p class="muted" id="audioUploadStatus" aria-live="polite"></p>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Attach audio to script</h2></div>
+   <div class="field"><label for="attachScriptId">Podcast script ID</label><input id="attachScriptId"></div>
+   <div class="field"><label for="attachAssetId">Uploaded audio asset ID</label><input id="attachAssetId"></div>
+   <button class="btn" onclick="attachPodcastAudio()">Attach pending audio</button>
+   <p class="muted" id="attachAudioStatus" aria-live="polite"></p>
+  </section>
+ </div>
+ <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Podcast scripts</h2><button class="btn secondary" onclick="loadPodcastScripts()">Refresh scripts</button></div><div id="podcastScriptList" class="empty">Load scripts after admin sign-in.</div></div>
+ <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Private audio assets</h2><button class="btn secondary" onclick="loadAudioAssets()">Refresh audio assets</button></div><div id="audioAssetList" class="empty">Load assets after admin sign-in.</div></div>
+</section>
+<section class="page" id="announcements">
+ <div class="heading"><div><h1>Channel announcements</h1><p>Draft broadcast updates for the secondary-school Telegram Channel.</p></div><span class="status info">Manual publishing</span></div>
+ <div class="notice">The approved Telegram scope is a broadcast-only Channel. This tool only prepares copy for manual review and posting; it does not connect to Telegram or publish messages. The separate university bot remains untouched.</div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Compose announcement</h2></div>
+   <div class="field"><label for="announcementType">Announcement type</label><select id="announcementType"><option>New lesson release</option><option>Study tip</option><option>Examination reminder</option><option>Platform update</option><option>General announcement</option></select></div>
+   <div class="field"><label for="announcementTitle">Headline</label><input id="announcementTitle" placeholder="A short, clear headline"></div>
+   <div class="field"><label for="announcementBody">Message</label><textarea id="announcementBody" placeholder="Write the Channel announcement"></textarea></div>
+   <div class="actions"><button class="btn" onclick="copyAnnouncement()">Copy announcement</button><button class="btn secondary" onclick="clearAnnouncement()">Clear</button></div>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Publishing checklist</h2></div>
+   <div class="row"><span>Check accuracy and links</span><span class="status">Required</span></div>
+   <div class="row"><span>Confirm class and subject details</span><span class="status">Required</span></div>
+   <div class="row"><span>Obtain admin approval</span><span class="status">Required</span></div>
+   <div class="row"><span>Post manually to official Channel</span><span class="status info">Manual</span></div>
+  </section>
+ </div>
+</section>
+<section class="page" id="students">
+ <div class="heading"><div><h1>Students and payments</h1><p>Student records, purchases and payment reconciliation.</p></div><span class="status">Locked preview</span></div>
+ <div class="notice">This section is intentionally unavailable until secure authentication, database permissions, Paystack verification and privacy controls are implemented. No real student or payment records are available.</div>
+ <div class="card"><div class="empty">Student management and payment operations will be enabled only after backend security and payment verification are complete.</div></div>
+</section>
+<section class="page" id="settings">
+ <div class="heading"><div><h1>Platform settings</h1><p>Configuration and release controls.</p></div><span class="status">Not connected</span></div>
+ <div class="card">
+  <div class="row"><div><b>Topic minimum price</b><div class="muted">₦1,000 per topic; higher configurable prices permitted</div></div><span class="status ok">Product rule</span></div>
+  <div class="row"><div><b>Student access</b><div class="muted">Web portal</div></div><span class="status ok">Confirmed</span></div>
+  <div class="row"><div><b>Telegram</b><div class="muted">Broadcast-only Channel; manual posting initially</div></div><span class="status ok">Confirmed</span></div>
+  <div class="row"><div><b>Production deployment</b><div class="muted">Requires owner approval</div></div><span class="status">Not authorised</span></div>
+ </div>
+</section>
+</div>
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const labels={overview:"Overview",curriculum:"Curriculum",studio:"Lesson studio",audio:"Audio library",announcements:"Announcements",students:"Students & payments",settings:"Settings"};
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.page===id));document.getElementById("crumb").textContent=labels[id]||"Overview";window.scrollTo(0,0);if(id==="curriculum"){loadCurriculumSources();loadCurriculumTopics()}if(id==="audio"){loadAudioAssets();loadPodcastScripts()}}
+document.querySelectorAll(".nav").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
+
+function adminCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}
+async function adminApi(path,body,method='GET'){
+ const headers={'Accept':'application/json'};
+ if(body!==undefined){headers['Content-Type']='application/json';headers['X-CSRF-Token']=adminCookie('learnwise_admin_csrf')}
+ const response=await fetch(path,{method,credentials:'same-origin',headers,body:body===undefined?undefined:JSON.stringify(body)});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.message||data.error||'Admin request failed');
+ return data;
+}
+function addAdminText(parent,tag,text){const node=document.createElement(tag);node.textContent=text||'';parent.append(node);return node}
+async function captureCurriculumSource(){
+ const status=document.getElementById('sourceCaptureStatus');status.textContent='Saving source metadata…';
+ try{
+  const data=await adminApi('/api/v1/admin/curriculum-sources',{
+   class_level:document.getElementById('sourceClass').value,
+   subject_slug:document.getElementById('sourceSubject').value,
+   source_title:document.getElementById('sourceTitle').value.trim(),
+   source_url:document.getElementById('sourceUrl').value.trim(),
+   source_version:document.getElementById('sourceVersion').value.trim(),
+   source_section:document.getElementById('sourceSection').value.trim(),
+   notes:document.getElementById('sourceNotes').value.trim(),
+   source_kind:'official_nerdc',licence_status:'metadata_only'
+  },'POST');
+  document.getElementById('topicSourceId').value=data.source_id;
+  status.textContent='Source captured as '+data.source_id+'. It is not yet approved for publication.';
+  loadCurriculumSources();
+ }catch(e){status.textContent=e.message}
+}
+async function loadCurriculumSources(){
+ const box=document.getElementById('curriculumSourceList');box.textContent='Loading source register…';
+ try{
+  const data=await adminApi('/api/v1/admin/curriculum-sources');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.source_title+' · '+item.subject+' · '+item.class_level);
+   addAdminText(detail,'small',(item.verification_status||'')+' · '+(item.source_section||'No section')+' · '+item.id);
+   const action=document.createElement('button');action.className='btn secondary';action.textContent=item.verification_status==='source_captured'?'Approve source':'Copy ID';
+   action.addEventListener('click',async()=>{if(item.verification_status==='source_captured')await reviewCurriculumSource(item.id);else{document.getElementById('topicSourceId').value=item.id;toast('Source ID selected')}});
+   row.append(detail,action);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No captured sources yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function reviewCurriculumSource(id){
+ const reviewer=prompt('Enter the qualified reviewer name who verified this source and its page/section reference:');
+ if(!reviewer)return;
+ try{await adminApi('/api/v1/admin/curriculum-sources/'+encodeURIComponent(id)+'/review',{verification_status:'approved',reviewer_name:reviewer},'POST');toast('Source approved.');loadCurriculumSources()}
+ catch(e){toast(e.message)}
+}
+async function createCurriculumTopic(){
+ const status=document.getElementById('topicCreateStatus');status.textContent='Saving topic draft…';
+ try{
+  const objectives=JSON.parse(document.getElementById('topicObjectives').value||'[]');
+  const data=await adminApi('/api/v1/admin/topics',{
+   source_id:document.getElementById('topicSourceId').value.trim(),
+   class_level:document.getElementById('topicClass').value,
+   subject_slug:document.getElementById('topicSubject').value,
+   slug:document.getElementById('topicSlug').value.trim(),
+   title:document.getElementById('topicTitle').value.trim(),
+   summary:document.getElementById('topicSummary').value.trim(),
+   learning_objectives:objectives,
+   curriculum_theme:document.getElementById('topicTheme').value.trim(),
+   curriculum_subtopic:document.getElementById('topicSubtopic').value.trim()
+  },'POST');
+  status.textContent='Draft topic created: '+data.topic_id+'. Term remains unassigned.';
+  ['contentTopicId','podcastTopicId','audioTopicId','publishTopicId'].forEach(id=>document.getElementById(id).value=data.topic_id);
+  loadCurriculumTopics();
+ }catch(e){status.textContent=e.message}
+}
+async function loadCurriculumTopics(){
+ const box=document.getElementById('curriculumTopicList');box.textContent='Loading topics…';
+ try{
+  const data=await adminApi('/api/v1/admin/topics');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.title+' · '+item.subject+' · '+item.class_level);
+   addAdminText(detail,'small',item.status+' / '+item.curriculum_status+' · '+item.term_mapping_status+' · '+item.id);
+   const button=document.createElement('button');button.className='btn secondary';button.textContent='Use topic';
+   button.addEventListener('click',()=>{['contentTopicId','podcastTopicId','audioTopicId','publishTopicId'].forEach(id=>document.getElementById(id).value=item.id);toast('Topic selected')});
+   row.append(detail,button);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No topic drafts or published topics yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function publishCurriculumTopic(){
+ const status=document.getElementById('topicPublishStatus');status.textContent='Checking publication requirements…';
+ const mapping=document.getElementById('publishTermMapping').value;
+ const rawTerm=document.getElementById('publishTermNumber').value;
+ try{
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(document.getElementById('publishTopicId').value.trim())+'/publish',{
+   teacher_reviewer_name:document.getElementById('publishReviewer').value.trim(),
+   curriculum_evidence_note:document.getElementById('publishEvidence').value.trim(),
+   term_mapping_status:mapping,
+   term_number:rawTerm?Number(rawTerm):null,
+   school_scheme_name:document.getElementById('publishSchemeName').value.trim()
+  },'POST');
+  status.textContent='Topic published: '+data.topic_id+' ('+data.term_mapping_status+').';
+  loadCurriculumTopics();
+ }catch(e){status.textContent=e.message}
+}
+async function saveLessonContentDraft(){
+ const status=document.getElementById('lessonDraftStatus');status.textContent='Saving draft and practice questions…';
+ try{
+  const payload=JSON.parse(document.getElementById('lessonPayload').value);
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(document.getElementById('contentTopicId').value.trim())+'/lesson-content',payload,'POST');
+  status.textContent='Saved draft '+data.content_id+' · '+data.practice_question_count+' practice questions. Not published.';
+  loadLessonDrafts();
+ }catch(e){status.textContent=e.message}
+}
+async function loadLessonDrafts(){
+ const box=document.getElementById('lessonDraftList');box.textContent='Loading lesson versions…';
+ try{
+  const topicId=document.getElementById('contentTopicId').value.trim();
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(topicId)+'/lesson-content');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b','Version '+item.version+' · '+item.review_status);
+   addAdminText(detail,'small',item.id+' · created by '+(item.created_by||'unknown'));
+   const actions=document.createElement('div');
+   if(item.review_status==='draft'||item.review_status==='teacher_review'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve';
+    approve.addEventListener('click',()=>reviewLessonContent(item.id,'approved'));
+    const reject=document.createElement('button');reject.className='btn secondary';reject.textContent='Reject';
+    reject.addEventListener('click',()=>reviewLessonContent(item.id,'rejected'));
+    actions.append(approve,reject);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No lesson content versions for this topic.';
+ }catch(e){box.textContent=e.message}
+}
+async function reviewLessonContent(id,status){
+ const reviewer=document.getElementById('lessonReviewerName').value.trim();
+ if(status==='approved'&&!reviewer){toast('Enter the teacher reviewer name first.');return}
+ try{await adminApi('/api/v1/admin/lesson-content/'+encodeURIComponent(id)+'/review',{review_status:status,teacher_reviewer_name:reviewer},'POST');toast('Lesson content '+status+'.');loadLessonDrafts()}
+ catch(e){toast(e.message)}
+}
+async function generatePodcastScript(){
+ const status=document.getElementById('podcastScriptStatus');status.textContent='Generating from approved lesson notes…';
+ try{
+  const data=await adminApi('/api/v1/admin/podcast-scripts',{topic_id:document.getElementById('podcastTopicId').value.trim()},'POST');
+  document.getElementById('podcastScriptOutput').value=data.script.script_text;
+  document.getElementById('attachScriptId').value=data.script.id;
+  status.textContent='Script draft saved: '+data.script.id+'. Review it before recording or generating voice audio.';
+  loadPodcastScripts();
+ }catch(e){status.textContent=e.message}
+}
+async function loadPodcastScripts(){
+ const box=document.getElementById('podcastScriptList');box.textContent='Loading podcast scripts…';
+ try{
+  const data=await adminApi('/api/v1/admin/podcast-scripts');box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.title+' · '+item.topic_title);
+   addAdminText(detail,'small',item.status+' · '+item.id+' · audio '+(item.audio_review_status||'not attached'));
+   const actions=document.createElement('div');
+   const select=document.createElement('button');select.className='btn secondary';select.textContent='Select';
+   select.addEventListener('click',()=>{document.getElementById('attachScriptId').value=item.id;document.getElementById('podcastScriptOutput').value=item.script_text});
+   actions.append(select);
+   if(item.status==='teacher_review'&&item.audio_review_status==='approved'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve episode';
+    approve.addEventListener('click',()=>reviewPodcastScript(item.id,'approved'));actions.append(approve);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No podcast scripts yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function uploadPodcastAudio(){
+ const status=document.getElementById('audioUploadStatus');
+ const file=document.getElementById('audioFile').files[0];
+ if(!file){status.textContent='Choose an audio file first.';return}
+ const form=new FormData();form.append('topic_id',document.getElementById('audioTopicId').value.trim());form.append('asset_type','podcast_audio');form.append('file',file);
+ status.textContent='Uploading to private storage…';
+ try{
+  const response=await fetch('/api/v1/admin/audio-assets',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':adminCookie('learnwise_admin_csrf')},body:form});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.message||data.error||'Private audio upload failed');
+  document.getElementById('attachAssetId').value=data.asset.id;
+  status.textContent='Private upload complete. Asset pending review: '+data.asset.id;
+  loadAudioAssets();
+ }catch(e){status.textContent=e.message}
+}
+async function attachPodcastAudio(){
+ const status=document.getElementById('attachAudioStatus');status.textContent='Attaching audio…';
+ try{
+  const id=document.getElementById('attachScriptId').value.trim();
+  const data=await adminApi('/api/v1/admin/podcast-scripts/'+encodeURIComponent(id)+'/attach-audio',{asset_id:document.getElementById('attachAssetId').value.trim()},'POST');
+  status.textContent='Audio attached. Script is awaiting review.';loadPodcastScripts();loadAudioAssets();
+ }catch(e){status.textContent=e.message}
+}
+async function reviewAudioAsset(id,status){
+ try{await adminApi('/api/v1/admin/audio-assets/'+encodeURIComponent(id)+'/review',{review_status:status},'POST');toast('Audio asset '+status+'.');loadAudioAssets();loadPodcastScripts()}
+ catch(e){toast(e.message)}
+}
+async function reviewPodcastScript(id,status){
+ try{await adminApi('/api/v1/admin/podcast-scripts/'+encodeURIComponent(id)+'/review',{status},'POST');toast('Podcast script '+status+'.');loadPodcastScripts()}
+ catch(e){toast(e.message)}
+}
+async function loadAudioAssets(){
+ const box=document.getElementById('audioAssetList');box.textContent='Loading private audio assets…';
+ try{
+  const data=await adminApi('/api/v1/admin/audio-assets');box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.topic_title+' · '+item.asset_type);
+   addAdminText(detail,'small',item.review_status+' · '+item.id+' · '+item.mime_type);
+   const actions=document.createElement('div');
+   if(item.review_status==='pending'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve';
+    approve.addEventListener('click',()=>reviewAudioAsset(item.id,'approved'));
+    const reject=document.createElement('button');reject.className='btn secondary';reject.textContent='Reject';
+    reject.addEventListener('click',()=>reviewAudioAsset(item.id,'rejected'));
+    actions.append(approve,reject);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No uploaded audio assets.';
+ }catch(e){box.textContent=e.message}
+}
+
+function toast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.add("show");window.setTimeout(()=>el.classList.remove("show"),2600)}
+function previewBrief(){const title=document.getElementById("lessonTitle").value.trim();const objectives=document.getElementById("lessonObjectives").value.trim();if(!title||!objectives){toast("Add a lesson title and source-backed learning notes first.");return}const box=document.getElementById("briefPreview");box.textContent="Draft preview: "+document.getElementById("lessonClass").value+" · "+document.getElementById("lessonSubject").value+" · "+title+". This is a local preview only; it has not been saved or approved.";box.style.display="block"}
+function clearBrief(){["lessonTitle","lessonObjectives"].forEach(id=>document.getElementById(id).value="");document.getElementById("briefPreview").style.display="none"}
+function clearAnnouncement(){["announcementTitle","announcementBody"].forEach(id=>document.getElementById(id).value="")}
+async function copyAnnouncement(){const title=document.getElementById("announcementTitle").value.trim();const body=document.getElementById("announcementBody").value.trim();if(!title||!body){toast("Add a headline and message first.");return}const text="["+document.getElementById("announcementType").value+"] "+title+"\n\n"+body;try{await navigator.clipboard.writeText(text);toast("Announcement copied for manual review and posting.")}catch(e){toast("Clipboard access is unavailable in this browser. Select and copy the announcement manually.")}}
+</script>
+</body></html>

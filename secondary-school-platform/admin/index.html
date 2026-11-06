@@ -188,6 +188,236 @@
 const labels={overview:"Overview",curriculum:"Curriculum",studio:"Lesson studio",audio:"Audio library",announcements:"Announcements",students:"Students & payments",settings:"Settings"};
 function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.page===id));document.getElementById("crumb").textContent=labels[id]||"Overview";window.scrollTo(0,0)}
 document.querySelectorAll(".nav").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
+
+function adminCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}
+async function adminApi(path,body,method='GET'){
+ const headers={'Accept':'application/json'};
+ if(body!==undefined){headers['Content-Type']='application/json';headers['X-CSRF-Token']=adminCookie('learnwise_admin_csrf')}
+ const response=await fetch(path,{method,credentials:'same-origin',headers,body:body===undefined?undefined:JSON.stringify(body)});
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw Error(data.message||data.error||'Admin request failed');
+ return data;
+}
+function addAdminText(parent,tag,text){const node=document.createElement(tag);node.textContent=text||'';parent.append(node);return node}
+async function captureCurriculumSource(){
+ const status=document.getElementById('sourceCaptureStatus');status.textContent='Saving source metadata…';
+ try{
+  const data=await adminApi('/api/v1/admin/curriculum-sources',{
+   class_level:document.getElementById('sourceClass').value,
+   subject_slug:document.getElementById('sourceSubject').value,
+   source_title:document.getElementById('sourceTitle').value.trim(),
+   source_url:document.getElementById('sourceUrl').value.trim(),
+   source_version:document.getElementById('sourceVersion').value.trim(),
+   source_section:document.getElementById('sourceSection').value.trim(),
+   notes:document.getElementById('sourceNotes').value.trim(),
+   source_kind:'official_nerdc',licence_status:'metadata_only'
+  },'POST');
+  document.getElementById('topicSourceId').value=data.source_id;
+  status.textContent='Source captured as '+data.source_id+'. It is not yet approved for publication.';
+  loadCurriculumSources();
+ }catch(e){status.textContent=e.message}
+}
+async function loadCurriculumSources(){
+ const box=document.getElementById('curriculumSourceList');box.textContent='Loading source register…';
+ try{
+  const data=await adminApi('/api/v1/admin/curriculum-sources');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.source_title+' · '+item.subject+' · '+item.class_level);
+   addAdminText(detail,'small',(item.verification_status||'')+' · '+(item.source_section||'No section')+' · '+item.id);
+   const action=document.createElement('button');action.className='btn secondary';action.textContent=item.verification_status==='source_captured'?'Approve source':'Copy ID';
+   action.addEventListener('click',async()=>{if(item.verification_status==='source_captured')await reviewCurriculumSource(item.id);else{document.getElementById('topicSourceId').value=item.id;toast('Source ID selected')}});
+   row.append(detail,action);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No captured sources yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function reviewCurriculumSource(id){
+ const reviewer=prompt('Enter the qualified reviewer name who verified this source and its page/section reference:');
+ if(!reviewer)return;
+ try{await adminApi('/api/v1/admin/curriculum-sources/'+encodeURIComponent(id)+'/review',{verification_status:'approved',reviewer_name:reviewer},'POST');toast('Source approved.');loadCurriculumSources()}
+ catch(e){toast(e.message)}
+}
+async function createCurriculumTopic(){
+ const status=document.getElementById('topicCreateStatus');status.textContent='Saving topic draft…';
+ try{
+  const objectives=JSON.parse(document.getElementById('topicObjectives').value||'[]');
+  const data=await adminApi('/api/v1/admin/topics',{
+   source_id:document.getElementById('topicSourceId').value.trim(),
+   class_level:document.getElementById('topicClass').value,
+   subject_slug:document.getElementById('topicSubject').value,
+   slug:document.getElementById('topicSlug').value.trim(),
+   title:document.getElementById('topicTitle').value.trim(),
+   summary:document.getElementById('topicSummary').value.trim(),
+   learning_objectives:objectives,
+   curriculum_theme:document.getElementById('topicTheme').value.trim(),
+   curriculum_subtopic:document.getElementById('topicSubtopic').value.trim()
+  },'POST');
+  status.textContent='Draft topic created: '+data.topic_id+'. Term remains unassigned.';
+  ['contentTopicId','podcastTopicId','audioTopicId','publishTopicId'].forEach(id=>document.getElementById(id).value=data.topic_id);
+  loadCurriculumTopics();
+ }catch(e){status.textContent=e.message}
+}
+async function loadCurriculumTopics(){
+ const box=document.getElementById('curriculumTopicList');box.textContent='Loading topics…';
+ try{
+  const data=await adminApi('/api/v1/admin/topics');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.title+' · '+item.subject+' · '+item.class_level);
+   addAdminText(detail,'small',item.status+' / '+item.curriculum_status+' · '+item.term_mapping_status+' · '+item.id);
+   const button=document.createElement('button');button.className='btn secondary';button.textContent='Use topic';
+   button.addEventListener('click',()=>{['contentTopicId','podcastTopicId','audioTopicId','publishTopicId'].forEach(id=>document.getElementById(id).value=item.id);toast('Topic selected')});
+   row.append(detail,button);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No topic drafts or published topics yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function publishCurriculumTopic(){
+ const status=document.getElementById('topicPublishStatus');status.textContent='Checking publication requirements…';
+ const mapping=document.getElementById('publishTermMapping').value;
+ const rawTerm=document.getElementById('publishTermNumber').value;
+ try{
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(document.getElementById('publishTopicId').value.trim())+'/publish',{
+   teacher_reviewer_name:document.getElementById('publishReviewer').value.trim(),
+   curriculum_evidence_note:document.getElementById('publishEvidence').value.trim(),
+   term_mapping_status:mapping,
+   term_number:rawTerm?Number(rawTerm):null,
+   school_scheme_name:document.getElementById('publishSchemeName').value.trim()
+  },'POST');
+  status.textContent='Topic published: '+data.topic_id+' ('+data.term_mapping_status+').';
+  loadCurriculumTopics();
+ }catch(e){status.textContent=e.message}
+}
+async function saveLessonContentDraft(){
+ const status=document.getElementById('lessonDraftStatus');status.textContent='Saving draft and practice questions…';
+ try{
+  const payload=JSON.parse(document.getElementById('lessonPayload').value);
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(document.getElementById('contentTopicId').value.trim())+'/lesson-content',payload,'POST');
+  status.textContent='Saved draft '+data.content_id+' · '+data.practice_question_count+' practice questions. Not published.';
+  loadLessonDrafts();
+ }catch(e){status.textContent=e.message}
+}
+async function loadLessonDrafts(){
+ const box=document.getElementById('lessonDraftList');box.textContent='Loading lesson versions…';
+ try{
+  const topicId=document.getElementById('contentTopicId').value.trim();
+  const data=await adminApi('/api/v1/admin/topics/'+encodeURIComponent(topicId)+'/lesson-content');
+  box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b','Version '+item.version+' · '+item.review_status);
+   addAdminText(detail,'small',item.id+' · created by '+(item.created_by||'unknown'));
+   const actions=document.createElement('div');
+   if(item.review_status==='draft'||item.review_status==='teacher_review'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve';
+    approve.addEventListener('click',()=>reviewLessonContent(item.id,'approved'));
+    const reject=document.createElement('button');reject.className='btn secondary';reject.textContent='Reject';
+    reject.addEventListener('click',()=>reviewLessonContent(item.id,'rejected'));
+    actions.append(approve,reject);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No lesson content versions for this topic.';
+ }catch(e){box.textContent=e.message}
+}
+async function reviewLessonContent(id,status){
+ const reviewer=document.getElementById('lessonReviewerName').value.trim();
+ if(status==='approved'&&!reviewer){toast('Enter the teacher reviewer name first.');return}
+ try{await adminApi('/api/v1/admin/lesson-content/'+encodeURIComponent(id)+'/review',{review_status:status,teacher_reviewer_name:reviewer},'POST');toast('Lesson content '+status+'.');loadLessonDrafts()}
+ catch(e){toast(e.message)}
+}
+async function generatePodcastScript(){
+ const status=document.getElementById('podcastScriptStatus');status.textContent='Generating from approved lesson notes…';
+ try{
+  const data=await adminApi('/api/v1/admin/podcast-scripts',{topic_id:document.getElementById('podcastTopicId').value.trim()},'POST');
+  document.getElementById('podcastScriptOutput').value=data.script.script_text;
+  document.getElementById('attachScriptId').value=data.script.id;
+  status.textContent='Script draft saved: '+data.script.id+'. Review it before recording or generating voice audio.';
+  loadPodcastScripts();
+ }catch(e){status.textContent=e.message}
+}
+async function loadPodcastScripts(){
+ const box=document.getElementById('podcastScriptList');box.textContent='Loading podcast scripts…';
+ try{
+  const data=await adminApi('/api/v1/admin/podcast-scripts');box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.title+' · '+item.topic_title);
+   addAdminText(detail,'small',item.status+' · '+item.id+' · audio '+(item.audio_review_status||'not attached'));
+   const actions=document.createElement('div');
+   const select=document.createElement('button');select.className='btn secondary';select.textContent='Select';
+   select.addEventListener('click',()=>{document.getElementById('attachScriptId').value=item.id;document.getElementById('podcastScriptOutput').value=item.script_text});
+   actions.append(select);
+   if(item.status==='teacher_review'&&item.audio_review_status==='approved'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve episode';
+    approve.addEventListener('click',()=>reviewPodcastScript(item.id,'approved'));actions.append(approve);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No podcast scripts yet.';
+ }catch(e){box.textContent=e.message}
+}
+async function uploadPodcastAudio(){
+ const status=document.getElementById('audioUploadStatus');
+ const file=document.getElementById('audioFile').files[0];
+ if(!file){status.textContent='Choose an audio file first.';return}
+ const form=new FormData();form.append('topic_id',document.getElementById('audioTopicId').value.trim());form.append('asset_type','podcast_audio');form.append('file',file);
+ status.textContent='Uploading to private storage…';
+ try{
+  const response=await fetch('/api/v1/admin/audio-assets',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':adminCookie('learnwise_admin_csrf')},body:form});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw Error(data.message||data.error||'Private audio upload failed');
+  document.getElementById('attachAssetId').value=data.asset.id;
+  status.textContent='Private upload complete. Asset pending review: '+data.asset.id;
+  loadAudioAssets();
+ }catch(e){status.textContent=e.message}
+}
+async function attachPodcastAudio(){
+ const status=document.getElementById('attachAudioStatus');status.textContent='Attaching audio…';
+ try{
+  const id=document.getElementById('attachScriptId').value.trim();
+  const data=await adminApi('/api/v1/admin/podcast-scripts/'+encodeURIComponent(id)+'/attach-audio',{asset_id:document.getElementById('attachAssetId').value.trim()},'POST');
+  status.textContent='Audio attached. Script is awaiting review.';loadPodcastScripts();loadAudioAssets();
+ }catch(e){status.textContent=e.message}
+}
+async function reviewAudioAsset(id,status){
+ try{await adminApi('/api/v1/admin/audio-assets/'+encodeURIComponent(id)+'/review',{review_status:status},'POST');toast('Audio asset '+status+'.');loadAudioAssets();loadPodcastScripts()}
+ catch(e){toast(e.message)}
+}
+async function reviewPodcastScript(id,status){
+ try{await adminApi('/api/v1/admin/podcast-scripts/'+encodeURIComponent(id)+'/review',{status},'POST');toast('Podcast script '+status+'.');loadPodcastScripts()}
+ catch(e){toast(e.message)}
+}
+async function loadAudioAssets(){
+ const box=document.getElementById('audioAssetList');box.textContent='Loading private audio assets…';
+ try{
+  const data=await adminApi('/api/v1/admin/audio-assets');box.replaceChildren();
+  (data.items||[]).forEach(item=>{
+   const row=document.createElement('div');row.className='row';
+   const detail=document.createElement('div');
+   addAdminText(detail,'b',item.topic_title+' · '+item.asset_type);
+   addAdminText(detail,'small',item.review_status+' · '+item.id+' · '+item.mime_type);
+   const actions=document.createElement('div');
+   if(item.review_status==='pending'){
+    const approve=document.createElement('button');approve.className='btn';approve.textContent='Approve';
+    approve.addEventListener('click',()=>reviewAudioAsset(item.id,'approved'));
+    const reject=document.createElement('button');reject.className='btn secondary';reject.textContent='Reject';
+    reject.addEventListener('click',()=>reviewAudioAsset(item.id,'rejected'));
+    actions.append(approve,reject);
+   }
+   row.append(detail,actions);box.append(row);
+  });
+  if(!(data.items||[]).length)box.textContent='No uploaded audio assets.';
+ }catch(e){box.textContent=e.message}
+}
+
 function toast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.add("show");window.setTimeout(()=>el.classList.remove("show"),2600)}
 function previewBrief(){const title=document.getElementById("lessonTitle").value.trim();const objectives=document.getElementById("lessonObjectives").value.trim();if(!title||!objectives){toast("Add a lesson title and source-backed learning notes first.");return}const box=document.getElementById("briefPreview");box.textContent="Draft preview: "+document.getElementById("lessonClass").value+" · "+document.getElementById("lessonSubject").value+" · "+title+". This is a local preview only; it has not been saved or approved.";box.style.display="block"}
 function clearBrief(){["lessonTitle","lessonObjectives"].forEach(id=>document.getElementById(id).value="");document.getElementById("briefPreview").style.display="none"}

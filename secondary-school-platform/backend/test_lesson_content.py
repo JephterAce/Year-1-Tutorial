@@ -53,6 +53,25 @@ class LessonContentServiceTests(unittest.TestCase):
         self.assertNotIn("answer_key", str(result))
         self.assertEqual(result["practice"][0]["id"], "question-1")
 
+
+    def test_ai_tutor_context_uses_only_entitled_approved_lesson_material(self):
+        fake = FakeConnection([
+            FakeCursor({"entitled": 1}),
+            FakeCursor({
+                "title":"Cell Structure","subject":"Biology","class_level":"SS1",
+                "content_json":{
+                    "intro":"Cells are the basic units of life.",
+                    "sections":[{"heading":"Nucleus","body":"Contains genetic material."}],
+                    "key_terms":[{"term":"Cytoplasm","definition":"Material inside the membrane."}]
+                }
+            })
+        ])
+        with patch.object(lesson_content, "connection", return_value=fake):
+            context = get_tutor_context("student-1","topic-1")
+        self.assertIn("Cell Structure",context)
+        self.assertIn("Contains genetic material.",context)
+        self.assertLessEqual(len(context),4000)
+
     def test_locked_lesson_rejects_content_access(self):
         fake = FakeConnection([FakeCursor(None)])
         with patch.object(lesson_content, "connection", return_value=fake):

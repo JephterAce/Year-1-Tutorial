@@ -164,6 +164,23 @@ class TutorRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         current.assert_called_once_with(require_csrf=True)
 
+
+    def test_tutor_route_retrieves_only_entitled_lesson_context(self):
+        topic_id = "00000000-0000-0000-0000-000000000001"
+        student = {"student_id":"synthetic-student-id","class_level":"SS1"}
+        with patch.dict(os.environ, {"AI_TUTOR_ENABLED":"true"}, clear=True):
+            with patch("app._current_student", return_value=student):
+                with patch("ai_tutor_quota.reserve_tutor_usage", return_value={"reserved_cost_microusd":1}):
+                    with patch("lesson_content.get_tutor_context", return_value="Approved lesson reference") as retrieve:
+                        with patch("ai_tutor.generate_tutor_answer", return_value="Grounded answer") as generate:
+                            response = self.client.post(
+                                "/api/v1/tutor/answer",
+                                json={"question":"Explain this lesson","topic_id":topic_id},
+                            )
+        self.assertEqual(response.status_code, 200)
+        retrieve.assert_called_once_with("synthetic-student-id",topic_id)
+        generate.assert_called_once_with("SS1","Explain this lesson",None,None,"Approved lesson reference")
+
     def test_tutor_route_uses_class_from_authenticated_session(self):
         from unittest.mock import patch
         with patch.dict(os.environ, {"AI_TUTOR_ENABLED": "true"}, clear=True):

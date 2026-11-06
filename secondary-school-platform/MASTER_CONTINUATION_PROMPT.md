@@ -488,3 +488,37 @@ The available GitHub integration supports repository file reads/writes but expos
 - Obtain official curriculum source materials and reuse rights, plus qualified Nigerian teacher review.
 - Complete privacy, NDPA, child/guardian consent, safeguarding, independent security, accessibility and recovery reviews.
 - Keep production deployment and public student onboarding blocked until explicit separate authorization and evidence-backed release approval.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (AI tutor foundation implementation)
+
+## Development changes committed
+- Added `backend/ai_tutor.py`: provider-neutral OpenAI-compatible chat-completions adapter; bounded learner question/context and answer size; class-level-specific teaching prompt; HTTPS endpoint validation; explicit host allow-list; redirects blocked; 20-second provider timeout; 600-token output cap; provider errors sanitised.
+- Added `POST /api/v1/tutor/answer` to `backend/app.py`. It requires a valid student session and CSRF token, uses class level from the authenticated session (not browser input), and returns only the tutor answer. It cannot change grades, payments, entitlements or curriculum state.
+- AI feature flag is strict opt-in: `AI_TUTOR_ENABLED` must be explicitly true; otherwise the endpoint returns 503. The sample environment file keeps it false and documents provider variables without credentials.
+- Added `backend/test_ai_tutor.py` covering prompt/input bounds, provider allow-list and credentials, bounded output, redirects, feature-disabled behaviour, authentication/CSRF gate and session-derived class level.
+- Updated backend README with provider setup and rollout limitations.
+
+## Commits
+- AI tutor client: `a47d8fdd068f39d4e231332ef4c2a5bf3048d164`
+- Protected API route: `ee71ea4ca19f4c05ac8e9bfe3cdca5c14942a25e`
+- Initial tests: `73ab1379debce505abe9c7f004538d50832e6395`
+- Protected route tests: `9ba7006cda18ec44d39d2cc47b3a229bb12d7e59`
+- Strict opt-in gate: `88fd92ded4ab77c52fde18573f4151d507eadeda`
+- Provider env example: `22e93d5f85b020d89ea27aaf061e86d41786c011`
+- Backend documentation: `b64b6aca1e06183001a61fa0450d801748c8a484`
+- Current development branch head at this checkpoint: `b64b6aca1e06183001a61fa0450d801748c8a484`
+
+## Verification and rollout status
+- GitHub Actions PR run `42295106769` for commit `9ba7006cda18ec44d39d2cc47b3a229bb12d7e59` completed successfully (API tests and container build). This was before the final strict-opt-in and documentation commits.
+- CI for current head `b64b6aca1e06183001a61fa0450d801748c8a484` was queued/in progress when recorded; do not claim the latest commit has passed until the check suite reports success.
+- No AI provider credentials were configured or read, no model request was made, and no learner data was sent to an external provider.
+- No staging deployment was triggered; Render remains on its previously verified app commit. No database migration or write was performed.
+
+## Explicit limitations before enabling AI tutor
+- Durable per-student quotas, concurrent request throttling, daily/monthly spend limits and provider budget alerts are not implemented. The endpoint is not approved for learner use until these controls exist and are tested.
+- No chat-history persistence, tutor frontend UI, streaming, content retrieval/grounding, teacher moderation workflow or independent answer-quality evaluation exists yet.
+- AI answers must not be treated as verified curriculum, marking authority or a replacement for qualified teachers.
+- Next engineering increment: implement database-backed usage quotas and cost controls with a new migration plus disposable-PostgreSQL tests; then integrate a learner-facing tutor interface and add authenticated browser acceptance. Keep the feature disabled until those controls and privacy review are complete.

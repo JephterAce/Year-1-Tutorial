@@ -116,6 +116,9 @@
     <div class="field"><label for="lessonPayload">Lesson content and practice questions (JSON)</label><textarea id="lessonPayload" rows="14" placeholder='{"content":{"intro":"…","learning_objectives":[],"sections":[],"key_terms":[],"worked_examples":[]},"practice_questions":[]}'></textarea></div>
     <button class="btn" onclick="saveLessonContentDraft()">Save lesson draft</button>
     <p class="muted" id="lessonDraftStatus" aria-live="polite"></p>
+    <div class="field"><label for="lessonReviewerName">Teacher reviewer name</label><input id="lessonReviewerName" placeholder="Name of qualified subject reviewer"></div>
+    <button class="btn secondary" onclick="loadLessonDrafts()">Load topic drafts</button>
+    <div id="lessonDraftList" class="empty">No lesson drafts loaded.</div>
    </section>
    <section class="card"><div class="cardhead"><h2>Generate podcast script</h2><span class="status">Draft script</span></div>
     <div class="field"><label for="podcastTopicId">Topic ID</label><input id="podcastTopicId" placeholder="Topic with approved lesson notes"></div>

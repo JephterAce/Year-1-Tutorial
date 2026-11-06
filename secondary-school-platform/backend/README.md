@@ -103,3 +103,12 @@ The API supports the local private filesystem for development and Neon branch-sc
 ## One-time owner administrator bootstrap
 
 There is deliberately no public administrator registration. To create the first owner, run `python bootstrap_admin.py` from a trusted environment with the staging `DATABASE_URL`, `LEARNWISE_ADMIN_EMAIL`, and a strong `LEARNWISE_ADMIN_PASSWORD` set in that environment, plus `LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN`. The script refuses to overwrite an existing account, hashes the password with scrypt, and records an audit event. Do not put the database URL or password in source control, browser code, or chat. Remove the bootstrap environment variables immediately after successful execution.
+
+
+## AI tutor foundation (not enabled for learners)
+
+- `POST /api/v1/tutor/answer` is a student-session and CSRF-protected endpoint. It takes a bounded question and optional lesson context; class level is read from the authenticated student session, not trusted from the browser.
+- `ai_tutor.py` provides an OpenAI-compatible chat-completions adapter with HTTPS endpoint validation, exact hostname allow-listing, redirect blocking, request/response size bounds, timeout and a short output-token cap. Provider credentials are read only from environment variables.
+- Configure `AI_API_URL`, `AI_API_ALLOWED_HOSTS`, `AI_API_KEY` and `AI_MODEL` privately in the host. Never commit or paste the key into chat.
+- `AI_TUTOR_ENABLED` is a strict opt-in and defaults to disabled. **Do not enable it for staging learners or production yet:** durable per-student request quotas, spend limits/budget alerts, retention controls and the complete learner UI have not been implemented or reviewed. The provider adapter and protected API route are an initial foundation, not a launch-ready AI tutor.
+- AI answers are educational assistance only. They do not grade assessments, grant paid access, publish curriculum or replace qualified teacher review. Provider responses must be evaluated for factual accuracy, age suitability, bias and curriculum alignment before wider use.

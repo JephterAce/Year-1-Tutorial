@@ -1,6 +1,7 @@
 """Entitlement-checked lesson notes, practice and topic progress."""
 from decimal import Decimal
 from database import connection
+from psycopg.types.json import Jsonb
 
 
 class LessonContentError(ValueError):
@@ -81,6 +82,13 @@ def check_practice_answer(student_id, topic_id, question_id, answer):
             correct = False
     else:
         correct = str(answer).strip().casefold() == str(expected).strip().casefold()
+    with connection() as conn:
+        conn.execute(
+            """INSERT INTO student_lesson_practice_attempts
+                 (student_id,topic_id,question_id,submitted_answer,is_correct)
+               VALUES (%s,%s,%s,%s,%s)""",
+            (student_id,topic_id,question_id,Jsonb({"value":answer}),correct),
+        )
     return {"correct": correct, "explanation": row["explanation"]}
 
 

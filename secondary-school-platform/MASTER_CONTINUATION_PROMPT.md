@@ -199,3 +199,69 @@ Do not cause a deployment or configuration mutation without explaining the effec
 ## Transfer message for a fresh ChatGPT account
 Paste the following instruction, then attach the Render screenshot:
 “Continue my Think Tank platform project from this master continuation file. Read it fully and inspect the current GitHub/Render/Neon state before acting. I am attaching a screenshot of the Render Environment Group named THINK TANK because the Linked Services area appears blank and I cannot find a link option. Diagnose the exact screen and guide me through only the necessary next step. Then continue the build autonomously from the recorded checkpoint, preserving all repository and deployment safety rules. Do not restart, do not ask me to repeat recorded details, and do not expose or request secrets.”
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (Render environment-group diagnosis and live provider reconciliation)
+
+## Screenshot diagnosis
+- The owner supplied a Render mobile-dashboard screenshot.
+- The screenshot is the THINK TANK Environment Group details page, not the learnwise-staging-api service's Environment page.
+- The group page shows an empty Linked Services panel and a visible Save only control. This is expected when a group has not yet been linked; the absence of a link button on the group page is not evidence of a broken group.
+- Current official Render route: open the target service → Environment → Linked Environment Groups → choose the group → Link. Render documentation: https://render.com/docs/configure-environment-variables
+- The owner should first select Save only on the current group editor, then open https://dashboard.render.com/web/srv-dbkqcmt9fdbs73c2kdpg and inspect the service's Environment page.
+- Do not click Link yet. Linking triggers a deploy. Before linking, compare key names and confirm the staging DATABASE_URL target/role privately. The screenshot shows DATABASE_URL, AWS storage variables, SMTP variables, payment and registration flags in the group; SMTP variables were also previously reported as being set directly on the service. Service-level values override same-named group values. Render does not guarantee precedence between multiple linked groups.
+- Owner must not reveal values or secrets in screenshots. Ask for a screenshot of the service Environment page with all values masked if UI guidance is still needed.
+- The connected Render tools available in this session do not expose environment-group list/detail/link operations or environment-variable readback. Do not claim to have independently inspected group values, scope, service links, or secret contents.
+
+## Verified GitHub state — 6 November 2026
+- Repository: https://github.com/JephterAce/Year-1-Tutorial
+- Active branch: secondary-school-platform-foundation
+- PR #1 remains open, draft, mergeable and unmerged: https://github.com/JephterAce/Year-1-Tutorial/pull/1
+- Branch head at this checkpoint: d35bebf6faa7690fd0412445d4fff5017126b70e.
+- CI run 42270003444 completed successfully on that exact head: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42270003444
+- Both jobs passed: api-tests and container-build. The API job includes unit/security tests, frontend/admin JavaScript syntax checks, disposable PostgreSQL migration replay, schema integration, and assessment/payment database E2E tests. Payment provider behavior in CI is mocked; this is not a real Paystack sandbox test or live staging browser acceptance.
+- Relative to the current Render live commit 26d83096b0fd89812b5a1c749798293a2ad1e2b1, the development branch is 4 commits ahead. The four commits include the staging owner-bootstrap workflow and this handover checkpoint. No code deployment was performed during this session.
+- Keep PR #1 draft/open/unmerged and keep main untouched.
+
+## Verified Render state — 6 November 2026
+- Workspace: Emmanuel's workspace (the only workspace returned by the connected Render account listing).
+- Service: learnwise-staging-api, ID srv-dbkqcmt9fdbs73c2kdpg.
+- URL: https://learnwise-staging-api.onrender.com
+- Dashboard: https://dashboard.render.com/web/srv-dbkqcmt9fdbs73c2kdpg
+- Connected branch: secondary-school-platform-foundation; Docker context secondary-school-platform; Dockerfile secondary-school-platform/backend/Dockerfile.
+- Region Frankfurt, Free plan, one instance.
+- Auto-deploy remains off (autoDeployTrigger=off).
+- Latest live deployment: dep-dbmf0h8ae00c73fcf1sg, commit 26d83096b0fd89812b5a1c749798293a2ad1e2b1, status live.
+- Health-check path remains blank.
+- HTTP /health and manual browser acceptance were not verified in this session. The web fetch could not access the endpoint and the container had no DNS/network access; this is an access limitation, not evidence that the endpoint is down.
+- SMTP environment values, sender verification and real delivery remain unverified. Never request or expose SMTP secrets.
+
+## Verified Neon staging state — 6 November 2026
+- Project: learnwise, ID spring-cloud-84267029.
+- Staging branch: think-tank-staging, ID br-still-cherry-baz7g5hk; non-default, non-primary, ready.
+- Database: learnwise, PostgreSQL 16.
+- Read-only aggregate query returned: 6 subjects, 0 topics, 0 students, 1 administrator, 1 audit event, 13 migration records.
+- The single audit event is admin.bootstrap.created at 2026-11-06T09:19:37.798Z.
+- The single admin record is an active owner role. This verifies that the one-time owner bootstrap occurred in the staging database; admin login, CSRF behavior and capability-gated admin operations have not yet been browser-tested.
+- Private bucket learnwise-private-audio exists with access level private; object listing returned zero objects. Neon storage is enabled. No object writes/deletes or migrations were performed in this session.
+- Render's actual DATABASE_URL and S3 secret values are not readable through the connected Render integration. A trusted operator must privately confirm that Render targets this Neon staging branch/database and uses the least-privilege learnwise_app role.
+
+## Outstanding gates and next work
+1. Owner action: tap Save only on the current THINK TANK group page, then open the staging service's Environment page and provide a masked screenshot showing the Linked Environment Groups section and relevant variable names only. Do not click Link yet.
+2. Before linking, reconcile duplicate keys and privately verify DATABASE_URL is the staging branch with learnwise_app; confirm the group is not scoped to a different project environment. Linking requires explicit approval because Render triggers a deployment.
+3. Run the manual workflow .github/workflows/think-tank-staging-browser.yml from GitHub Actions → Think Tank staging browser acceptance → Run workflow. The connected GitHub integration does not expose workflow dispatch.
+4. Test the newly bootstrapped owner login and protected admin routes using the owner's private password; never request the password in chat.
+5. Complete real Brevo sender verification and controlled SMTP delivery tests; keep student registration disabled except for an explicitly approved, brief staging test.
+6. Complete Paystack sandbox transactions/webhooks/retries/reconciliation; keep checkout and live payments disabled.
+7. Complete private audio object-storage E2E; the bucket is still empty.
+8. Obtain authorised NERDC curriculum source materials and reuse rights, map all 18 class/subject combinations, and obtain qualified teacher review.
+9. Complete Nigerian DPIA, NDPA/legal, child/guardian consent and safeguarding approvals.
+10. Complete full CMS/admin operations, student profile/export/deletion UAT, monitoring, backup/restore, accessibility and independent security review.
+11. No production release. No main-branch change, PR merge, paid resource, production migration, live payment, or production deployment is authorised.
+
+## Session outcome
+- Completed: full master prompt read; screenshot identified; current GitHub/Render/Neon state reconciled; owner bootstrap independently verified in Neon; current exact-head CI verified green.
+- Not completed: Environment Group linkage, HTTP/browser staging acceptance, SMTP delivery, Paystack sandbox, audio E2E, curriculum/legal/teacher gates, production readiness.
+- Next checkpoint: resume after the owner saves the group and opens the staging service's Environment page. Continue without rebuilding completed foundations.

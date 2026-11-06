@@ -124,7 +124,7 @@ There is deliberately no public administrator registration. To create the first 
 
 ### Reviewed lesson content and podcast production
 
-- Migration `015_reviewed_lesson_content_and_progress.sql` adds versioned lesson-content JSON, separate practice-question records, and student topic completion records.
+- Migration `015_reviewed_lesson_content_and_progress.sql` adds versioned lesson-content JSON, separate practice-question records, student practice-attempt history, and student topic completion records.
 - Authenticated students with an active topic entitlement can read only published topic content that has an approved lesson-content version. Student projections omit answer keys. Practice submissions are checked server-side; completion writes are CSRF-protected.
 - Admin authors with `curriculum.edit` can submit lesson content and practice questions as drafts. Admins with `curriculum.publish` can approve or reject a draft and must provide the teacher-reviewer's name. Approval promotes its practice questions at the same time. The lesson content itself does not publish the curriculum topic; the topic must separately pass source, cohort, term and publication guards.
 - Migration `016_podcast_script_workflow.sql` adds a versioned script register. Admins with `audio.upload` can generate an original two-presenter script draft from approved lesson content. They can upload a recorded or externally generated TTS file through the existing private audio upload route, attach the pending podcast asset to the script, and send the script/audio through separate review. A podcast script can be approved only when its attached private podcast audio is approved.

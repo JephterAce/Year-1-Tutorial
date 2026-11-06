@@ -400,7 +400,7 @@ def create_topic_checkout(topic_id):
 @app.post("/api/v1/tutor/answer")
 def answer_tutor_question():
     """Authenticated, CSRF-protected AI tutoring; disabled until explicitly configured."""
-    if not _feature_enabled("AI_TUTOR_ENABLED"):
+    if os.environ.get("AI_TUTOR_ENABLED", "").strip().lower() not in {"1", "true", "yes", "on"}:
         return jsonify({"error": "ai_tutor_temporarily_disabled"}), 503
     student = _current_student(require_csrf=True)
     if not student:

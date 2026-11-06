@@ -370,7 +370,7 @@ def review_podcast_script(script_id):
 
 
 @admin_data.post("/api/v1/admin/topics/<topic_id>/lesson-content")
-def create_lesson_content_draft():
+def create_lesson_content_draft(topic_id):
     from uuid import UUID
     from psycopg.types.json import Jsonb
     from admin_auth import validate_admin_csrf

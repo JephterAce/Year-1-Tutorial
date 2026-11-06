@@ -1,7 +1,7 @@
 """Transactional per-student AI tutor request and spend reservations."""
 import math
 import os
-from datetime import date
+from datetime import date, datetime, timezone
 from database import connection
 
 
@@ -39,7 +39,7 @@ def reserve_tutor_usage(student_id, input_text, output_token_reservation=600, to
     """Atomically enforce daily/monthly request and estimated-spend limits."""
     if not student_id:
         raise TutorQuotaError("student_required", "A verified student session is required.", 401)
-    usage_day = today or date.today()
+    usage_day = today or datetime.now(timezone.utc).date()
     month_start = usage_day.replace(day=1)
     input_tokens, cost = estimate_request_cost_microusd(input_text, output_token_reservation)
     daily_requests = _positive_int("AI_TUTOR_DAILY_REQUEST_LIMIT", 20)

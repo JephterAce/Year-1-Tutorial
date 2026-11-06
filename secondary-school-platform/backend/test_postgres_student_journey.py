@@ -47,7 +47,7 @@ class StudentRegistrationToResultsJourney(unittest.TestCase):
             if self.student_id:
                 conn.execute("DELETE FROM entitlements WHERE student_id=%s", (self.student_id,))
                 conn.execute("DELETE FROM students WHERE id=%s", (self.student_id,))
-            conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment_id,))
+            # Published assessment fixtures are immutable by design; the CI database is disposable.
             conn.execute("DELETE FROM topics WHERE id=%s", (self.topic_id,))
             conn.execute("DELETE FROM curriculum_source_records WHERE id=%s", (self.source_id,))
             conn.execute("DELETE FROM ai_tutor_platform_usage WHERE usage_date=%s", (self.usage_day,))

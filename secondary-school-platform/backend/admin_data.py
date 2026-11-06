@@ -367,3 +367,144 @@ def review_podcast_script(script_id):
                                   "reviewed_at":row["reviewed_at"].isoformat()}}),200
     except Exception:
         return jsonify({"error":"podcast_script_review_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/topics/<topic_id>/lesson-content")
+def create_lesson_content_draft():
+    from uuid import UUID
+    from psycopg.types.json import Jsonb
+    from admin_auth import validate_admin_csrf
+    import json
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.edit")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        topic_id=str(UUID(topic_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_topic_id"}),400
+    data=request.get_json(silent=True) or {}
+    content=data.get("content")
+    questions=data.get("practice_questions",[])
+    if not isinstance(content,dict) or not isinstance(questions,list) or len(questions)>100:
+        return jsonify({"error":"invalid_lesson_payload"}),400
+    if len(json.dumps(content,ensure_ascii=False))>60000:
+        return jsonify({"error":"lesson_content_too_large"}),413
+    for key in ("sections","learning_objectives","key_terms","worked_examples"):
+        if key in content and not isinstance(content[key],list):
+            return jsonify({"error":"invalid_lesson_structure","field":key}),400
+    if not isinstance(content.get("sections",[]),list) or len(content.get("sections",[]))>30:
+        return jsonify({"error":"invalid_lesson_sections"}),400
+    for q in questions:
+        if not isinstance(q,dict) or q.get("question_type") not in {"single_choice","true_false","numeric"}:
+            return jsonify({"error":"invalid_practice_question"}),400
+        if not isinstance(q.get("prompt"),str) or not q["prompt"].strip() or len(q["prompt"])>2000:
+            return jsonify({"error":"invalid_practice_prompt"}),400
+        if not isinstance(q.get("answer_key"),dict) or "value" not in q["answer_key"]:
+            return jsonify({"error":"practice_answer_key_required"}),400
+        if not isinstance(q.get("explanation"),str) or not q["explanation"].strip() or len(q["explanation"])>4000:
+            return jsonify({"error":"practice_explanation_required"}),400
+        if q["question_type"]=="single_choice":
+            options=q.get("options")
+            if not isinstance(options,list) or not 2<=len(options)<=8:
+                return jsonify({"error":"invalid_practice_options"}),400
+            option_ids={x.get("id") for x in options if isinstance(x,dict)}
+            if len(option_ids)!=len(options) or q["answer_key"]["value"] not in option_ids:
+                return jsonify({"error":"invalid_practice_answer_key"}),400
+        elif q.get("options") not in (None,[]):
+            return jsonify({"error":"options_not_allowed"}),400
+    try:
+        with connection() as conn:
+            topic=conn.execute("SELECT id,status FROM topics WHERE id=%s",(topic_id,)).fetchone()
+            if not topic: return jsonify({"error":"topic_not_found"}),404
+            if topic["status"] in {"published","archived"}:
+                return jsonify({"error":"published_topic_locked"}),409
+            version=conn.execute(
+                "SELECT COALESCE(MAX(version),0)+1 AS next_version FROM topic_lesson_content WHERE topic_id=%s",
+                (topic_id,)
+            ).fetchone()["next_version"]
+            row=conn.execute(
+                """INSERT INTO topic_lesson_content
+                     (topic_id,version,content_json,review_status,created_by)
+                   VALUES (%s,%s,%s,'draft',%s)
+                   RETURNING id,version,created_at""",
+                (topic_id,version,Jsonb(content),session["email"]),
+            ).fetchone()
+            for index,q in enumerate(questions,1):
+                conn.execute(
+                    """INSERT INTO lesson_practice_questions
+                         (topic_id,lesson_content_id,question_type,prompt,options,answer_key,
+                          explanation,sort_order,review_status)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'draft')""",
+                    (topic_id,row["id"],q["question_type"],q["prompt"],
+                     Jsonb(q["options"]) if q.get("options") else None,
+                     Jsonb(q["answer_key"]),q["explanation"],q.get("sort_order",index)),
+                )
+            _audit(conn,session,"admin.lesson_content.created","topic_lesson_content",1)
+        return jsonify({"content_id":str(row["id"]),"version":row["version"],
+                        "practice_question_count":len(questions),"review_status":"draft"}),201
+    except Exception:
+        return jsonify({"error":"lesson_content_save_failed"}),503
+
+
+@admin_data.post("/api/v1/admin/lesson-content/<content_id>/review")
+def review_lesson_content_draft(content_id):
+    from uuid import UUID
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.publish")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        content_id=str(UUID(content_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_content_id"}),400
+    data=request.get_json(silent=True) or {}
+    status=data.get("review_status")
+    teacher_reviewer=(data.get("teacher_reviewer_name") or "").strip()
+    if status not in {"approved","rejected"}:
+        return jsonify({"error":"invalid_review_status"}),400
+    if status=="approved" and not 2<=len(teacher_reviewer)<=120:
+        return jsonify({"error":"teacher_reviewer_required"}),400
+    try:
+        with connection() as conn:
+            if status=="approved":
+                row=conn.execute(
+                    """UPDATE topic_lesson_content SET review_status='approved',
+                         approved_by=%s,approved_at=now()
+                       WHERE id=%s AND review_status IN ('draft','teacher_review')
+                       RETURNING id,topic_id,version,review_status""",
+                    (teacher_reviewer,content_id),
+                ).fetchone()
+                if row:
+                    conn.execute(
+                        """UPDATE lesson_practice_questions SET review_status='approved'
+                           WHERE lesson_content_id=%s AND review_status IN ('draft','teacher_review')""",
+                        (content_id,),
+                    )
+            else:
+                row=conn.execute(
+                    """UPDATE topic_lesson_content SET review_status='rejected'
+                       WHERE id=%s AND review_status IN ('draft','teacher_review')
+                       RETURNING id,topic_id,version,review_status""",
+                    (content_id,),
+                ).fetchone()
+                if row:
+                    conn.execute(
+                        "UPDATE lesson_practice_questions SET review_status='rejected' WHERE lesson_content_id=%s",
+                        (content_id,),
+                    )
+            if not row: return jsonify({"error":"draft_not_found_or_already_reviewed"}),409
+            _audit(conn,session,"admin.lesson_content.reviewed","topic_lesson_content",1)
+        return jsonify({"content_id":str(row["id"]),"topic_id":str(row["topic_id"]),
+                        "version":row["version"],"review_status":row["review_status"]}),200
+    except Exception:
+        return jsonify({"error":"lesson_content_review_unavailable"}),503

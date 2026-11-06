@@ -52,7 +52,7 @@ def get_lesson_content(student_id, topic_id):
 
 
 def check_practice_answer(student_id, topic_id, question_id, answer):
-    if not isinstance(answer, (str, int, float, bool)) or isinstance(answer, bool) and answer not in (True, False):
+    if not isinstance(answer, (str, int, float, bool)):
         raise LessonContentError("invalid_answer", "Enter a valid answer.")
     if isinstance(answer, str) and len(answer) > 100:
         raise LessonContentError("invalid_answer", "Your answer is too long.")
@@ -72,8 +72,11 @@ def check_practice_answer(student_id, topic_id, question_id, answer):
             raise LessonContentError("practice_unavailable", "This practice question is unavailable.", 404)
     expected = row["answer_key"].get("value") if isinstance(row["answer_key"], dict) else row["answer_key"]
     if row["question_type"] == "numeric":
+        if isinstance(answer, bool) or not isinstance(answer, (int, float, str)):
+            raise LessonContentError("invalid_answer", "Enter a numeric answer.")
         try:
-            correct = Decimal(str(answer)) == Decimal(str(expected))
+            submitted_number, expected_number = Decimal(str(answer)), Decimal(str(expected))
+            correct = submitted_number.is_finite() and expected_number.is_finite() and submitted_number == expected_number
         except Exception:
             correct = False
     else:
@@ -85,9 +88,11 @@ def mark_topic_complete(student_id, topic_id):
     with connection() as conn:
         _require_entitlement(conn, student_id, topic_id)
         content = conn.execute(
-            """SELECT id FROM topic_lesson_content
-               WHERE topic_id=%s AND review_status='approved'
-               ORDER BY version DESC LIMIT 1""",
+            """SELECT c.id FROM topic_lesson_content c
+               JOIN topics t ON t.id=c.topic_id
+               WHERE c.topic_id=%s AND c.review_status='approved'
+                 AND t.status='published' AND t.curriculum_status='published'
+               ORDER BY c.version DESC LIMIT 1""",
             (topic_id,),
         ).fetchone()
         if not content:

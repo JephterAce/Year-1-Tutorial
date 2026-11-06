@@ -87,7 +87,7 @@
 </section>
 <section class="page" id="studio">
  <div class="heading"><div><h1>Lesson studio</h1><p>Prepare the two approved narration formats for each verified topic.</p></div><span class="status">Production disabled</span></div>
- <div class="notice">Script drafts created in this preview are not saved. Connect the authenticated backend and editorial workflow before using real lesson content.</div>
+ <div class="notice">Authenticated draft authoring is connected. Lesson content remains private and unpublished until a qualified subject reviewer approves it and the curriculum topic passes its separate evidence and publication checks.</div>
  <div class="layout">
   <section class="card"><div class="cardhead"><h2>New lesson brief</h2><span class="status info">Draft preview</span></div>
    <div class="field"><label for="lessonTitle">Lesson title</label><input id="lessonTitle" placeholder="Enter a verified topic title"></div>
@@ -101,6 +101,20 @@
    <div class="row"><div><b>Transcript and learning notes</b><div class="muted">Accessible lesson companion</div></div><span class="status">Not produced</span></div>
    <div id="briefPreview" class="notice" style="display:none;margin-top:14px"></div>
   </section>
+  <div class="layout" style="margin-top:16px">
+   <section class="card"><div class="cardhead"><h2>Save reviewed lesson draft</h2><span class="status">Draft only</span></div>
+    <div class="field"><label for="contentTopicId">Topic ID</label><input id="contentTopicId" placeholder="Paste topic ID from curriculum register"></div>
+    <div class="field"><label for="lessonPayload">Lesson content and practice questions (JSON)</label><textarea id="lessonPayload" rows="14" placeholder='{"content":{"intro":"…","learning_objectives":[],"sections":[],"key_terms":[],"worked_examples":[]},"practice_questions":[]}'></textarea></div>
+    <button class="btn" onclick="saveLessonContentDraft()">Save lesson draft</button>
+    <p class="muted" id="lessonDraftStatus" aria-live="polite"></p>
+   </section>
+   <section class="card"><div class="cardhead"><h2>Generate podcast script</h2><span class="status">Draft script</span></div>
+    <div class="field"><label for="podcastTopicId">Topic ID</label><input id="podcastTopicId" placeholder="Topic with approved lesson notes"></div>
+    <button class="btn" onclick="generatePodcastScript()">Generate two-presenter script</button>
+    <div class="field"><label for="podcastScriptOutput">Generated script</label><textarea id="podcastScriptOutput" rows="14" readonly></textarea></div>
+    <p class="muted" id="podcastScriptStatus" aria-live="polite"></p>
+   </section>
+  </div>
  </div>
 </section>
 <section class="page" id="audio">

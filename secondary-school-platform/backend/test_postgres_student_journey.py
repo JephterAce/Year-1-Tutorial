@@ -36,12 +36,15 @@ class StudentRegistrationToResultsJourney(unittest.TestCase):
         self.env.start()
 
     def tearDown(self):
-        if self.student_id:
-            with connection() as conn:
+        with connection() as conn:
+            if not self.student_id:
+                row=conn.execute("SELECT id FROM students WHERE email=%s",(self.email,)).fetchone()
+                self.student_id=str(row["id"]) if row else None
+            if self.student_id:
                 conn.execute("DELETE FROM students WHERE id=%s", (self.student_id,))
-                conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment_id,))
-                conn.execute("DELETE FROM topics WHERE id=%s", (self.topic_id,))
-                conn.execute("DELETE FROM curriculum_source_records WHERE id=%s", (self.source_id,))
+            conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment_id,))
+            conn.execute("DELETE FROM topics WHERE id=%s", (self.topic_id,))
+            conn.execute("DELETE FROM curriculum_source_records WHERE id=%s", (self.source_id,))
         self.env.stop()
 
     def test_registration_to_lesson_practice_progress_and_results(self):

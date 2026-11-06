@@ -506,13 +506,15 @@ def student_dashboard():
                         JOIN topics t ON t.id=lp.topic_id
                        WHERE lp.student_id=%s AND lp.completed_at IS NOT NULL
                          AND t.status='published' AND t.curriculum_status='published') AS completed_lessons,
+                     (SELECT count(*) FROM student_lesson_practice_attempts
+                       WHERE student_id=%s) AS practice_attempts,
                      (SELECT count(*) FROM assessment_attempts
                        WHERE student_id=%s AND status <> 'briefing') AS assessment_attempts,
                      (SELECT count(*) FROM assessment_attempts
                        WHERE student_id=%s AND passed IS TRUE) AS assessments_passed,
                      (SELECT round(avg(percentage),1) FROM assessment_attempts
                        WHERE student_id=%s AND percentage IS NOT NULL) AS average_score""",
-                (student["student_id"], student["student_id"],
+                (student["student_id"], student["student_id"], student["student_id"],
                  student["student_id"], student["student_id"]),
             ).fetchone()
             subjects = conn.execute(
@@ -549,6 +551,7 @@ def student_dashboard():
             },
             "summary": {
                 "completed_lessons": int(summary["completed_lessons"] or 0),
+                "practice_attempts": int(summary["practice_attempts"] or 0),
                 "assessment_attempts": int(summary["assessment_attempts"] or 0),
                 "assessments_passed": int(summary["assessments_passed"] or 0),
                 "average_score": str(summary["average_score"]) if summary["average_score"] is not None else None,

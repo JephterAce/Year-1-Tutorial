@@ -119,9 +119,23 @@
 </section>
 <section class="page" id="audio">
  <div class="heading"><div><h1>Audio library</h1><p>Manage teacher narration, podcast audio and transcripts.</p></div><span class="status">No assets uploaded</span></div>
- <div class="notice">Audio upload, private storage, signed playback and approval are not connected in this preview. Do not upload student or confidential files here.</div>
- <div class="grid"><div class="card"><small>Teacher narration</small><strong>0</strong><small>Approved assets</small></div><div class="card"><small>Podcast episodes</small><strong>0</strong><small>Approved assets</small></div><div class="card"><small>Transcripts</small><strong>0</strong><small>Reviewed files</small></div><div class="card"><small>Pending QA</small><strong>0</strong><small>Awaiting review</small></div></div>
- <div class="card" style="margin-top:16px"><div class="empty">Your approved audio assets will appear here after secure storage and the review workflow are implemented.</div></div>
+ <div class="notice">Audio uploads are sent to private object storage. An audio reviewer must approve the asset, then approve the podcast script. Student playback is still protected by topic entitlement and the private streaming endpoint.</div>
+ <div class="layout">
+  <section class="card"><div class="cardhead"><h2>Upload private podcast audio</h2><span class="status">Pending review</span></div>
+   <div class="field"><label for="audioTopicId">Topic ID</label><input id="audioTopicId" placeholder="Topic ID"></div>
+   <div class="field"><label for="audioFile">Audio file (MP3, M4A, WAV, OGG or WebM; max 100 MB)</label><input id="audioFile" type="file" accept="audio/mpeg,audio/mp4,audio/wav,audio/ogg,audio/webm"></div>
+   <button class="btn" onclick="uploadPodcastAudio()">Upload to private storage</button>
+   <p class="muted" id="audioUploadStatus" aria-live="polite"></p>
+  </section>
+  <section class="card"><div class="cardhead"><h2>Attach audio to script</h2></div>
+   <div class="field"><label for="attachScriptId">Podcast script ID</label><input id="attachScriptId"></div>
+   <div class="field"><label for="attachAssetId">Uploaded audio asset ID</label><input id="attachAssetId"></div>
+   <button class="btn" onclick="attachPodcastAudio()">Attach pending audio</button>
+   <p class="muted" id="attachAudioStatus" aria-live="polite"></p>
+  </section>
+ </div>
+ <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Podcast scripts</h2><button class="btn secondary" onclick="loadPodcastScripts()">Refresh scripts</button></div><div id="podcastScriptList" class="empty">Load scripts after admin sign-in.</div></div>
+ <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Private audio assets</h2><button class="btn secondary" onclick="loadAudioAssets()">Refresh audio assets</button></div><div id="audioAssetList" class="empty">Load assets after admin sign-in.</div></div>
 </section>
 <section class="page" id="announcements">
  <div class="heading"><div><h1>Channel announcements</h1><p>Draft broadcast updates for the secondary-school Telegram Channel.</p></div><span class="status info">Manual publishing</span></div>

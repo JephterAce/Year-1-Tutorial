@@ -51,11 +51,13 @@ CREATE INDEX IF NOT EXISTS lesson_practice_questions_approved_idx
 CREATE TABLE IF NOT EXISTS student_topic_progress (
   student_id UUID NOT NULL REFERENCES students(id) ON DELETE CASCADE,
   topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
-  lesson_content_id UUID REFERENCES topic_lesson_content(id),
+  lesson_content_id UUID,
   last_accessed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   completed_at TIMESTAMPTZ,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  PRIMARY KEY(student_id,topic_id)
+  PRIMARY KEY(student_id,topic_id),
+  FOREIGN KEY (lesson_content_id,topic_id)
+    REFERENCES topic_lesson_content(id,topic_id)
 );
 CREATE INDEX IF NOT EXISTS student_topic_progress_recent_idx
   ON student_topic_progress(student_id,updated_at DESC);

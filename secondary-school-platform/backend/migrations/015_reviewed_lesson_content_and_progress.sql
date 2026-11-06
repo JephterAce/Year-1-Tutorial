@@ -62,8 +62,18 @@ CREATE TABLE IF NOT EXISTS student_topic_progress (
 CREATE INDEX IF NOT EXISTS student_topic_progress_recent_idx
   ON student_topic_progress(student_id,updated_at DESC);
 
-ALTER TABLE lesson_practice_questions
-  ADD CONSTRAINT lesson_practice_question_topic_unique UNIQUE(id,topic_id);
+DO $migration$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'lesson_practice_question_topic_unique'
+      AND conrelid = 'lesson_practice_questions'::regclass
+  ) THEN
+    ALTER TABLE lesson_practice_questions
+      ADD CONSTRAINT lesson_practice_question_topic_unique UNIQUE(id,topic_id);
+  END IF;
+END
+$migration$;
 
 CREATE TABLE IF NOT EXISTS student_lesson_practice_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -789,3 +789,33 @@ def publish_curriculum_topic(topic_id):
                         "term_mapping_status":published["term_mapping_status"]}),200
     except Exception:
         return jsonify({"error":"curriculum_topic_publish_failed"}),503
+
+
+@admin_data.get("/api/v1/admin/topics/<topic_id>/lesson-content")
+def list_admin_lesson_content(topic_id):
+    from uuid import UUID
+    session,error=_denied("curriculum.read")
+    if error: return error
+    try:
+        topic_id=str(UUID(topic_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_topic_id"}),400
+    try:
+        with connection() as conn:
+            rows=conn.execute(
+                """SELECT id,version,content_json,review_status,created_by,approved_by,
+                          approved_at,created_at
+                   FROM topic_lesson_content WHERE topic_id=%s
+                   ORDER BY version DESC LIMIT 20""",
+                (topic_id,),
+            ).fetchall()
+            _audit(conn,session,"admin.lesson_content.viewed","topic_lesson_content",len(rows))
+        return jsonify({"items":[{
+            "id":str(r["id"]),"version":r["version"],"content":r["content_json"],
+            "review_status":r["review_status"],"created_by":r["created_by"],
+            "approved_by":r["approved_by"],
+            "approved_at":r["approved_at"].isoformat() if r["approved_at"] else None,
+            "created_at":r["created_at"].isoformat()
+        } for r in rows]}),200
+    except Exception:
+        return jsonify({"error":"admin_lesson_content_unavailable"}),503

@@ -641,3 +641,25 @@ This increment is committed to the development branch only. It is not yet a comp
 - No NERDC topics/lesson drafts were inserted into managed staging. Two SS1 source documents (English Language and Biology) have topic maps and one original draft lesson each; all remain unreviewed and unpublished.
 - SSS2 official viewer links for several subjects are identified but PDF text remains unavailable; SSS3 class-specific sources are still outstanding.
 - No managed Neon migrations 014–017 were applied, no Render deployment was triggered, and production/main remain untouched.
+
+
+---
+
+# Continuation checkpoint — 6 November 2026 (isolated migration rehearsal)
+
+## Migration rehearsal
+- Created a separate Neon child branch `think-tank-migration-rehearsal-20261106` (branch ID `br-plain-band-ba3mrbzi`) from the managed staging branch at its current parent snapshot. The rehearsal branch is not the staging branch and is not the project default.
+- Confirmed the child branch reached `ready`.
+- Applied the DDL from migrations 014–017 to the child branch database only, using one transaction with individual statements. The DDL completed successfully.
+- Verified all seven expected new tables exist: `student_ai_tutor_usage`, `topic_lesson_content`, `lesson_practice_questions`, `student_topic_progress`, `student_lesson_practice_attempts`, `podcast_scripts`, and `ai_tutor_platform_usage`.
+- Found a replay-safety issue in migration 015: its explicit UNIQUE constraint addition was not guarded. Updated migration 015 on this development branch to add the constraint inside a catalog-checked DO block. Applied the guarded block against the rehearsal branch where the constraint already existed; it completed successfully without duplicate-constraint failure.
+- This is a targeted DDL rehearsal, not yet a full automated run of the repository migration runner against a fresh Neon child branch. The disposable PostgreSQL GitHub Actions migration suite remains the canonical full replay test.
+- No migrations were applied to the managed staging parent, production, or main branch. No staging deployment was triggered.
+
+## Remaining release work (still open)
+- Capture and map actual NERDC documents and cohort applicability for all 18 subject/class tracks; only SSS1 English Language and Biology have captured topic maps at present. SSS2 subject pages list the relevant subjects, but individual curriculum PDFs remain uncaptured; class-specific SSS3 documents remain unresolved.
+- Create original, teacher-reviewed lesson libraries, practice banks and answer keys for the remaining subject/class tracks. No unverified topics or guessed term mappings are to be published.
+- Complete authenticated browser-level registration-to-results tests; current evidence is API-level PostgreSQL acceptance with email delivery mocked.
+- Complete automatic TTS only after selecting a provider/API workflow that is supported beyond the near-term deprecation of the currently documented Speech endpoint; implement provider-specific price accounting, quota reservations, private storage and review before enabling it.
+- Finish the student-facing results/history and podcast library experiences, then run mobile browser checks.
+- Do not claim staging-ready or production-ready until these gates, privacy/safeguarding review, provider configuration and staging migration/deploy checks are complete.

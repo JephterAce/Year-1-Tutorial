@@ -34,7 +34,7 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
             names = conn.execute(
                 """SELECT table_name FROM information_schema.tables
                    WHERE table_schema='public' AND table_name IN
-                     ('student_ai_tutor_usage','topic_lesson_content',
+                     ('student_ai_tutor_usage','ai_tutor_platform_usage','topic_lesson_content',
                       'lesson_practice_questions','student_topic_progress')"""
             ).fetchall()
         self.assertEqual({row[0] for row in names}, {

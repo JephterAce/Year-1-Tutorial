@@ -508,3 +508,204 @@ def review_lesson_content_draft(content_id):
                         "version":row["version"],"review_status":row["review_status"]}),200
     except Exception:
         return jsonify({"error":"lesson_content_review_unavailable"}),503
+
+
+@admin_data.get("/api/v1/admin/topics")
+def list_curriculum_topics():
+    session,error=_denied("curriculum.read")
+    if error: return error
+    class_level=request.args.get("class_level")
+    subject_slug=request.args.get("subject")
+    if class_level and class_level not in {"SS1","SS2","SS3"}:
+        return jsonify({"error":"invalid_class_level"}),400
+    try:
+        with connection() as conn:
+            rows=conn.execute(
+                """SELECT t.id,t.slug,t.title,t.class_level,t.status,t.curriculum_status,
+                          t.term_mapping_status,t.term_id,t.curriculum_source_record_id,
+                          s.slug AS subject_slug,s.name AS subject
+                   FROM topics t JOIN subjects s ON s.id=t.subject_id
+                   WHERE (%s IS NULL OR t.class_level=%s)
+                     AND (%s IS NULL OR s.slug=%s)
+                   ORDER BY t.class_level,s.sort_order,t.title LIMIT 500""",
+                (class_level,class_level,subject_slug,subject_slug),
+            ).fetchall()
+            _audit(conn,session,"admin.curriculum_topics.viewed","topics",len(rows))
+        return jsonify({"items":[{
+            "id":str(r["id"]),"slug":r["slug"],"title":r["title"],
+            "class_level":r["class_level"],"subject_slug":r["subject_slug"],
+            "subject":r["subject"],"status":r["status"],
+            "curriculum_status":r["curriculum_status"],
+            "term_mapping_status":r["term_mapping_status"],
+            "term_id":str(r["term_id"]) if r["term_id"] else None,
+            "source_id":str(r["curriculum_source_record_id"]) if r["curriculum_source_record_id"] else None
+        } for r in rows]}),200
+    except Exception:
+        return jsonify({"error":"admin_topics_unavailable"}),503
+
+
+@admin_data.post("/api/v1/admin/curriculum-sources")
+def create_curriculum_source_record():
+    from uuid import UUID
+    from urllib.parse import urlparse
+    from admin_auth import validate_admin_csrf
+    from psycopg.types.json import Jsonb
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.edit")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    data=request.get_json(silent=True) or {}
+    class_level=data.get("class_level")
+    subject_slug=data.get("subject_slug")
+    title=(data.get("source_title") or "").strip()
+    url=(data.get("source_url") or "").strip()
+    section=(data.get("source_section") or "").strip()
+    source_kind=data.get("source_kind","official_nerdc")
+    licence_status=data.get("licence_status","metadata_only")
+    parsed=urlparse(url)
+    if class_level not in {"SS1","SS2","SS3"} or not isinstance(subject_slug,str):
+        return jsonify({"error":"invalid_class_or_subject"}),400
+    if not 5<=len(title)<=240 or not section or len(section)>500:
+        return jsonify({"error":"source_title_and_section_required"}),400
+    if parsed.scheme!="https" or not parsed.hostname or parsed.username or parsed.password:
+        return jsonify({"error":"https_source_url_required"}),400
+    if source_kind not in {"official_nerdc","school_scheme","teacher_reference","other"}:
+        return jsonify({"error":"invalid_source_kind"}),400
+    if licence_status not in {"metadata_only","permission_requested","permission_granted","restricted","unknown"}:
+        return jsonify({"error":"invalid_licence_status"}),400
+    try:
+        with connection() as conn:
+            subject=conn.execute("SELECT id FROM subjects WHERE slug=%s AND is_active=true",(subject_slug,)).fetchone()
+            version=conn.execute("SELECT id FROM curriculum_versions WHERE version_code='nerdc_ssec_2025' AND status='active'").fetchone()
+            if not subject or not version:
+                return jsonify({"error":"subject_or_curriculum_version_unavailable"}),404
+            row=conn.execute(
+                """INSERT INTO curriculum_source_records
+                     (subject_id,class_level,source_title,source_url,source_version,source_date,
+                      source_section,notes,verification_status,curriculum_version_id,source_kind,
+                      licence_status)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,'source_captured',%s,%s,%s)
+                   RETURNING id,created_at""",
+                (subject["id"],class_level,title,url,data.get("source_version"),
+                 data.get("source_date") or None,section,(data.get("notes") or "")[:2000],
+                 version["id"],source_kind,licence_status),
+            ).fetchone()
+            _audit(conn,session,"admin.curriculum_source.captured","curriculum_source_record",1)
+        return jsonify({"source_id":str(row["id"]),"verification_status":"source_captured",
+                        "created_at":row["created_at"].isoformat()}),201
+    except Exception:
+        return jsonify({"error":"curriculum_source_save_failed"}),503
+
+
+@admin_data.post("/api/v1/admin/topics")
+def create_curriculum_topic_draft():
+    from uuid import UUID
+    import re
+    from psycopg.types.json import Jsonb
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.edit")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    data=request.get_json(silent=True) or {}
+    class_level=data.get("class_level")
+    subject_slug=data.get("subject_slug")
+    source_id=data.get("source_id")
+    slug=(data.get("slug") or "").strip().lower()
+    title=(data.get("title") or "").strip()
+    objectives=data.get("learning_objectives",[])
+    if class_level not in {"SS1","SS2","SS3"} or not isinstance(subject_slug,str):
+        return jsonify({"error":"invalid_class_or_subject"}),400
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+){0,7}",slug):
+        return jsonify({"error":"invalid_topic_slug"}),400
+    if not 3<=len(title)<=180 or not isinstance(objectives,list) or len(objectives)>20:
+        return jsonify({"error":"invalid_topic_metadata"}),400
+    if any(not isinstance(x,str) or not x.strip() or len(x)>400 for x in objectives):
+        return jsonify({"error":"invalid_learning_objectives"}),400
+    try:
+        source_id=str(UUID(source_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_source_id"}),400
+    try:
+        with connection() as conn:
+            source=conn.execute(
+                """SELECT c.id,c.subject_id,c.class_level,c.source_url,c.source_version,
+                          c.source_section,c.curriculum_version_id,s.slug AS subject_slug
+                   FROM curriculum_source_records c JOIN subjects s ON s.id=c.subject_id
+                   WHERE c.id=%s AND c.class_level=%s AND s.slug=%s
+                     AND c.verification_status IN ('source_captured','mapped','teacher_review','approved')""",
+                (source_id,class_level,subject_slug),
+            ).fetchone()
+            if not source: return jsonify({"error":"matching_curriculum_source_required"}),409
+            row=conn.execute(
+                """INSERT INTO topics
+                     (subject_id,class_level,term_id,slug,title,summary,learning_objectives,
+                      price_kobo,currency,status,curriculum_version_id,curriculum_source_record_id,
+                      curriculum_status,curriculum_theme,curriculum_subtopic,curriculum_source_url,
+                      curriculum_source_version,curriculum_source_section,curriculum_evidence_note,
+                      term_mapping_status)
+                   VALUES (%s,%s,NULL,%s,%s,%s,%s,%s,'NGN','draft',%s,%s,'source_captured',
+                      %s,%s,%s,%s,%s,%s,'not_assigned')
+                   RETURNING id,created_at""",
+                (source["subject_id"],class_level,slug,title,(data.get("summary") or "")[:2000],
+                 Jsonb(objectives),max(100000,int(data.get("price_kobo",100000))),
+                 source["curriculum_version_id"],source_id,(data.get("curriculum_theme") or "")[:180],
+                 (data.get("curriculum_subtopic") or "")[:180],source["source_url"],
+                 source["source_version"],source["source_section"],
+                 (data.get("curriculum_evidence_note") or "")[:2000]),
+            ).fetchone()
+            _audit(conn,session,"admin.curriculum_topic.created","topic",1)
+        return jsonify({"topic_id":str(row["id"]),"status":"draft",
+                        "curriculum_status":"source_captured",
+                        "term_mapping_status":"not_assigned"}),201
+    except (ValueError,TypeError):
+        return jsonify({"error":"invalid_topic_metadata"}),400
+    except Exception:
+        return jsonify({"error":"curriculum_topic_save_failed"}),503
+
+
+@admin_data.post("/api/v1/admin/curriculum-sources/<source_id>/review")
+def review_curriculum_source_record(source_id):
+    from uuid import UUID
+    from admin_auth import validate_admin_csrf
+    session=_session()
+    if not session: return jsonify({"error":"unauthenticated"}),401
+    if not validate_admin_csrf(session,request.headers.get("X-CSRF-Token","")):
+        return jsonify({"error":"csrf_failed"}),401
+    try:
+        require(session["principal"],"curriculum.publish")
+    except PermissionError:
+        return jsonify({"error":"forbidden"}),403
+    try:
+        source_id=str(UUID(source_id))
+    except (TypeError,ValueError,AttributeError):
+        return jsonify({"error":"invalid_source_id"}),400
+    data=request.get_json(silent=True) or {}
+    status=data.get("verification_status")
+    reviewer=(data.get("reviewer_name") or "").strip()
+    if status not in {"approved","superseded"} or not 2<=len(reviewer)<=120:
+        return jsonify({"error":"review_status_and_reviewer_required"}),400
+    try:
+        with connection() as conn:
+            row=conn.execute(
+                """UPDATE curriculum_source_records SET verification_status=%s,
+                     reviewed_by=%s,reviewed_at=now()
+                   WHERE id=%s AND verification_status IN ('source_captured','mapped','teacher_review')
+                     AND COALESCE(trim(source_section),'')<>''
+                   RETURNING id,verification_status,reviewed_at""",
+                (status,reviewer,source_id),
+            ).fetchone()
+            if not row: return jsonify({"error":"source_not_reviewable"}),409
+            _audit(conn,session,"admin.curriculum_source.reviewed","curriculum_source_record",1)
+        return jsonify({"source_id":str(row["id"]),"verification_status":row["verification_status"],
+                        "reviewed_at":row["reviewed_at"].isoformat()}),200
+    except Exception:
+        return jsonify({"error":"curriculum_source_review_unavailable"}),503

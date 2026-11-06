@@ -354,3 +354,20 @@ Paste the following instruction, then attach the Render screenshot:
 3. Verify student/admin pages and anonymous authorization behaviour. Test authenticated admin login only through the owner-controlled browser session; never request or print the password.
 4. Verify SMTP delivery and Paystack sandbox separately using test credentials; no live payment. Private audio storage remains unpopulated and private.
 5. Keep production release gated on privacy/safeguarding/legal/teacher/curriculum, backup/restore, security and operational approvals. No production release is authorised.
+
+## Staging health and database connectivity verified — 6 November 2026
+- Owner opened `https://learnwise-staging-api.onrender.com/health` and supplied the exact JSON response:
+  ```json
+  {"mode":"database","service":"secondary-school-api","status":"ok"}
+  ```
+- This is direct external HTTP evidence that the deployed Flask health route returned HTTP success with `status=ok` and `mode=database`. The route's database-mode readiness check calls `database_ready()`; therefore the app successfully reached its configured PostgreSQL database at the time of the request.
+- This confirms runtime database connectivity for the staging service, not the correctness of every schema/query, all application routes, or production readiness. The effective secret values and precise database target remain unreadable through the connected Render integration; the response confirms successful DB readiness but does not independently identify the Neon branch/role.
+- Render deployment remains the already verified live deployment `dep-dbn2dcrl550s73f9ahag` on application commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`. No redeploy, migration, database write, payment, storage upload, or production change was performed for this health check.
+- Inspected the exact browser acceptance suite on `secondary-school-platform-foundation`: `secondary-school-platform/browser-acceptance/staging.spec.js`, package script `npm test`, Playwright 1.56.1, Chromium. It contains eight read-only tests for health, student-facing pages, account form controls without submission, anonymous student/private API authorization, assessment/audio denial, administrator identity denial, admin redirects, and separation of the admin login form. The workflow is `.github/workflows/think-tank-staging-browser.yml`; it installs dependencies and Chromium, runs the suite against the supplied staging base URL, and uploads report/traces. It does not submit registration, payment or other state-changing actions.
+- The browser suite has not yet been executed. The connected GitHub integration still cannot dispatch the workflow, and it remains absent from `main`; do not modify `main` to expose it. The remaining safe route is to run the existing suite from a Codespaces terminal on the development branch, using the staging URL. A user/operator terminal action is required because no Codespaces execution tool is exposed here.
+- Exact command from the repository root in Codespaces:
+  ```bash
+  cd secondary-school-platform/browser-acceptance && npm install && npx playwright install chromium && STAGING_BASE_URL=https://learnwise-staging-api.onrender.com npm test
+  ```
+  This runs only the existing read-only browser checks. Do not add credentials, submit forms, or enable registration.
+- Remaining gates include authenticated owner-admin browser testing (owner-controlled session only), controlled SMTP delivery, Paystack sandbox, private audio E2E, curriculum provenance/teacher review, privacy/safeguarding/legal review, and backup/restore/operational readiness. No production release is authorised.

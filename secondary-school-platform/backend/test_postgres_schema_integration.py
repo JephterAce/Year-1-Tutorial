@@ -24,9 +24,23 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
             rows = conn.execute(
                 "SELECT version FROM learnwise_schema_migrations ORDER BY version"
             ).fetchall()
-            self.assertEqual(len(rows), 14)
+            self.assertEqual(len(rows), 16)
             self.assertEqual(rows[0][0], "000_DATABASE_SCHEMA.sql")
-            self.assertEqual(rows[-1][0], "013_admin_sessions_and_audit_guard.sql")
+            self.assertEqual(rows[-1][0], "015_reviewed_lesson_content_and_progress.sql")
+
+
+    def test_ai_quota_and_lesson_content_tables_exist(self):
+        with psycopg.connect(self.dsn) as conn:
+            names = conn.execute(
+                """SELECT table_name FROM information_schema.tables
+                   WHERE table_schema='public' AND table_name IN
+                     ('student_ai_tutor_usage','topic_lesson_content',
+                      'lesson_practice_questions','student_topic_progress')"""
+            ).fetchall()
+        self.assertEqual({row[0] for row in names}, {
+            "student_ai_tutor_usage","topic_lesson_content",
+            "lesson_practice_questions","student_topic_progress"
+        })
 
     def test_curriculum_target_version_is_seeded(self):
         with psycopg.connect(self.dsn) as conn:

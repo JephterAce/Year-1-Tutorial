@@ -413,18 +413,29 @@ def answer_tutor_question():
             TutorConfigurationError, TutorProviderError
         )
         from ai_tutor_quota import reserve_tutor_usage, TutorQuotaError
+        from lesson_content import get_tutor_context, LessonContentError
+        lesson_context = None
+        topic_id = data.get("topic_id")
+        if topic_id:
+            from uuid import UUID
+            topic_id = str(UUID(topic_id))
+            lesson_context = get_tutor_context(student["student_id"], topic_id)
         messages = build_tutor_messages(
-            student.get("class_level"), data.get("question"), data.get("topic_context"), data.get("history")
+            student.get("class_level"), data.get("question"), data.get("topic_context"),
+            data.get("history"), lesson_context
         )
-        bounded_prompt = "\\n".join(item["content"] for item in messages)
+        bounded_prompt = "\n".join(item["content"] for item in messages)
         reserve_tutor_usage(student["student_id"], bounded_prompt)
         answer = generate_tutor_answer(
             student.get("class_level"),
             data.get("question"),
             data.get("topic_context"),
             data.get("history"),
+            lesson_context,
         )
         return jsonify({"answer": answer}), 200
+    except LessonContentError as exc:
+        return jsonify({"error": exc.code, "message": str(exc)}), exc.status
     except TutorQuotaError as exc:
         return jsonify({"error": exc.code, "message": str(exc)}), exc.status
     except ValueError as exc:

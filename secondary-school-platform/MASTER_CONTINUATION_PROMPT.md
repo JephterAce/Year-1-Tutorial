@@ -324,3 +324,13 @@ Paste the following instruction, then attach the Render screenshot:
 - The current PR API observation subsequently returned `mergeable=false` again (PR remains open, draft and unmerged). GitHub's mergeability field has varied between reads; cause is unknown. Do not merge, rebase, sync main, or take action on this field without a separate review.
 - A latest deployment-list recheck still shows only the existing live deployment `dep-dbmf0h8ae00c73fcf1sg` on commit `26d83096b0fd89812b5a1c749798293a2ad1e2b1`. No new Render build/deployment occurred after the owner-reported Link only action. Auto-deploy remains off.
 - The owner-reported group link remains not independently visible through the connected Render service API. Verify visually that `Think Tank` appears in Linked Environment Groups.
+
+
+## Browser acceptance workflow dispatch blocker — 6 November 2026
+- Owner supplied a screenshot of GitHub Actions → All workflows. The left workflow list contains only "Secondary-school platform checks" and "Staging owner admin bootstrap (one-time)"; "Think Tank staging browser acceptance" is absent.
+- Verified the exact workflow file `.github/workflows/think-tank-staging-browser.yml` exists on `secondary-school-platform-foundation` (blob `8fe95c383024d621e9f502549391bfd2de2557c6`) and declares `workflow_dispatch`.
+- Verified the same path does **not** exist on the repository default branch `main` (GitHub contents API returned 404).
+- Root cause: GitHub only makes a `workflow_dispatch` workflow manually runnable when its workflow file exists on the default branch. The workflow cannot be launched from the Actions UI while it exists only on the development branch.
+- Do not copy/add this workflow to `main` without the owner's explicit approval; owner has explicitly prohibited main modifications.
+- Safe alternative under consideration: execute the existing Playwright browser-acceptance suite from a Codespaces terminal checked out on `secondary-school-platform-foundation`, targeting the existing staging URL. This is a read-only browser test suite, but inspect package/test files and confirm the staging service/database environment first. Do not deploy, change main, or submit forms/transactions.
+- Owner was not at fault; there is no missing Run workflow button to find on the current page.

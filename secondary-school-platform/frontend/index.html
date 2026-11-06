@@ -151,7 +151,7 @@ async function askThinkTankTutor(){
  try{
   const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context,history:tutorHistory.slice(-8)},'POST');
   tutorHistory.push({role:'user',content:question},{role:'assistant',content:data.answer});tutorHistory=tutorHistory.slice(-8);
-  answer.textContent=tutorHistory.map(item=>(item.role==='user'?'You: ':'Think Tank: ')+item.content).join('\\n\\n');answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
+  answer.textContent=tutorHistory.map(item=>(item.role==='user'?'You: ':'Think Tank: ')+item.content).join('\n\n');answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
  }catch(e){status.textContent=e.message}
  finally{button.disabled=false}
 }

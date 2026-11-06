@@ -46,10 +46,27 @@ def reserve_tutor_usage(student_id, input_text, output_token_reservation=600, to
     monthly_requests = _positive_int("AI_TUTOR_MONTHLY_REQUEST_LIMIT", 300)
     daily_budget = _positive_int("AI_TUTOR_DAILY_BUDGET_MICROUSD", 1_000_000)
     monthly_budget = _positive_int("AI_TUTOR_MONTHLY_BUDGET_MICROUSD", 10_000_000)
+    platform_daily_budget = _positive_int("AI_TUTOR_PLATFORM_DAILY_BUDGET_MICROUSD", 10_000_000)
+    platform_monthly_budget = _positive_int("AI_TUTOR_PLATFORM_MONTHLY_BUDGET_MICROUSD", 100_000_000)
 
     with connection() as conn:
-        # Serialize a student's reservation transactions to prevent concurrent overspend.
+        # Serialize global reservations as well as each student's reservations.
+        conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", ("think-tank-ai-tutor-platform",))
         conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (str(student_id),))
+        platform_daily = conn.execute(
+            """SELECT request_count,estimated_cost_microusd
+               FROM ai_tutor_platform_usage WHERE usage_date=%s FOR UPDATE""",
+            (usage_day,),
+        ).fetchone()
+        platform_monthly = conn.execute(
+            """SELECT COALESCE(sum(estimated_cost_microusd),0) AS cost
+               FROM ai_tutor_platform_usage
+               WHERE usage_date >= %s AND usage_date <= %s""",
+            (month_start, usage_day),
+        ).fetchone()
+        platform_daily_cost = platform_daily["estimated_cost_microusd"] if platform_daily else 0
+        if platform_daily_cost + cost > platform_daily_budget or platform_monthly["cost"] + cost > platform_monthly_budget:
+            raise TutorQuotaError("platform_budget_reached", "Think Tank's AI teacher is temporarily unavailable. Please try again later.")
         daily = conn.execute(
             """SELECT request_count,estimated_cost_microusd
                FROM student_ai_tutor_usage
@@ -69,6 +86,18 @@ def reserve_tutor_usage(student_id, input_text, output_token_reservation=600, to
             raise TutorQuotaError("request_limit_reached", "Your AI teacher usage limit has been reached. Please try again later.")
         if daily_cost + cost > daily_budget or monthly["cost"] + cost > monthly_budget:
             raise TutorQuotaError("spend_limit_reached", "The AI teacher has reached its usage budget for now. Please try again later.")
+        conn.execute(
+            """INSERT INTO ai_tutor_platform_usage
+                 (usage_date,request_count,estimated_cost_microusd,estimated_input_tokens,reserved_output_tokens)
+               VALUES (%s,1,%s,%s,%s)
+               ON CONFLICT(usage_date) DO UPDATE SET
+                 request_count=ai_tutor_platform_usage.request_count+1,
+                 estimated_cost_microusd=ai_tutor_platform_usage.estimated_cost_microusd+EXCLUDED.estimated_cost_microusd,
+                 estimated_input_tokens=ai_tutor_platform_usage.estimated_input_tokens+EXCLUDED.estimated_input_tokens,
+                 reserved_output_tokens=ai_tutor_platform_usage.reserved_output_tokens+EXCLUDED.reserved_output_tokens,
+                 updated_at=now()""",
+            (usage_day,cost,input_tokens,output_token_reservation),
+        )
         conn.execute(
             """INSERT INTO student_ai_tutor_usage
                  (student_id,usage_date,request_count,estimated_cost_microusd,

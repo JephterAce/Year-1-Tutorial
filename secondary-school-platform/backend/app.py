@@ -501,7 +501,7 @@ def student_dashboard():
             summary = conn.execute(
                 """SELECT
                      (SELECT count(DISTINCT lp.topic_id)
-                        FROM lesson_progress lp
+                        FROM student_topic_progress lp
                         JOIN topics t ON t.id=lp.topic_id
                        WHERE lp.student_id=%s AND lp.completed_at IS NOT NULL
                          AND t.status='published' AND t.curriculum_status='published') AS completed_lessons,
@@ -521,7 +521,7 @@ def student_dashboard():
                    FROM subjects s
                    LEFT JOIN topics t ON t.subject_id=s.id AND t.class_level=%s
                      AND t.status='published' AND t.curriculum_status='published'
-                   LEFT JOIN lesson_progress lp ON lp.topic_id=t.id
+                   LEFT JOIN student_topic_progress lp ON lp.topic_id=t.id
                      AND lp.student_id=%s AND lp.completed_at IS NOT NULL
                    WHERE s.is_active=true
                    GROUP BY s.id,s.slug,s.name,s.sort_order
@@ -530,7 +530,7 @@ def student_dashboard():
             ).fetchall()
             recent = conn.execute(
                 """SELECT DISTINCT ON (t.id) t.id,t.title,s.name AS subject,lp.updated_at
-                   FROM lesson_progress lp
+                   FROM student_topic_progress lp
                    JOIN topics t ON t.id=lp.topic_id
                    JOIN subjects s ON s.id=t.subject_id
                    WHERE lp.student_id=%s AND t.status='published'

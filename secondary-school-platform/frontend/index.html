@@ -38,8 +38,10 @@
    <div class="panelhead"><div><h3>Ask your AI teacher</h3><small style="color:var(--muted)">A guided explanation for your class level. AI assistance can make mistakes.</small></div><span class="tag lock">Preview · gated</span></div>
    <label for="tutorQuestion" style="display:block;font-weight:700;font-size:13px;margin-bottom:7px">What would you like help understanding?</label>
    <textarea id="tutorQuestion" maxlength="2000" rows="3" placeholder="Example: Explain how ionic bonding forms, step by step." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical"></textarea>
-   <label for="tutorContext" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional lesson or subject context</label>
-   <input id="tutorContext" maxlength="1200" placeholder="e.g. SS1 Chemistry — atomic structure" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
+   <label for="tutorTopicId" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional published lesson ID (to ground the answer in your unlocked lesson)</label>
+   <input id="tutorTopicId" placeholder="Paste topic ID from an unlocked lesson" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
+   <label for="tutorContext" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional additional context</label>
+   <input id="tutorContext" maxlength="1200" placeholder="e.g. Which step in the example is confusing?" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
    <div class="actions"><button class="primary" id="askTutorButton" onclick="askThinkTankTutor()">Ask Think Tank</button><button class="link" type="button" onclick="clearTutorConversation()">Clear conversation</button><small id="tutorStatus" aria-live="polite" style="color:var(--muted)">Sign in required. AI service remains disabled until budget controls and provider settings are approved.</small></div>
    <div id="tutorAnswer" hidden style="margin-top:14px;padding:14px;background:#f6f8fc;border-radius:10px;white-space:pre-wrap"></div>
   </div>
@@ -140,18 +142,20 @@ async function loadDashboard(){
   document.getElementById('dashAttemptsNote').textContent='Sign in to load private progress';
  }
 }
-let tutorHistory=[];
+let tutorHistory=[];let tutorTopicId='';
 function clearTutorConversation(){tutorHistory=[];document.getElementById("tutorAnswer").replaceChildren();document.getElementById("tutorAnswer").hidden=true;document.getElementById("tutorStatus").textContent="Conversation cleared from this page."}
 async function askThinkTankTutor(){
  const question=document.getElementById('tutorQuestion').value.trim();
  const context=document.getElementById('tutorContext').value.trim();
+ const topicId=document.getElementById('tutorTopicId').value.trim();
+ if(topicId!==tutorTopicId){tutorHistory=[];tutorTopicId=topicId}
  const status=document.getElementById('tutorStatus');
  const answer=document.getElementById('tutorAnswer');
  const button=document.getElementById('askTutorButton');
  if(!question){status.textContent='Write a question first.';return}
  button.disabled=true;status.textContent='Checking your account and AI availability…';answer.hidden=true;
  try{
-  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context,history:tutorHistory.slice(-8)},'POST');
+  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context,topic_id:topicId||null,history:tutorHistory.slice(-8)},'POST');
   tutorHistory.push({role:'user',content:question},{role:'assistant',content:data.answer});tutorHistory=tutorHistory.slice(-8);
   answer.textContent=tutorHistory.map(item=>(item.role==='user'?'You: ':'Think Tank: ')+item.content).join('\n\n');answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
  }catch(e){status.textContent=e.message}

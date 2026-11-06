@@ -41,6 +41,7 @@ class StudentRegistrationToResultsJourney(unittest.TestCase):
                 row=conn.execute("SELECT id FROM students WHERE email=%s",(self.email,)).fetchone()
                 self.student_id=str(row["id"]) if row else None
             if self.student_id:
+                conn.execute("DELETE FROM entitlements WHERE student_id=%s", (self.student_id,))
                 conn.execute("DELETE FROM students WHERE id=%s", (self.student_id,))
             conn.execute("DELETE FROM assessments WHERE id=%s", (self.assessment_id,))
             conn.execute("DELETE FROM topics WHERE id=%s", (self.topic_id,))

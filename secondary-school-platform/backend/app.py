@@ -869,6 +869,20 @@ def get_student_topic(topic_id):
         return jsonify({"error": "topic_unavailable"}), 503
 
 
+@app.get("/api/v1/student/podcasts")
+def student_podcast_library():
+    """Return approved podcast episodes only for the signed-in student's active entitlements."""
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        from podcast_production import list_student_podcasts
+        return jsonify(list_student_podcasts(student["student_id"])), 200
+    except Exception:
+        app.logger.exception("Student podcast library failed")
+        return jsonify({"error": "podcast_library_unavailable"}), 503
+
+
 @app.get("/api/v1/student/assessment-history")
 def student_assessment_history():
     from database import connection

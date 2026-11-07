@@ -535,3 +535,16 @@ Managed Neon staging still has only 13 migration records; migrations 014–018 h
 
 ### Current release state
 **Development software milestone substantially advanced; staging and production release are not approved.** Do not apply migrations 014–019 or deploy code until the owner approves a reviewed staging migration/deployment plan, backup and rollback evidence. Production launch requires a separate explicit approval after all legal, safeguarding, curriculum, payment, audio, security and operational gates pass.
+
+
+---
+
+## Verified update — 7 November 2026 (authenticated student data-rights browser acceptance)
+
+- Latest fully tested application commit: a057289c4930b86b6bdd5176bd71e61a9536f044.
+- Exact-head push CI [42416064502](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416064502) and PR CI [42416068375](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416068375) both passed.
+- The unit/security suite passed 246 tests. Python compileall, frontend/admin JavaScript syntax and guarded backup script shell syntax passed.
+- Disposable PostgreSQL replay of baseline plus migrations 001–019, schema integration, assessment/payment E2E and synthetic registration-to-results all passed.
+- All 14 Playwright tests passed. New authenticated student browser journey signed in as a synthetic student, submitted and withdrew a privacy request, downloaded the student's own JSON export, and verified the export omitted password hashes, answer keys and provider payloads. Admin assessment creation/publication and admin data-rights queue journeys also passed.
+- All fixtures were synthetic and isolated to the ephemeral CI database. No managed staging student account, payment or media object was created.
+- The browser test caught and fixed another asynchronous form issue: the student privacy-request form now captures its form element before awaiting the API response.

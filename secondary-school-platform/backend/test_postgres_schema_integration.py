@@ -24,9 +24,9 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
             rows = conn.execute(
                 "SELECT version FROM learnwise_schema_migrations ORDER BY version"
             ).fetchall()
-            self.assertEqual(len(rows), 19)
+            self.assertEqual(len(rows), 20)
             self.assertEqual(rows[0][0], "000_DATABASE_SCHEMA.sql")
-            self.assertEqual(rows[-1][0], "018_student_saved_topics.sql")
+            self.assertEqual(rows[-1][0], "019_student_data_rights_requests.sql")
 
 
     def test_ai_quota_and_lesson_content_tables_exist(self):
@@ -35,11 +35,11 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
                 """SELECT table_name FROM information_schema.tables
                    WHERE table_schema='public' AND table_name IN
                      ('student_ai_tutor_usage','ai_tutor_platform_usage','topic_lesson_content',
-                      'lesson_practice_questions','student_topic_progress','student_lesson_practice_attempts','student_saved_topics')"""
+                      'lesson_practice_questions','student_topic_progress','student_lesson_practice_attempts','student_saved_topics','student_data_rights_requests')"""
             ).fetchall()
         self.assertEqual({row[0] for row in names}, {
             "student_ai_tutor_usage","ai_tutor_platform_usage","topic_lesson_content",
-            "lesson_practice_questions","student_topic_progress","student_lesson_practice_attempts","student_saved_topics"
+            "lesson_practice_questions","student_topic_progress","student_lesson_practice_attempts","student_saved_topics","student_data_rights_requests"
         })
 
 

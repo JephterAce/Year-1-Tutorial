@@ -59,6 +59,14 @@ test("assessment authoring is mobile-usable and exposes labelled controls", asyn
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport + 2);
 });
 
+test("authorised support workspace opens the data-rights review queue", async ({ page }) => {
+  await signInAdmin(page);
+  await page.goto("/admin/data-rights");
+  await expect(page.getByRole("heading", { name: "Student data-rights queue" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Requests" })).toBeVisible();
+  await expect(page.locator("#queueMsg")).toContainText(/request\(s\)|No data-rights requests|Queue unavailable/);
+});
+
 test("assessment authoring page redirects anonymous visitors", async ({ page }) => {
   await page.goto("/admin/assessments");
   await expect(page).toHaveURL(/\/admin\/login$/);

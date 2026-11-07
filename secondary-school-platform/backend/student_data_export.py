@@ -3,6 +3,8 @@
 Queries are strictly scoped by the authenticated student ID. Projections never
 select password hashes, session/token data, provider payloads or answer keys.
 """
+from datetime import datetime, timezone
+
 from database import connection
 
 
@@ -94,7 +96,7 @@ def build_student_export(student_id):
 
     return {
         "export_version": "1.0",
-        "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "student": serialise([dict(student)])[0],
         "consents": serialise(consents),
         "topic_progress": serialise(topic_progress),

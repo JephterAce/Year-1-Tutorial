@@ -103,6 +103,19 @@ jobs:
           CI_ADMIN_EMAIL: ci-owner@thinktank.invalid
           CI_ADMIN_PASSWORD: Ephemeral-CI-Admin-Password-Only-2026!
         run: npm test
+      - name: Capture API diagnostics on browser failure
+        if: failure()
+        run: tail -n 200 /tmp/thinktank-api.log || true
+      - name: Upload local browser report and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: think-tank-local-browser-acceptance
+          path: |
+            secondary-school-platform/browser-acceptance/playwright-report/
+            secondary-school-platform/browser-acceptance/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
   container-build:
     runs-on: ubuntu-latest

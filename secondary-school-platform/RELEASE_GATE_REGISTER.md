@@ -118,3 +118,12 @@ The suite passed 246 unit/security tests, Python/JavaScript/shell syntax checks,
 
 ### Managed staging migration checksum comparison — 7 November 2026
 All 13 applied migration source_blob_sha values in managed Neon learnwise_migration_history exactly match the GitHub blob SHAs of canonical backend migrations 001–013 on the development branch (13/13). This is a read-only source-integrity comparison. Migrations 014–019 remain unapplied; clean disposable CI replay is not a substitute for an isolated upgrade rehearsal from the managed 001–013 state.
+
+
+### Public staging health and restore verification — 7 November 2026
+
+Current branch head ee2cc4306279772ecb05a3813eb33266c134d497 passed exact-head push [42416698937](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416698937) and PR [42416702456](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416702456).
+
+A read-only CI health job verified public Render /health returns HTTP 200 and JSON status=ok, mode=database, service=secondary-school-api. The CI workflow now performs this check on every push/PR run. The same workflow successfully completed a local pg_dump/pg_restore rehearsal to a separate disposable PostgreSQL database and verified all 20 baseline-plus-migration history entries were restored. This does not replace managed backup/PITR or production restore evidence.
+
+Managed Neon still has only 001–013 (all 13 source blob hashes match); 014–019 remain unapplied. Render remains on its previous live SHA and no deployment was triggered.

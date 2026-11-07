@@ -44,7 +44,7 @@ class StudentDataRightsRouteTests(unittest.TestCase):
     def test_deletion_request_is_intake_only_not_an_automatic_delete(self):
         from pathlib import Path
         source = (Path(__file__).resolve().parent / "student_data_rights.py").read_text(encoding="utf-8")
-        self.assertIn("does not automatically execute", source)
+        self.assertIn("not automatically executed", source)
         self.assertIn("UPDATE students SET deletion_requested_at=now()", source)
         self.assertNotIn("DELETE FROM students", source)
 

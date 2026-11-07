@@ -60,7 +60,7 @@ No managed staging migration has been run as part of this work.
 
 Queried the managed staging table `learnwise_migration_history` and compared each recorded `source_blob_sha` with the GitHub blob SHA for the same canonical backend migration file on the development branch.
 
-<badge>13/13 applied migrations match</badge>
+**13/13 applied migrations match.**
 
 | Migration | Managed recorded SHA | Development GitHub blob SHA | Result |
 |---|---|---|---|

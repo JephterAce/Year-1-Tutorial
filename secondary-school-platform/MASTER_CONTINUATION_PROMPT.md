@@ -803,3 +803,55 @@ This increment is committed to the development branch only. It is not yet a comp
 - Add authenticated synthetic-browser journeys on disposable fixtures; do not create test accounts on managed staging.
 - Complete private audio provider/range/revocation E2E only with approved non-production test storage; current staging bucket is empty.
 - Continue to hold registration/checkout, SMTP, Paystack sandbox, AI provider, external curriculum publication, student media uploads and production release behind their existing gates.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (admin authoring, privacy, finance and release operations)
+
+### Tested application milestone
+- Latest fully tested application commit: dd7b620676c4312aa9540a89d19be71381f71ec5.
+- Exact-head push CI 42415624459 and PR CI 42415628254 both passed.
+- CI passed unit/security tests, JavaScript syntax, baseline plus migrations 001–019 on disposable PostgreSQL, schema integration, assessment/payment E2E, synthetic registration-to-results, authenticated/anonymous Playwright browser tests and non-publishing container build.
+- The authenticated browser job creates only a disposable CI owner administrator and synthetic subjects in its temporary PostgreSQL service. It does not touch managed staging.
+- Current branch has subsequent documentation-only updates recording this verified state; fetch latest branch head before making more changes.
+
+### Software work completed in this increment
+1. Admin mobile/accessibility: bottom navigation at narrow widths, safe-area spacing, skip link, named navigation landmark, visible focus, reduced-motion and forced-colour support. Student account fields now expose accessible labels and password-manager autocomplete.
+2. Curriculum: existing protected admin interface and API-backed source/topic draft/review/publish flow retained. The UI notice now distinguishes persisted API workflows from local-only previews.
+3. Assessments: added admin_assessments.py and protected admin/assessments.html workspace. Owner/editor can create drafts and add validated single-choice, multiple-select, true/false, numeric and exact-text questions; reviewer/owner publication is permission-gated; published versions remain immutable. Detail API does not return answer keys.
+4. Finance: added read-only ledger summary and unverified/stale payment exception counts to admin operations. No provider reconciliation, charge, refund or payment write is performed by the dashboard.
+5. Student data rights: migration 019; authenticated student request intake/history/withdrawal; scoped self-service JSON export; restricted admin triage and response notes. Deletion is a tracked request only, never automatic.
+6. SMTP: mocked STARTTLS/SSL transport tests added. No actual SMTP credentials/mailbox delivery has been verified.
+7. Paystack: existing server-side verification contract tests remain. No real Paystack sandbox account/key or provider-side charge/webhook/refund run has been performed.
+8. Private audio: existing S3-compatible private upload/range/delete and token/entitlement security tests remain mock-backed. Managed staging audio bucket is empty; no real provider E2E playback/revocation test has been performed.
+9. Operations: added guarded local-only restore rehearsal script and backup/recovery/monitoring runbook. No managed backup restore has been executed.
+
+### Migration and provider state
+- Canonical repository migrations: 001–019 plus baseline (20 entries in disposable CI).
+- Managed Neon project learnwise, branch think-tank-staging (br-still-cherry-baz7g5hk): exactly migrations 001–013 recorded in learnwise_migration_history; 0 students, 1 admin, 6 subjects, 0 topics, 6 audit events.
+- Neon branch think-tank-migration-rehearsal-20261106 (br-plain-band-ba3mrbzi) also contains only 001–013. It is not a rehearsal of 014–019.
+- Migrations 014–019 pass disposable CI but are not applied to managed staging.
+- Render service learnwise-staging-api: auto-deploy off; latest live deployment dep-dbn2dcrl550s73f9ahag, commit 0f343fff800b619fdaff76f5ee97225ec6c3dbdf, finished 2026-11-06T19:13:13Z. Do not trigger a deployment without explicit owner approval.
+- Public /health not directly verified in the last check. Web open returned “URL is not accessible by this tool”; Render HTTP metrics filtered to /health returned no data. Treat this as unavailable evidence, not as a confirmed outage. Service metadata healthCheckPath is empty.
+
+### Remaining release blockers
+- No authorised NERDC curriculum materials/licence and no independent qualified teacher sign-offs.
+- No live SMTP delivery/account-recovery proof.
+- No Paystack sandbox E2E with authorised test credentials.
+- No real private audio provider E2E; managed bucket empty.
+- No verified guardian identity/consent process, completed NDPA/DPIA, retention schedule, Nigerian legal review, child-safeguarding policy/lead or processor/cross-border review.
+- Self-service JSON export is synchronous; bulk export worker, streaming, private archive/checksum manifest, signed URL lifecycle and automated export expiry remain outstanding.
+- Correction/deletion fulfilment remains a human/legal workflow; no automatic deletion.
+- Backup/restore runbook exists, but managed restore and approved RPO/RTO/retention are outstanding.
+- Monitoring alert delivery/incident drill and independent security review remain outstanding.
+- Staging database must be reconciled/upgraded safely from 013 to 019 only after backup, compatibility review, isolated branch rehearsal and explicit owner approval.
+- Staging deployment approval and production-launch approval are separate decisions. Neither has been granted.
+
+### Immediate next actions
+1. Fetch latest branch head, current exact-head CI and PR state.
+2. Wait for any documentation-only commits' CI to finish; do not claim a later commit is tested unless its exact-head push and PR runs pass.
+3. Continue the remaining software gap analysis, especially assessment draft correction/versioning and admin student support, then add browser tests.
+4. Prepare but do not execute an isolated Neon migration rehearsal for 014–019 until owner authorises it; current managed staging remains at 013.
+5. Obtain the required provider accounts, licensed NERDC sources, teacher/legal/safeguarding reviewers and written deployment approval through secure external channels.
+6. Do not merge PR #1, deploy staging, change environment variables, run managed migrations, activate live payments, upload media or launch production without explicit owner approval.

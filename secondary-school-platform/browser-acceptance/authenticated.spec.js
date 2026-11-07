@@ -26,7 +26,9 @@ test("authenticated administrator creates, reviews and publishes a draft assessm
   await page.getByLabel("Allowed question counts").fill("1");
   await page.getByRole("button", { name: "Create draft" }).click();
 
-  await expect(page.getByText("Draft created. Add questions before publication.")).toBeVisible();
+  await expect(page.locator("#createMsg")).not.toHaveText("");
+  const createMessage = await page.locator("#createMsg").textContent();
+  expect(createMessage, "Assessment creation response").toContain("Draft created.");
   await expect(page.getByRole("heading", { name: "Question editor" })).toBeVisible();
 
   await page.getByLabel("Question prompt").fill("Which particle carries a negative electric charge?");

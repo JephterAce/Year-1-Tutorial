@@ -46,8 +46,8 @@ def download_student_data_export():
     student = _student()
     if not student:
         return jsonify({"error": "unauthenticated"}), 401
+    from student_data_export import build_student_export, StudentExportError
     try:
-        from student_data_export import build_student_export, StudentExportError
         payload = build_student_export(student["student_id"])
         with connection() as conn:
             conn.execute(

@@ -1,7 +1,10 @@
 const { test, expect } = require("@playwright/test");
+const fs = require("node:fs");
 
 const adminEmail = process.env.CI_ADMIN_EMAIL || "ci-owner@thinktank.invalid";
 const adminPassword = process.env.CI_ADMIN_PASSWORD || "Ephemeral-CI-Admin-Password-Only-2026!";
+const studentEmail = process.env.CI_STUDENT_EMAIL || "ci-student@thinktank.invalid";
+const studentPassword = process.env.CI_STUDENT_PASSWORD || "Ephemeral-CI-Student-Password-Only-2026!";
 
 async function signInAdmin(page) {
   await page.goto("/admin/login");
@@ -68,6 +71,39 @@ test("authorised support workspace opens the data-rights review queue", async ({
   await expect(page.getByRole("heading", { name: "Student data-rights queue" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Requests" })).toBeVisible();
   await expect(page.locator("#queueMsg")).toContainText(/request\(s\)|No data-rights requests|Queue unavailable/);
+});
+
+test("authenticated student can submit, review and withdraw a data-rights request and download own data", async ({ page }) => {
+  await page.goto("/account");
+  await page.getByLabel("Sign-in email address").fill(studentEmail);
+  await page.getByLabel("Sign-in password").fill(studentPassword);
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page.locator("#dataRightsCard")).toBeVisible();
+  await expect(page.locator("#sessionMsg")).toContainText("CI Student");
+
+  await page.locator("#rightsType").selectOption("access_export");
+  await page.locator("#rightsNote").fill("Please provide a copy of my Think Tank account and learning data.");
+  await page.getByRole("button", { name: "Submit privacy request" }).click();
+  await expect(page.locator("#rightsMsg")).toContainText("recorded");
+  await expect(page.locator("#rightsRequests")).toContainText("access export");
+  await expect(page.locator("#rightsRequests")).toContainText("submitted");
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: /Download a copy of my data/ }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe("think-tank-my-data.json");
+  const filePath = await download.path();
+  const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  expect(payload.student.email).toBe(studentEmail);
+  expect(payload.consents.length).toBeGreaterThanOrEqual(2);
+  const exported = JSON.stringify(payload);
+  expect(exported).not.toContain("password_hash");
+  expect(exported).not.toContain("answer_key");
+  expect(exported).not.toContain("provider_payload");
+
+  await page.getByRole("button", { name: "Withdraw request" }).click();
+  await expect(page.locator("#rightsRequests")).toContainText("withdrawn");
 });
 
 test("assessment authoring page redirects anonymous visitors", async ({ page }) => {

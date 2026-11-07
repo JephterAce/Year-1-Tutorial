@@ -15,6 +15,45 @@ permissions:
   contents: read
 
 jobs:
+  staging-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify public Render staging health without changing service state
+        env:
+          STAGING_HEALTH_URL: https://learnwise-staging-api.onrender.com/health
+        run: |
+          set -euo pipefail
+          response="$RUNNER_TEMP/think-tank-health.json"
+          set +e
+          http_code=$(curl --silent --show-error --connect-timeout 15 --max-time 90 \
+            --retry 2 --retry-delay 5 --retry-all-errors \
+            --output "$response" --write-out '%{http_code}' "$STAGING_HEALTH_URL")
+          curl_status=$?
+          set -e
+          if [ "$curl_status" -ne 0 ]; then
+            echo "::error::Public /health transport request failed (curl exit $curl_status); health is unverified, not assumed down."
+            exit 1
+          fi
+          echo "HTTP status: $http_code"
+          python - "$response" "$http_code" "$GITHUB_STEP_SUMMARY" <<'PY'
+          import json, sys
+          path, code, summary = sys.argv[1:]
+          try:
+              with open(path, encoding="utf-8") as handle:
+                  payload = json.load(handle)
+          except Exception:
+              print("Health response was not valid JSON.")
+              raise SystemExit(1)
+          status = payload.get("status")
+          mode = payload.get("mode")
+          service = payload.get("service")
+          print(f"JSON status={status!r}; mode={mode!r}; service={service!r}")
+          with open(summary, "a", encoding="utf-8") as handle:
+              handle.write(f"### Public staging health\n- HTTP: {code}\n- JSON status: {status}\n- mode: {mode}\n- service: {service}\n")
+          if code != "200" or status != "ok" or not isinstance(mode, str) or not mode or not isinstance(service, str) or not service:
+              raise SystemExit("Public staging health assertion failed.")
+          PY
   api-tests:
     runs-on: ubuntu-latest
     services:

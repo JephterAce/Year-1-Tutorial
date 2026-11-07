@@ -3,7 +3,6 @@
 Published assessments are immutable at the database layer. A revision is a new
 assessment record; answer keys are never returned by these admin read routes.
 """
-import math
 from decimal import Decimal, InvalidOperation
 from uuid import UUID
 
@@ -86,7 +85,7 @@ def _question_payload(data):
             raise AssessmentInputError("correct_option_must_match_option")
     elif kind == "multiple_select":
         ids = answer_key.get("correct_option_ids")
-        if not isinstance(ids, list) or not ids or len(ids) != len(set(ids)) or not set(ids) <= option_ids:
+        if (not isinstance(ids, list) or not ids or not all(isinstance(x, str) for x in ids) or len(ids) != len(set(ids)) or not set(ids) <= option_ids):
             raise AssessmentInputError("correct_options_must_match_options")
     elif kind == "true_false":
         if not isinstance(answer_key.get("correct"), bool):

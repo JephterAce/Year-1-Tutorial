@@ -736,6 +736,10 @@ def create_private_audio_access(topic_id, asset_id):
                    WHERE a.id=%s AND a.topic_id=%s AND t.status='published'
                      AND a.review_status='approved'
                      AND a.asset_type IN ('teacher_audio','podcast_audio')
+                     AND (a.asset_type <> 'podcast_audio' OR EXISTS (
+                       SELECT 1 FROM podcast_scripts ps
+                       WHERE ps.topic_id=t.id AND ps.audio_asset_id=a.id
+                         AND ps.status='approved'))
                      AND EXISTS (SELECT 1 FROM entitlements e
                                  WHERE e.student_id=%s AND e.topic_id=t.id
                                    AND e.revoked_at IS NULL)""",
@@ -852,6 +856,10 @@ def get_student_topic(topic_id):
                     """SELECT id,asset_type,duration_seconds,mime_type
                        FROM lesson_assets WHERE topic_id=%s AND review_status='approved'
                          AND asset_type IN ('teacher_audio','podcast_audio','transcript','notes')
+                         AND (asset_type <> 'podcast_audio' OR EXISTS (
+                           SELECT 1 FROM podcast_scripts ps
+                           WHERE ps.topic_id=lesson_assets.topic_id
+                             AND ps.audio_asset_id=lesson_assets.id AND ps.status='approved'))
                        ORDER BY asset_type,version DESC""",
                     (topic_id,),
                 ).fetchall()

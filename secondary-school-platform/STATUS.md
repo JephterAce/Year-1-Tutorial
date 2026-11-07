@@ -480,3 +480,14 @@ Application commit `199c4e52bfd86050df4058a50593846745434fbd` passed exact-head 
 Assessment history now displays accurate attempt counts, score fraction, question count, percentage, pass/fail, integrity-review status and submitted/started time. The source is the existing authenticated assessment-history API. Added UI regression coverage.
 
 Progress dashboard and approved, entitlement-gated private podcast library remain implemented. Managed staging has not been deployed or migrated; it still has 13 migration records while repository CI verifies 17 migrations on disposable PostgreSQL. Render remains on its previous live commit. The project is still not approved for production.
+
+
+---
+
+## Verified update — 7 November 2026 (saved lessons)
+
+Application commit `8e1f838c34d5dcc55c6358e74c97928566dcb622` passed exact-head push CI [42413332222](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42413332222) and PR CI [42413335065](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42413335065).
+
+Saved lessons are now database-backed through migration 018, with authenticated list, CSRF-protected save/remove routes, idempotent bookmarks, published-topic validation and a working student UI. Schema integration checks now account for the baseline plus 18 numbered migrations.
+
+Managed Neon staging still has only 13 migration records; migrations 014–018 have not been applied there. Render staging has not been deployed and remains on its previous live commit. No production or live payment action occurred. The platform is not production-ready.

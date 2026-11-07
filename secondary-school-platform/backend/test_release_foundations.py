@@ -83,5 +83,15 @@ class StudentProgressUiTests(unittest.TestCase):
   self.assertIn("Podcast library",source)
 
 
+
+class StudentAssessmentHistoryUiTests(unittest.TestCase):
+ def test_history_displays_source_result_and_timestamp_fields(self):
+  page=Path(__file__).resolve().parents[1]/"frontend"/"index.html"
+  source=page.read_text(encoding="utf-8")
+  self.assertIn("item.score+' / '+item.maximum_score",source)
+  self.assertIn("item.submitted_at||item.started_at",source)
+  self.assertIn("Human review requested",source)
+  self.assertIn("Assessment attempts",source)
+
 if __name__ == "__main__":
  unittest.main()

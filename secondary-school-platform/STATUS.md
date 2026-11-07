@@ -568,3 +568,9 @@ Managed Neon staging still has only 13 migration records; migrations 014–018 h
 - Render latest deployment remains dep-dbn2dcrl550s73f9ahag, status live, SHA 0f343fff800b619fdaff76f5ee97225ec6c3dbdf, finished 2026-11-06T19:13:13.356Z. The current development branch is 213 commits ahead of that deployed SHA. No deployment was triggered; auto-deploy remains off.
 - Render event history for the last seven days shows the latest build and deployment succeeded and no failure event. Service healthCheckPath remains empty; the new CI check provides public endpoint verification without changing Render configuration.
 - The public health check is now verified by the GitHub runner; the earlier web-tool accessibility limitation is superseded for this run.
+
+
+### Latest branch-head confirmation — 7 November 2026
+- Current branch head is 1419ed4b8c6011ad5d30ea9299a36c2816e1aa3c. Changes after application commit a057289c4930b86b6bdd5176bd71e61a9536f044 are documentation/workflow evidence updates; no additional application code was introduced.
+- Exact-head push [42416831355](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416831355) and PR [42416833832](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416833832) passed.
+- Both exact-head runs passed the read-only public staging health job (HTTP 200, status=ok, mode=database, service=secondary-school-api), all unit/database/browser checks, and local backup/restore rehearsal.

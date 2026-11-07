@@ -96,5 +96,30 @@ class AssessmentAuthoringRouteSecurityTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
 
+
+class AssessmentAuthoringUiTests(unittest.TestCase):
+    def test_authoring_page_uses_protected_admin_api_and_csrf(self):
+        from pathlib import Path
+        page = Path(__file__).resolve().parents[1] / "admin" / "assessments.html"
+        source = page.read_text(encoding="utf-8")
+        for marker in (
+            "/api/v1/admin/assessment-subjects",
+            "/api/v1/admin/assessments",
+            "X-CSRF-Token",
+            "/questions",
+            "/publish",
+            "Published assessments are immutable",
+            'href="#main">Skip to main content',
+            "@media(max-width:680px)",
+        ):
+            self.assertIn(marker, source)
+
+    def test_assessment_detail_projection_does_not_select_answer_keys(self):
+        from pathlib import Path
+        source = (Path(__file__).resolve().parent / "admin_assessments.py").read_text(encoding="utf-8")
+        self.assertIn("SELECT id,question_type,prompt,options,explanation,points,sort_order", source)
+        self.assertNotIn("SELECT id,question_type,prompt,options,answer_key", source)
+
+
 if __name__ == "__main__":
     unittest.main()

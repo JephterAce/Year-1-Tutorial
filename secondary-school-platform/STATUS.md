@@ -491,3 +491,47 @@ Application commit `8e1f838c34d5dcc55c6358e74c97928566dcb622` passed exact-head 
 Saved lessons are now database-backed through migration 018, with authenticated list, CSRF-protected save/remove routes, idempotent bookmarks, published-topic validation and a working student UI. Schema integration checks now account for the baseline plus 18 numbered migrations.
 
 Managed Neon staging still has only 13 migration records; migrations 014–018 have not been applied there. Render staging has not been deployed and remains on its previous live commit. No production or live payment action occurred. The platform is not production-ready.
+
+
+---
+
+## Verified update — 7 November 2026 (admin authoring, finance, data rights and release operations)
+
+### Code verification
+- Latest fully tested application commit: dd7b620676c4312aa9540a89d19be71381f71ec5.
+- Exact-head push CI [42415624459](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42415624459) and PR CI [42415628254](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42415628254) passed.
+- Passed 241+ unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL replay of baseline plus migrations 001–019, schema integration, assessment/payment E2E, synthetic registration-to-results, authenticated and anonymous Playwright browser journeys, and non-publishing container build.
+- Playwright uses a disposable PostgreSQL database, synthetic owner admin and synthetic subjects. No managed staging student accounts or payments were created.
+- A browser test first caught an async form handler bug (event.currentTarget became null after await); the handler now captures the form before asynchronous work. A later browser assertion was corrected to check the selected assessment title. Exact-head browser CI now passes.
+
+### Implemented
+- Improved admin mobile navigation, skip links, focus visibility, reduced-motion and forced-colour support; student account fields now have accessible labels/autocomplete.
+- Added a protected assessment authoring workspace and role-gated API: list/detail, create draft, validated objective questions (single choice, multiple select, true/false, numeric, exact text), answer-key-safe detail projection, and immutable publication.
+- Added read-only finance ledger summary and exception indicators; no Paystack calls/refunds are initiated from this view.
+- Added student self-service JSON export, privacy request intake/history/withdrawal and administrator data-rights review queue. Deletion is intake-only and never auto-erases data.
+- Added migration 019_student_data_rights_requests.sql.
+- Added SMTP transport contract tests with mocked STARTTLS/SSL, retained Paystack verification contract tests and private S3-compatible audio/range/revocation tests.
+- Added guarded local backup/restore rehearsal script and backup/recovery/monitoring runbook.
+- Updated migration reconciliation and release-gate documentation.
+
+### Migration and managed provider state
+- Repository canonical sequence is baseline plus numbered migrations 001–019 (20 history entries in CI).
+- Managed Neon project learnwise, branch think-tank-staging (br-still-cherry-baz7g5hk), has exactly 001–013 in learnwise_migration_history; counts remain 0 students, 1 admin, 6 subjects, 0 topics, 6 audit events.
+- The separate think-tank-migration-rehearsal-20261106 branch also has only 001–013. Do not mistake it for a rehearsal of 014–019.
+- Migrations 014–019 passed disposable CI but are not applied to managed staging.
+- Render service learnwise-staging-api has auto-deploy off. Latest live deployment is dep-dbn2dcrl550s73f9ahag, commit 0f343fff800b619fdaff76f5ee97225ec6c3dbdf, completed 2026-11-06T19:13:13Z. No deployment was triggered.
+- Public /health could not be directly verified in this run: web open returned “URL is not accessible by this tool”; Render HTTP request metrics for host learnwise-staging-api.onrender.com, path /health, last-hour default range returned no data. This is unavailable evidence, not a confirmed health failure. Render service metadata has no configured healthCheckPath.
+
+### External and release blockers
+- SMTP code is tested with mocks; no live provider delivery/account recovery proof or controlled mailbox.
+- Paystack verification contracts pass; no authorised Paystack sandbox account/keys and no real sandbox charge/webhook/refund acceptance.
+- Audio storage/range/security logic is tested with mocks; managed bucket learnwise-private-audio remains empty and no real provider playback/revocation acceptance exists.
+- No authorised NERDC corpus/licence or qualified teacher approvals.
+- No completed guardian identity/consent verification, NDPA/DPIA, retention schedule, safeguarding/legal sign-off or processor/cross-border review.
+- Backup/restore procedure exists but no managed backup restore has been executed; RPO/RTO and retention are not approved.
+- Monitoring/alert delivery and independent security review remain outstanding.
+- Full bulk-export worker, large streamed exports, private export archives, signed URL lifecycle and actual data deletion workflow remain outstanding.
+- PR #1 remains open/draft/unmerged. Main and legacy university bot remain untouched.
+
+### Current release state
+**Development software milestone substantially advanced; staging and production release are not approved.** Do not apply migrations 014–019 or deploy code until the owner approves a reviewed staging migration/deployment plan, backup and rollback evidence. Production launch requires a separate explicit approval after all legal, safeguarding, curriculum, payment, audio, security and operational gates pass.

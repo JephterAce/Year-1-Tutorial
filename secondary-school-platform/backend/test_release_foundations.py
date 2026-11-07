@@ -104,5 +104,24 @@ class StudentSavedLessonsUiTests(unittest.TestCase):
   self.assertIn("studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topicId)",source)
   self.assertIn("id=\"savedLessons\"",source)
 
+
+class AdminStudioAccessibilityTests(unittest.TestCase):
+ def test_admin_studio_has_skip_navigation_and_named_landmark(self):
+  page=Path(__file__).resolve().parents[1]/"admin"/"index.html"
+  source=page.read_text(encoding="utf-8")
+  self.assertIn('href="#main-content">Skip to main content',source)
+  self.assertIn('role="navigation" aria-label="Administrator workspace"',source)
+  self.assertIn('<main class="main" id="main-content" tabindex="-1">',source)
+  self.assertIn('aria-hidden="true"',source)
+
+ def test_admin_studio_has_small_screen_navigation_and_accessible_focus(self):
+  page=Path(__file__).resolve().parents[1]/"admin"/"index.html"
+  source=page.read_text(encoding="utf-8")
+  self.assertIn("@media(max-width:640px)",source)
+  self.assertIn("env(safe-area-inset-bottom)",source)
+  self.assertIn(":focus-visible",source)
+  self.assertIn("prefers-reduced-motion:reduce",source)
+  self.assertIn("forced-colors:active",source)
+
 if __name__ == "__main__":
  unittest.main()

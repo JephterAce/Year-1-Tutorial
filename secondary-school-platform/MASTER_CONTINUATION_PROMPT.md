@@ -892,3 +892,7 @@ Current branch head 1419ed4b8c6011ad5d30ea9299a36c2816e1aa3c. Application code r
 
 ### Final continuation pointer — 7 November 2026
 Latest repository/PR head is 2098d7ad37b830a84a1120654afc56b5152ae4ef (documentation/PR evidence only); latest tested application commit remains a057289c4930b86b6bdd5176bd71e61a9536f044. Exact-head push CI 42416959890 and PR CI 42416965208 both passed, including public /health, disposable backup/restore, all migrations in CI and authenticated browser journeys.
+
+
+### Handover pointer — 7 November 2026
+Current branch/PR head: fc77dbc714af2103b50f58c02bff844556a776ad. Exact-head push 42417089283 and PR 42417094553 passed. This branch head contains documentation/PR-status changes only; latest tested application code remains a057289c4930b86b6bdd5176bd71e61a9536f044. Latest public staging health is HTTP 200, status=ok, mode=database, service=secondary-school-api. Render remains on its prior live deployment; no managed migration or deployment was performed.

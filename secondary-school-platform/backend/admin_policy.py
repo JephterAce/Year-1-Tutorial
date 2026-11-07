@@ -9,7 +9,7 @@ from dataclasses import dataclass
 CAPABILITIES = frozenset({
     "curriculum.read", "curriculum.edit", "curriculum.publish",
     "audio.upload", "audio.review",
-    "assessment.read", "assessment.review", "assessment.respond",
+    "assessment.read", "assessment.edit", "assessment.publish", "assessment.review", "assessment.respond",
     "student.support", "student.read_private",
     "payment.read", "payment.reconcile", "payment.refund",
     "export.request", "export.approve", "export.download",
@@ -20,11 +20,11 @@ ROLE_CAPABILITIES = {
     "owner": CAPABILITIES,
     "editor": frozenset({
         "curriculum.read", "curriculum.edit",
-        "assessment.read", "audio.upload",
+        "assessment.read", "assessment.edit", "audio.upload",
     }),
     "reviewer": frozenset({
         "curriculum.read", "curriculum.publish", "audio.review",
-        "assessment.read", "assessment.review",
+        "assessment.read", "assessment.publish", "assessment.review",
         "assessment.respond",
     }),
     "support": frozenset({

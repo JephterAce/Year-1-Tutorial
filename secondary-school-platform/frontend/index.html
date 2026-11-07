@@ -89,7 +89,7 @@
   </div>
   <p class="tip">Progress is based on saved learning records. Listening time is not yet measured, so no listening-time estimate is shown.</p>
  </section>
- <section class="page" id="saved"><div class="sectionhead" style="margin-top:0"><div><h2>Saved lessons</h2><p>Keep useful topics close at hand.</p></div></div><div class="panel">You haven't saved any lessons yet.</div></section>
+ <section class="page" id="saved"><div class="sectionhead" style="margin-top:0"><div><h2>Saved lessons</h2><p>Your private bookmarks for published Think Tank lessons.</p></div><button class="link" type="button" onclick="loadSavedLessons()">Refresh saved lessons</button></div><div class="panel"><div id="savedLessons" aria-live="polite">Sign in to view your saved lessons.</div></div></section>
  <section class="page" id="podcasts">
   <div class="sectionhead" style="margin-top:0"><div><h2>Podcast library</h2><p>Listen to approved two-presenter episodes attached to lessons you have unlocked.</p></div><button class="link" type="button" onclick="loadPodcastLibrary()">Refresh library</button></div>
   <div class="panel"><div id="podcastList" aria-live="polite">Sign in to view your podcast library.</div><audio id="podcastPlayer" controls preload="none" style="width:100%;margin-top:16px"></audio><p id="podcastStatus" aria-live="polite" style="font-size:12px;color:var(--muted)"></p></div>
@@ -117,6 +117,41 @@ const topics=[
 ["Physics","Work, energy and power","Connect force, work, energy transfer and power.","Term allocation pending",1000,"⚛️"],
 ["Physics","Waves and sound","Explore wave properties and sound behaviour.","Term allocation pending",1000,"⚛️"]
 ];
+async function loadSavedLessons(){
+ const target=document.getElementById('savedLessons');
+ target.textContent='Loading your saved lessons…';
+ try{
+  const data=await studentApi('/api/v1/student/saved-lessons');
+  const items=data.items||[];target.replaceChildren();
+  if(!items.length){target.textContent='No saved lessons yet. Explore the catalogue and choose “Save lesson” on a published topic.';return}
+  items.forEach(item=>{
+   const row=document.createElement('article');row.style.cssText='display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #e7ebf2';
+   const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+   const link=document.createElement('a');link.href='/lesson.html?topic='+encodeURIComponent(item.topic_id);link.textContent=item.title;link.style.cssText='font-weight:700;color:#3456c8;text-decoration:none';
+   const detail=document.createElement('p');detail.style.cssText='margin:4px 0;color:#68758b;font-size:11px';detail.textContent=(item.subject||'Lesson')+' · '+item.class_level;
+   info.append(link,detail);
+   const remove=document.createElement('button');remove.className='link';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>removeSavedLesson(item.topic_id,remove));
+   row.append(info,remove);target.append(row);
+  });
+ }catch(e){target.textContent=e.message||'Unable to load saved lessons.'}
+}
+async function saveTopic(topic,button){
+ if(button)button.disabled=true;
+ try{
+  const result=await studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topic.id),{},'POST');
+  if(button)button.textContent='Saved';
+  await loadSavedLessons();
+ }catch(e){if(button)button.textContent='Save failed';alert(e.message||'Unable to save this lesson.')}
+ finally{if(button)button.disabled=false}
+}
+async function removeSavedLesson(topicId,button){
+ if(button)button.disabled=true;
+ try{
+  await studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topicId),{},'DELETE');
+  await loadSavedLessons();
+ }catch(e){alert(e.message||'Unable to remove this saved lesson.')}
+ finally{if(button)button.disabled=false}
+}
 async function loadPodcastLibrary(){
  const target=document.getElementById('podcastList'),status=document.getElementById('podcastStatus');
  target.textContent='Loading approved podcasts…';status.textContent='';
@@ -149,7 +184,7 @@ async function playPodcast(item,button){
  }catch(e){status.textContent=e.message||'This podcast could not be played.'}
  finally{if(button)button.disabled=false}
 }
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',assessments:'My assessments',profile:'My profile',help:'Help & support',podcasts:'Podcast library'})[id]||'Overview';if(id==='catalog')renderCatalog();if(id==='profile')loadStudentProfile();if(id==='progress')loadDashboard();if(id==='podcasts')loadPodcastLibrary();if(id==='assessments')loadAssessmentHistory();window.scrollTo(0,0)}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',assessments:'My assessments',profile:'My profile',help:'Help & support',podcasts:'Podcast library'})[id]||'Overview';if(id==='catalog')renderCatalog();if(id==='saved')loadSavedLessons();if(id==='profile')loadStudentProfile();if(id==='progress')loadDashboard();if(id==='podcasts')loadPodcastLibrary();if(id==='assessments')loadAssessmentHistory();window.scrollTo(0,0)}
 document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
 function previewProfilePhoto(event){const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>2*1024*1024){alert('Choose a JPG, PNG or WebP image under 2 MB.');event.target.value='';return}const reader=new FileReader();reader.onload=()=>{document.getElementById('profileAvatar').style.backgroundImage='url('+reader.result+')';document.getElementById('profileAvatar').textContent=''};reader.readAsDataURL(file)}
 function studentCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}
@@ -317,7 +352,7 @@ async function renderCatalog(){
    const price=document.createElement('span');price.className='price';
    price.textContent=Number(topic.price_kobo||0)>0?'₦'+(Number(topic.price_kobo)/100).toLocaleString('en-NG'):'Price to be confirmed';
    const button=document.createElement('button');button.textContent='View lesson';button.addEventListener('click',()=>previewTopic(index));
-   footer.append(price,button);card.append(meta,title,summary,footer);grid.append(card);
+   const saveButton=document.createElement('button');saveButton.className='link';saveButton.type='button';saveButton.textContent='Save lesson';saveButton.addEventListener('click',()=>saveTopic(topic,saveButton));footer.append(price,button,saveButton);card.append(meta,title,summary,footer);grid.append(card);
   });
  }catch(error){
   if(requestId!==catalogueRequest)return;

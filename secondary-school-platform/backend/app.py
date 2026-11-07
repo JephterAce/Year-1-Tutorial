@@ -877,6 +877,58 @@ def get_student_topic(topic_id):
         return jsonify({"error": "topic_unavailable"}), 503
 
 
+@app.get("/api/v1/student/saved-lessons")
+def student_saved_lessons_list():
+    student = _current_student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        from student_saved_lessons import list_saved_lessons
+        return jsonify(list_saved_lessons(student["student_id"])), 200
+    except Exception:
+        app.logger.exception("Student saved lessons list failed")
+        return jsonify({"error": "saved_lessons_unavailable"}), 503
+
+
+@app.post("/api/v1/student/saved-lessons/<topic_id>")
+def student_save_lesson(topic_id):
+    import uuid
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        topic_id = str(uuid.UUID(topic_id))
+    except (TypeError, ValueError, AttributeError):
+        return jsonify({"error": "lesson_not_available"}), 404
+    try:
+        from student_saved_lessons import save_lesson, SavedLessonError
+        result = save_lesson(student["student_id"], topic_id)
+        return jsonify(result), 200 if result["already_saved"] else 201
+    except SavedLessonError as exc:
+        return jsonify({"error": exc.code}), exc.status
+    except Exception:
+        app.logger.exception("Student save lesson failed")
+        return jsonify({"error": "save_lesson_unavailable"}), 503
+
+
+@app.delete("/api/v1/student/saved-lessons/<topic_id>")
+def student_remove_saved_lesson(topic_id):
+    import uuid
+    student = _current_student(require_csrf=True)
+    if not student:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    try:
+        topic_id = str(uuid.UUID(topic_id))
+    except (TypeError, ValueError, AttributeError):
+        return jsonify({"error": "lesson_not_available"}), 404
+    try:
+        from student_saved_lessons import remove_saved_lesson
+        return jsonify(remove_saved_lesson(student["student_id"], topic_id)), 200
+    except Exception:
+        app.logger.exception("Student remove saved lesson failed")
+        return jsonify({"error": "remove_saved_lesson_unavailable"}), 503
+
+
 @app.get("/api/v1/student/podcasts")
 def student_podcast_library():
     """Return approved podcast episodes only for the signed-in student's active entitlements."""

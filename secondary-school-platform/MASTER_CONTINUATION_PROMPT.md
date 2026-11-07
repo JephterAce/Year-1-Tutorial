@@ -758,3 +758,16 @@ This increment is committed to the development branch only. It is not yet a comp
 ### Safety
 - PR #1 stays open, draft and unmerged. `main` and the legacy university Telegram bot remain untouched.
 - No deployment, managed staging migration, environment-variable change, account creation, payment, storage upload or production action occurred.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (assessment history UX)
+
+- Tested application commit: `199c4e52bfd86050df4058a50593846745434fbd`.
+- Exact-head GitHub Actions push run `42413078275` and PR run `42413082270` both passed.
+- Student assessment history now distinguishes attempts from completed assessments and displays status, score/maximum score, question count, percentage, pass/fail, human-review flag and submitted/started timestamp. Empty/error states remain explicit.
+- Added static UI coverage for these source fields. Existing authenticated assessment-history API remains the data source; no score or result is fabricated.
+- The earlier progress dashboard, podcast library and podcast-script playback authorization remain present and covered by the previously passing exact-head CI runs.
+- No staging deployment or database migration was performed. Render remains on the previous live SHA; managed Neon staging remains at 13 migrations while repository CI rehearses all 17 migrations on disposable PostgreSQL.
+- At the next session, fetch the live branch head and latest CI before editing. Continue with accessible/mobile student experience and admin curriculum/assessment authoring, then synthetic authenticated browser acceptance.

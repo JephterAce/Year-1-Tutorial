@@ -29,7 +29,8 @@ test("authenticated administrator creates, reviews and publishes a draft assessm
   await expect(page.locator("#createMsg")).not.toHaveText("");
   const createMessage = await page.locator("#createMsg").textContent();
   expect(createMessage, "Assessment creation response").toContain("Draft created.");
-  await expect(page.getByRole("heading", { name: "Question editor" })).toBeVisible();
+  await expect(page.locator("#editor")).toBeVisible();
+  await expect(page.locator("#editorTitle")).toHaveText(title);
 
   await page.getByLabel("Question prompt").fill("Which particle carries a negative electric charge?");
   await page.getByLabel("Options (JSON)").fill('[{"id":"electron","text":"Electron"},{"id":"proton","text":"Proton"}]');

@@ -136,3 +136,7 @@ Current branch head 1419ed4b8c6011ad5d30ea9299a36c2816e1aa3c passed exact-head p
 
 ### Final documentation-head confirmation — 7 November 2026
 Repository/PR head 2098d7ad37b830a84a1120654afc56b5152ae4ef passed exact-head push [42416959890](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416959890) and PR [42416965208](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416965208). Latest tested application commit remains a057289c4930b86b6bdd5176bd71e61a9536f044; the later head updates documentation/PR evidence only.
+
+
+### Handover pointer — 7 November 2026
+Current branch/PR head fc77dbc714af2103b50f58c02bff844556a776ad passed exact-head push 42417089283 and PR 42417094553. Application code tested at a057289c4930b86b6bdd5176bd71e61a9536f044; later commits update workflow and documentation evidence only. Public staging health passed HTTP 200/status=ok/mode=database/service=secondary-school-api.

@@ -112,3 +112,35 @@ def create_podcast_script(topic_id, admin_id):
         "title": created["title"], "status": created["status"],
         "script_text": script, "created_at": created["created_at"].isoformat(),
     }
+
+
+def list_student_podcasts(student_id):
+    """List only approved podcast audio attached to approved scripts and entitled lessons."""
+    with connection() as conn:
+        rows = conn.execute(
+            """SELECT t.id AS topic_id,t.title AS topic_title,s.name AS subject,
+                      t.class_level,a.id AS asset_id,a.duration_seconds,
+                      p.title AS podcast_title,p.version AS script_version
+               FROM entitlements e
+               JOIN topics t ON t.id=e.topic_id
+               JOIN subjects s ON s.id=t.subject_id
+               JOIN lesson_assets a ON a.topic_id=t.id
+                 AND a.asset_type='podcast_audio' AND a.review_status='approved'
+               JOIN podcast_scripts p ON p.topic_id=t.id AND p.audio_asset_id=a.id
+                 AND p.status='approved'
+               WHERE e.student_id=%s AND e.revoked_at IS NULL
+                 AND t.status='published' AND t.curriculum_status='published'
+               ORDER BY p.reviewed_at DESC,p.created_at DESC,a.version DESC
+               LIMIT 100""",
+            (student_id,),
+        ).fetchall()
+    return {"items": [{
+        "topic_id": str(row["topic_id"]),
+        "topic_title": row["topic_title"],
+        "subject": row["subject"],
+        "class_level": row["class_level"],
+        "asset_id": str(row["asset_id"]),
+        "duration_seconds": row["duration_seconds"],
+        "title": row["podcast_title"],
+        "script_version": row["script_version"],
+    } for row in rows]}

@@ -579,3 +579,7 @@ Managed Neon staging still has only 13 migration records; migrations 014–018 h
 ### Final documentation-head confirmation — 7 November 2026
 - Latest repository/PR head: 2098d7ad37b830a84a1120654afc56b5152ae4ef. This update contains documentation and PR-status evidence only; tested application code remains a057289c4930b86b6bdd5176bd71e61a9536f044.
 - Exact-head push CI [42416959890](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416959890) and PR CI [42416965208](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416965208) both passed, including the public staging health job, backup/restore rehearsal and authenticated browser suite.
+
+
+### Final handover pointer — 7 November 2026
+The current development branch and open draft PR head is fc77dbc714af2103b50f58c02bff844556a776ad. Exact-head push workflow 42417089283 and PR workflow 42417094553 both passed. This head contains documentation/PR-status updates only; latest tested application code remains a057289c4930b86b6bdd5176bd71e61a9536f044. Public health is HTTP 200/status=ok/mode=database/service=secondary-school-api. No deployment or managed migration was performed.

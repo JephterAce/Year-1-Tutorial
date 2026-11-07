@@ -29,3 +29,15 @@ Official starting points: https://ndpc.gov.ng/ and https://nerdc.gov.ng/
 
 ## Release-blocking evidence
 Approved privacy notice, terms and retention schedule; completed DPIA and signed legal review; child safeguarding policy and named lead; processor agreements and hosting/data residency assessment; tested access/correction/export/deletion and incident response; independent security test and remediation sign-off. Do not release while unresolved.
+
+
+## Engineering update — 7 November 2026
+
+The following technical foundations now exist:
+- Student profile privacy defaults and explicit terms/privacy consent capture remain in the account flow.
+- Authenticated students can download a scoped JSON copy of their own account, consent, progress, practice, assessment, payment-ledger, entitlement, saved-lesson and rights-request data.
+- Migration 019 tracks student access/export, correction, deletion and restriction requests. Students can view and withdraw open requests; authorised support/owner administrators can triage and record a reasoned response.
+- A deletion request records intent only. No automatic account or record deletion is performed.
+- Authenticated administrator data-rights triage and student self-service controls are included in disposable-fixture browser acceptance.
+
+These controls do **not** establish legal compliance. The export is not yet a streamed/bulk archive workflow; guardian identity/age verification, formal correction/deletion fulfilment, retention schedules, processor contracts, cross-border transfer assessment, DPIA and safeguarding policy approvals remain outstanding. The guardian consent field is not proof of verified guardian consent. Obtain counsel and safeguarding-lead sign-off before enabling real student registration.

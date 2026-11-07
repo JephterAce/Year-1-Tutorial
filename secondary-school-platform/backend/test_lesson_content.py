@@ -153,6 +153,14 @@ class StudentLearningRouteSecurityTests(unittest.TestCase):
         self.client = app.test_client()
 
 
+    def test_podcast_audio_requires_approved_script(self):
+        fake = FakeConnection([FakeCursor(None)])
+        with patch("app._current_student", return_value={"student_id":"student-1"}), \
+             patch("database.connection", return_value=fake):
+            response = self.client.post("/api/v1/topics/topic-1/audio/asset-1/access")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("ps.status='approved'", fake.calls[0][0])
+
     def test_podcast_library_requires_student_session(self):
         with patch("app._current_student", return_value=None):
             response = self.client.get("/api/v1/student/podcasts")

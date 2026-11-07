@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import lesson_content
+import podcast_production
 from lesson_content import (
     LessonContentError, check_practice_answer, get_lesson_content, mark_topic_complete, get_tutor_context
 )
@@ -126,10 +127,36 @@ class PodcastScriptTests(unittest.TestCase):
             build_podcast_script("Cell Structure", "Biology", None)
 
 
+
+class PodcastLibraryTests(unittest.TestCase):
+    def test_library_returns_only_approved_entitled_podcast_assets(self):
+        fake = FakeConnection([FakeCursor(rows=[{
+            "topic_id":"topic-1","topic_title":"Cell Structure","subject":"Biology",
+            "class_level":"SS1","asset_id":"asset-1","duration_seconds":420,
+            "podcast_title":"Inside the Cell","script_version":2
+        }])])
+        with patch.object(podcast_production, "connection", return_value=fake):
+            result = podcast_production.list_student_podcasts("student-1")
+        self.assertEqual(result["items"][0]["asset_id"], "asset-1")
+        self.assertEqual(result["items"][0]["title"], "Inside the Cell")
+        sql = fake.calls[0][0]
+        self.assertIn("a.review_status='approved'", sql)
+        self.assertIn("p.status='approved'", sql)
+        self.assertIn("e.revoked_at IS NULL", sql)
+        self.assertIn("t.status='published'", sql)
+        self.assertIn("t.curriculum_status='published'", sql)
+
+
 class StudentLearningRouteSecurityTests(unittest.TestCase):
     def setUp(self):
         from app import app
         self.client = app.test_client()
+
+
+    def test_podcast_library_requires_student_session(self):
+        with patch("app._current_student", return_value=None):
+            response = self.client.get("/api/v1/student/podcasts")
+        self.assertEqual(response.status_code, 401)
 
     def test_dashboard_requires_student_session(self):
         with patch("app._current_student", return_value=None):

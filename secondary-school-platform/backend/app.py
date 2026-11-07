@@ -1059,6 +1059,16 @@ def admin_operations_page():
     response.headers["Cache-Control"] = "no-store"
     return response
 
+@app.get("/admin/assessments")
+def admin_assessments_page():
+    if not _current_admin():
+        return redirect("/admin/login")
+    response = send_from_directory(_ADMIN_DIR, "assessments.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @app.get("/admin/reviews")
 def admin_reviews_page():
     if not _current_admin():

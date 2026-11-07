@@ -63,6 +63,13 @@ The Git repository stores application source, migrations, tests and documentatio
 - Password hashes, tokens, private answer keys and unrelated sensitive fields are excluded.
 - No real student data or export files appear in Git history, CI artifacts or application logs.
 
-## Implementation boundary
+## Implementation status — 7 November 2026
 
-Migration `005_student_data_exports.sql` creates export-job and audit metadata only. It does not implement export endpoints, object storage, worker processing, role permissions or user-facing download flows. Those remain engineering tasks and must be tested before the feature is described as operational.
+- Migration `005_student_data_exports.sql` still defines administrator bulk-export job/audit metadata; the asynchronous worker, private archive storage, checksum manifest, signed-download lifecycle and bulk-export role are not implemented.
+- A separate student self-service JSON export endpoint now returns only the authenticated student's own profile, consent, learning progress, lesson practice, assessment attempts/answers, payment ledger, entitlements, saved lessons and data-rights request records.
+- The student export projection does not select password hashes, session/reset/verification tokens, provider payloads or assessment answer keys. The download is private/no-store and audited.
+- Migration `019_student_data_rights_requests.sql` provides student access/export, correction, deletion and restriction request intake, student request history/withdrawal, and a role-gated administrator triage queue.
+- Deletion requests are intake-only. The system does not automatically erase accounts or records. Fulfilment, statutory retention exceptions, guardian identity verification and appeal handling remain subject to approved legal policy and human review.
+- Disposable PostgreSQL CI replays the migration and runs authenticated browser tests with synthetic fixtures. No managed staging data or real student account is used.
+
+**Still not complete:** bulk export worker, private archive storage, streamed large exports, file manifests/checksums, signed URL expiry/revocation, export lifecycle background jobs, formal guardian/age verification and legally approved retention/deletion execution. Do not describe statutory data-rights compliance as complete until legal sign-off and all acceptance criteria above pass.

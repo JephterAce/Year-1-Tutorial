@@ -120,6 +120,20 @@ def _question_payload(data):
     }
 
 
+@admin_assessments.get("/api/v1/admin/assessment-subjects")
+def list_assessment_subjects():
+    _, error = _authorise("assessment.read")
+    if error:
+        return error
+    try:
+        with connection() as conn:
+            rows = conn.execute("SELECT id,name FROM subjects ORDER BY name").fetchall()
+        return jsonify({"items": [{"id": str(r["id"]), "name": r["name"]} for r in rows]}), 200
+    except Exception:
+        current_app.logger.exception("Admin assessment subject list failed")
+        return jsonify({"error": "assessment_subjects_unavailable"}), 503
+
+
 @admin_assessments.get("/api/v1/admin/assessments")
 def list_assessments():
     session, error = _authorise("assessment.read")

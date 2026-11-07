@@ -73,6 +73,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
           AUTH_RATE_LIMIT_PEPPER: ci-only-pepper-not-a-real-secret-000000000000
+          CI_STUDENT_PASSWORD: Ephemeral-CI-Student-Password-Only-2026!
         run: python ../browser-acceptance/seed_fixtures.py
       - name: Set up Node for authenticated browser acceptance
         uses: actions/setup-node@v4
@@ -105,6 +106,8 @@ jobs:
           STAGING_BASE_URL: http://127.0.0.1:8000
           CI_ADMIN_EMAIL: ci-owner@thinktank.invalid
           CI_ADMIN_PASSWORD: Ephemeral-CI-Admin-Password-Only-2026!
+          CI_STUDENT_EMAIL: ci-student@thinktank.invalid
+          CI_STUDENT_PASSWORD: Ephemeral-CI-Student-Password-Only-2026!
         run: npm test
       - name: Capture API diagnostics on browser failure
         if: failure()

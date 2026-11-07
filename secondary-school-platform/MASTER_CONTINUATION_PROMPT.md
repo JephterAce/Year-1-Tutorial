@@ -870,3 +870,7 @@ This increment is committed to the development branch only. It is not yet a comp
 - An async form-reset bug found by the browser test has been fixed by capturing the form reference before awaiting the API.
 
 Fetch latest branch head and exact-head CI before any further changes. Documentation-only updates after this tested application commit must not be represented as new application test evidence unless their own exact-head workflows pass.
+
+
+### Additional migration checksum evidence — 7 November 2026
+Read-only comparison of managed Neon learnwise_migration_history.source_blob_sha against the development branch's canonical backend migration GitHub blob SHA returned exact matches for all applied migrations 001–013 (13/13). No source drift was detected in the applied sequence. Pending migrations 014–019 remain unapplied; they still require an upgrade rehearsal from the actual 001–013 state, backup/rollback evidence and explicit owner approval.

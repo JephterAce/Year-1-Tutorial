@@ -884,3 +884,7 @@ Read-only comparison of managed Neon learnwise_migration_history.source_blob_sha
 - Read-only Neon comparison confirmed exact GitHub blob SHA matches for all 13 applied managed-staging migrations. Migrations 014–019 remain unapplied.
 - Render remains on live deployment dep-dbn2dcrl550s73f9ahag, SHA 0f343fff800b619fdaff76f5ee97225ec6c3dbdf, completed 2026-11-06T19:13:13.356Z. Development branch is 213 commits ahead. No failed/in-progress deployment event; auto-deploy off; no deploy performed.
 - Public health is verified by CI; Render's healthCheckPath itself is still empty and was not changed.
+
+
+### Latest branch head and exact CI — 7 November 2026
+Current branch head 1419ed4b8c6011ad5d30ea9299a36c2816e1aa3c. Application code remains at the tested a057289c4930b86b6bdd5176bd71e61a9536f044; subsequent changes are documentation/workflow evidence updates. Exact-head push 42416831355 and PR 42416833832 both passed, including the read-only public staging health job, migration replay, local backup/restore rehearsal and authenticated browser suite.

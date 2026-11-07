@@ -469,3 +469,14 @@ The student progress dashboard and podcast library are implemented. Podcast list
 Render has not been updated; latest live deployment remains `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`. Neon managed staging remains at 13 migrations, 6 subjects, 0 topics, 0 students, 1 administrator and 6 audit events; private audio bucket is empty. Migrations 014–017 are not applied to managed staging.
 
 The platform is not production-ready. Curriculum rights/content, teacher review, SMTP/Paystack sandbox, private audio provider E2E, full CMS/admin/student UAT, privacy/child safeguarding/legal approvals, monitoring, backup/restore, independent security review and production authorization remain open. PR #1 remains draft/open/unmerged; main and the legacy bot remain untouched.
+
+
+---
+
+## Verified update — 7 November 2026 (assessment history UX)
+
+Application commit `199c4e52bfd86050df4058a50593846745434fbd` passed exact-head push CI [42413078275](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42413078275) and PR CI [42413082270](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42413082270).
+
+Assessment history now displays accurate attempt counts, score fraction, question count, percentage, pass/fail, integrity-review status and submitted/started time. The source is the existing authenticated assessment-history API. Added UI regression coverage.
+
+Progress dashboard and approved, entitlement-gated private podcast library remain implemented. Managed staging has not been deployed or migrated; it still has 13 migration records while repository CI verifies 17 migrations on disposable PostgreSQL. Render remains on its previous live commit. The project is still not approved for production.

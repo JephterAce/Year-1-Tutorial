@@ -431,3 +431,26 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 - Added HMAC-signed, short-lived private-audio authorisation primitives and test coverage. This is not yet an object-storage streaming endpoint; a private storage adapter and entitlement lookup are still required.
 - Added NERDC acquisition, content production, privacy/safeguarding/legal review, secure audio and deployment/operations runbooks.
 - Added automated unit/security tests for the new release foundations. External NERDC access/rights, independent teacher review, Nigerian legal sign-off, live provider credentials, staging infrastructure, real Paystack sandbox E2E and production approval remain external gates.
+
+
+---
+
+## Current verified checkpoint — 7 November 2026
+
+**Development branch head:** `905171f7a55254887c9cc905449598bc96403a58`
+
+**CI:** Exact-head push run [42412752132](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42412752132) and PR run [42412756438](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42412756438) passed. Coverage includes unit/security, JS syntax, all 17 migrations on disposable PostgreSQL, schema integration, assessment/payment E2E, synthetic student registration-to-results journey and container build without publishing.
+
+**Newly implemented**
+- Student progress page now consumes the authenticated dashboard API and displays lesson completion, practice/assessment totals, graded average, per-subject progress and recent lesson activity.
+- Student podcast library now lists only episodes with an active student entitlement, published topic, approved audio asset and approved linked podcast script. Playback uses short-lived private audio authorization.
+- Added unit, route-auth and UI wiring tests.
+
+**Provider state (read-only)**
+- Render staging remains live on old deployed commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; no new deployment was triggered. Auto-deploy is off.
+- Neon staging remains ready with 13 migrations, 6 subjects, 0 topics, 0 students, 1 administrator and 6 audit events. Private audio bucket exists and is empty.
+- Repository migrations 014–017 are CI/rehearsal verified but not applied to managed staging. Do not deploy the new code to staging until migration/deployment prerequisites and owner approval are satisfied.
+
+**Still not production-ready:** no approved curriculum corpus/rights and teacher sign-offs, no published topics, no podcast assets, no real SMTP delivery proof, no Paystack sandbox acceptance, no private audio provider E2E, incomplete CMS/assessment authoring and admin UAT, incomplete privacy/child safeguarding/legal approvals, and no backup/restore, monitoring or independent security sign-off.
+
+**Protected boundaries:** PR #1 remains draft/open/unmerged; main and legacy university bot untouched; registration and checkout disabled; no production deployment or live payment authorized.

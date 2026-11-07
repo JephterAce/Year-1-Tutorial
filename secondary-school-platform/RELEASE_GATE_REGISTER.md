@@ -132,3 +132,7 @@ Managed Neon still has only 001–013 (all 13 source blob hashes match); 014–0
 ### Latest branch head — 7 November 2026
 
 Current branch head 1419ed4b8c6011ad5d30ea9299a36c2816e1aa3c passed exact-head push [42416831355](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416831355) and PR [42416833832](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416833832). Both include public staging health verification (HTTP 200/status=ok/database/secondary-school-api), 246 unit/security tests, disposable PostgreSQL migration/schema and E2E suites, local backup/restore rehearsal, authenticated/anonymous Playwright acceptance and non-publishing container build.
+
+
+### Final documentation-head confirmation — 7 November 2026
+Repository/PR head 2098d7ad37b830a84a1120654afc56b5152ae4ef passed exact-head push [42416959890](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416959890) and PR [42416965208](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416965208). Latest tested application commit remains a057289c4930b86b6bdd5176bd71e61a9536f044; the later head updates documentation/PR evidence only.

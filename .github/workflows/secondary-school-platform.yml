@@ -47,8 +47,11 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Run unit and security tests
         run: python -m unittest -v
-      - name: Check frontend and admin JavaScript syntax
-        run: python check_frontend_scripts.py
+      - name: Check Python, frontend/admin JavaScript and operations script syntax
+        run: |
+          python -m compileall -q .
+          python check_frontend_scripts.py
+          bash -n ../ops/backup_restore_rehearsal.sh
       - name: Rehearse all PostgreSQL migrations on a disposable database
         env:
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal

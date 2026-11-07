@@ -771,3 +771,35 @@ This increment is committed to the development branch only. It is not yet a comp
 - The earlier progress dashboard, podcast library and podcast-script playback authorization remain present and covered by the previously passing exact-head CI runs.
 - No staging deployment or database migration was performed. Render remains on the previous live SHA; managed Neon staging remains at 13 migrations while repository CI rehearses all 17 migrations on disposable PostgreSQL.
 - At the next session, fetch the live branch head and latest CI before editing. Continue with accessible/mobile student experience and admin curriculum/assessment authoring, then synthetic authenticated browser acceptance.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (saved lessons)
+
+### Exact-head CI
+- Tested application commit: `8e1f838c34d5dcc55c6358e74c97928566dcb622`.
+- Exact-head push run `42413332222` and PR run `42413335065` both passed.
+- Passed unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL replay of migrations 001–018, PostgreSQL schema integration, assessment/payment E2E, synthetic registration-to-results journey and non-publishing container build.
+- The initial run after adding migration 018 correctly applied all 18 numbered migrations but exposed a stale schema integration expectation (19 total records including baseline, not 18). Updated the assertion and latest exact-head runs passed.
+
+### Completed saved-lessons feature
+- Added migration `018_student_saved_topics.sql` with a private per-student bookmark table and recent index.
+- Added `student_saved_lessons.py` list/save/remove service functions.
+- Added authenticated GET and CSRF-protected POST/DELETE student routes.
+- Replaced the empty Saved Lessons placeholder with a working student page; published catalogue cards now have a Save lesson action. Students can open or remove their bookmarks.
+- Saving is idempotent; only published, curriculum-published topics can be saved or listed. The UI uses safe DOM text insertion and URL-encoded topic IDs.
+- Added service, route-security, UI and schema-integration tests.
+
+### Provider state and migration boundary
+- Render staging was not deployed. Latest live service deployment remains `dep-dbn2dcrl550s73f9ahag` on `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; auto-deploy remains off.
+- Managed Neon staging remains at 13 migration records, 6 subjects, 0 topics, 0 students, 1 administrator and 6 audit events. Private bucket `learnwise-private-audio` remains empty.
+- Repository migrations 014–018 are verified only in disposable CI/rehearsal databases and are not applied to managed staging. Do not deploy new code to staging or apply migrations until compatibility, reviewed sequencing, owner approval and safe backup/rollback are confirmed.
+- No health request was performed in this increment; the last owner-supplied health response remains status `ok`, mode `database`, service `secondary-school-api`.
+
+### Next safe engineering work
+- Continue mobile/responsive and accessibility QA for student progress, saved lessons, podcast library and assessment history.
+- Improve assessment result detail/review UX and complete admin CMS/assessment authoring, finance and student-support workflows.
+- Add authenticated synthetic-browser journeys on disposable fixtures; do not create test accounts on managed staging.
+- Complete private audio provider/range/revocation E2E only with approved non-production test storage; current staging bucket is empty.
+- Continue to hold registration/checkout, SMTP, Paystack sandbox, AI provider, external curriculum publication, student media uploads and production release behind their existing gates.

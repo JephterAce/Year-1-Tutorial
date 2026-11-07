@@ -63,3 +63,10 @@ The script has not been run against managed staging or production. Do not paste 
 - No restore rehearsal has been completed against a managed backup.
 - Monitoring and alert routing are not independently verified.
 - Independent security review and production release approval remain outstanding.
+
+
+## Disposable CI rehearsal evidence — 7 November 2026
+
+The CI workflow now executes the guarded script against an ephemeral PostgreSQL source and a separate local restore database. It creates a custom-format pg_dump, restores into the explicitly named local target, verifies the restored database identity, and asserts that all 20 baseline-plus-migration history entries are present. This validates the script and a local logical restore path.
+
+It is **not** evidence of a managed Neon backup, off-site retention, object-storage recovery, point-in-time recovery or production RTO/RPO. Those remain release gates.

@@ -71,3 +71,39 @@ Do not put credentials in Git, issue comments, email drafts or ChatGPT messages.
 ## Evidence record template
 
 For every completed external gate, record: provider/authority; reviewer name and role; scope and version; date; evidence location with access restrictions; outcome; unresolved conditions; and the person who accepted the risk. Never place credentials or sensitive student data in this record.
+
+
+## Engineering update — 7 November 2026
+
+### Implemented and CI-verified on disposable fixtures
+- Responsive administrator navigation, skip links, visible keyboard focus, reduced-motion/forced-colour support, and labelled student account fields.
+- Curriculum source capture, draft topic mapping and publication workflow remain API-backed and role-gated; publication still depends on licensed evidence and teacher review.
+- New administrator assessment authoring workspace and API: list/detail, create draft, add validated objective questions, role-gated publication and immutable published versions. Answer keys are never returned by assessment detail.
+- Read-only finance ledger summary identifies transaction totals and unverified/stale exceptions; it does not contact Paystack or issue refunds.
+- Student self-service JSON export and student data-rights request intake/withdrawal; restricted administrator review queue. Deletion requests are not automatically executed.
+- Guarded local backup/restore rehearsal script and operational runbook.
+- SMTP delivery contract tests with mocked STARTTLS/SSL transports; existing Paystack server-verification contract tests and private-audio S3/range/revocation tests remain in CI.
+- Authenticated Playwright browser journeys run against a disposable PostgreSQL database with a synthetic owner administrator and synthetic subject fixtures.
+
+### Exact-head CI evidence
+Development commit `dd7b620676c4312aa9540a89d19be71381f71ec5` passed:
+- [Push workflow 42415624459](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42415624459)
+- [PR workflow 42415628254](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42415628254)
+
+Both runs passed unit/security tests, JavaScript syntax checks, disposable PostgreSQL migration replay through 019, schema integration, assessment/payment E2E, synthetic student journey, authenticated/anonymous Playwright acceptance and non-publishing container build.
+
+### Still blocked or requiring external evidence
+- Live SMTP delivery/account recovery: no provider credentials or controlled mailbox delivery proof.
+- Paystack sandbox: API contract tests pass; no authorised test account/key or provider-side charge/webhook/refund E2E evidence.
+- Private audio: S3-compatible storage/range/security logic is mocked in tests; managed staging bucket has no media objects and no provider E2E playback/revocation proof.
+- NERDC: no authorised curriculum corpus/licence and no independent subject-teacher signatures.
+- Child safeguarding, guardian identity/consent, NDPA/DPIA, retention and legal review: drafts and technical request controls only; formal approvals absent.
+- Backup/restore: guarded local rehearsal procedure is authored but no managed backup restore has been executed; RPO/RTO and retention remain unapproved.
+- Monitoring: Render deployment/events can be inspected, but public /health response was not directly verified in this run; no alert delivery/incident drill evidence.
+- Independent security review: not performed.
+
+### Managed staging and deployment gate
+- Managed Neon branch `think-tank-staging` contains migration history 001–013 only. Repository migrations 014–019 are CI-rehearsed but unapplied to managed staging.
+- Render `learnwise-staging-api` remains on deployment `dep-dbn2dcrl550s73f9ahag`, commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; auto-deploy is off. No deployment was triggered.
+- PR #1 remains open/draft/unmerged. Main and the legacy university bot remain untouched.
+- Staging migration/deployment approval and production-launch approval are separate explicit owner decisions. Neither has been granted.

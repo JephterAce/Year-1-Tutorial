@@ -34,6 +34,22 @@ test("account page exposes registration, sign-in and recovery controls without s
   await expect(page.locator("#resetRequest")).toBeVisible();
 });
 
+test("student account is keyboard- and mobile-accessible", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/account");
+  await expect(page.getByLabel("Display name")).toBeVisible();
+  await expect(page.getByLabel("Username")).toBeVisible();
+  await expect(page.getByLabel("Registration email address")).toBeVisible();
+  await expect(page.getByLabel("Class level")).toBeVisible();
+  await expect(page.getByLabel("Create password")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your student account" })).toBeVisible();
+  const dimensions = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    content: document.documentElement.scrollWidth,
+  }));
+  expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport + 2);
+});
+
 test("anonymous student identity and private learning APIs fail closed", async ({ request }) => {
   const checks = [
     ["GET", "/api/v1/auth/me"],

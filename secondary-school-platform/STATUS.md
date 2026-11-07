@@ -548,3 +548,9 @@ Managed Neon staging still has only 13 migration records; migrations 014–018 h
 - All 14 Playwright tests passed. New authenticated student browser journey signed in as a synthetic student, submitted and withdrew a privacy request, downloaded the student's own JSON export, and verified the export omitted password hashes, answer keys and provider payloads. Admin assessment creation/publication and admin data-rights queue journeys also passed.
 - All fixtures were synthetic and isolated to the ephemeral CI database. No managed staging student account, payment or media object was created.
 - The browser test caught and fixed another asynchronous form issue: the student privacy-request form now captures its form element before awaiting the API response.
+ 
+
+### Additional migration reconciliation evidence — 7 November 2026
+- Queried managed staging migration history including source_blob_sha and compared all recorded versions 001–013 against the development branch's GitHub blob SHA for each canonical backend migration.
+- Result: 13/13 applied migration source blobs match exactly. This confirms no source checksum drift among the currently applied migrations.
+- Migrations 014–019 remain unapplied to managed staging. Their clean disposable CI replay does not replace a staged upgrade rehearsal from the actual 001–013 state.

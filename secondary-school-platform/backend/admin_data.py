@@ -80,6 +80,41 @@ def payments():
     except Exception:
         return jsonify({"error":"admin_payments_unavailable"}),503
 
+@admin_data.get("/api/v1/admin/finance/summary")
+def finance_summary():
+    session, error = _denied("payment.read")
+    if error:
+        return error
+    try:
+        with connection() as conn:
+            rows = conn.execute(
+                """SELECT status,count(*) AS transaction_count,
+                          COALESCE(sum(amount_kobo),0) AS amount_kobo,
+                          count(*) FILTER (WHERE verified_at IS NULL) AS unverified_count
+                   FROM payment_transactions GROUP BY status ORDER BY status"""
+            ).fetchall()
+            exceptions = conn.execute(
+                """SELECT
+                     count(*) FILTER (WHERE status='successful' AND verified_at IS NULL) AS unverified_successes,
+                     count(*) FILTER (WHERE status IN ('initialized','pending')
+                       AND created_at < now()-interval '24 hours') AS stale_pending,
+                     count(*) FILTER (WHERE status IN ('refunded','reversed')) AS reversed_or_refunded
+                   FROM payment_transactions"""
+            ).fetchone()
+            _audit(conn, session, "admin.finance_summary.viewed", "payment_transactions", len(rows))
+        return jsonify({
+            "by_status": [{
+                "status": r["status"], "transaction_count": int(r["transaction_count"]),
+                "amount_kobo": int(r["amount_kobo"]), "unverified_count": int(r["unverified_count"])
+            } for r in rows],
+            "exceptions": {key: int(value) for key, value in exceptions.items()},
+            "currency": "NGN",
+            "note": "Read-only ledger summary; provider reconciliation and refunds are not performed here."
+        }), 200
+    except Exception:
+        return jsonify({"error": "admin_finance_summary_unavailable"}), 503
+
+
 @admin_data.get("/api/v1/admin/curriculum-sources")
 def curriculum_sources():
     session, error = _denied("curriculum.read")

@@ -62,5 +62,17 @@ class NeonS3StorageConfigTests(unittest.TestCase):
   for key in ("../secret.mp3", "/absolute.mp3", "a\\\\b.mp3", "a//b.mp3"):
    with self.assertRaises(AudioStorageError): validate_object_key(key)
 
+class StudentProgressUiTests(unittest.TestCase):
+ def test_progress_page_is_connected_to_private_dashboard_records(self):
+  page=Path(__file__).resolve().parents[1]/"frontend"/"index.html"
+  source=page.read_text(encoding="utf-8")
+  for marker in ("progressCompleted","progressPractice","progressAttempts",
+                 "progressAverage","progressSubjects","progressRecent"):
+   self.assertIn(marker,source)
+  self.assertIn("function renderStudentProgress(data)",source)
+  self.assertIn("studentApi('/api/v1/student/dashboard')",source)
+  self.assertIn("encodeURIComponent(item.id)",source)
+  self.assertNotIn("Progress tracking will become available",source)
+
 if __name__ == "__main__":
  unittest.main()

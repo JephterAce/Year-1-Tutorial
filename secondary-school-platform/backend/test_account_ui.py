@@ -20,6 +20,20 @@ class StudentAccountUiTests(unittest.TestCase):
         self.assertIn("history.replaceState", html)
         self.assertIn("X-CSRF-Token", html)
 
+    def test_account_fields_have_accessible_names_and_autocomplete(self):
+        page = Path(__file__).resolve().parents[1] / "frontend" / "account.html"
+        html = page.read_text(encoding="utf-8")
+        for label in (
+            'aria-label="Display name"', 'aria-label="Username"',
+            'aria-label="Registration email address"', 'aria-label="Class level"',
+            'aria-label="Create password"', 'aria-label="Sign-in email address"',
+            'aria-label="Sign-in password"', 'aria-label="Password reset email address"',
+            'aria-label="New password"',
+        ):
+            self.assertIn(label, html)
+        self.assertIn("autocomplete=\"current-password\"", html)
+        self.assertIn("autocomplete=\"new-password\"", html)
+
     def test_dashboard_links_to_account_page(self):
         page = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
         html = page.read_text(encoding="utf-8")

@@ -671,3 +671,56 @@ This increment is committed to the development branch only. It is not yet a comp
 - Container build completed successfully without publishing an image.
 - Run: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42299148536
 - The registration journey remains API-level with mocked email delivery; this does not substitute for authenticated browser testing or real SMTP.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (student progress dashboard and podcast library)
+
+### Verified branch and CI
+- Development branch: `secondary-school-platform-foundation`.
+- Current branch head: `905171f7a55254887c9cc905449598bc96403a58`.
+- PR #1 remains open, draft and unmerged; `main` is untouched.
+- Exact-head GitHub Actions push run `42412752132` and PR run `42412756438` both completed successfully.
+- Successful CI covered unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL replay of all 17 migrations, schema integration, assessment/payment E2E, synthetic registration-to-results student journey and a non-publishing container build.
+- Earlier progress-dashboard commit `94ee5ac542a611c133cee70cd10a5aadd2552c65` also passed exact-head CI (push run `42412578500`, PR run `42412582538`).
+- The podcast UI test initially failed due to Python string escaping in commit `b37c0d8db86f4d38ead421dbd62a1dfa58a9e4b4`; the failure was isolated to test syntax, not application behavior. It was corrected in `905171f7a55254887c9cc905449598bc96403a58`, and the exact-head CI runs above passed.
+
+### Completed engineering increments
+1. Student progress dashboard:
+   - Replaced the disconnected progress placeholder with live values from the authenticated `/api/v1/student/dashboard` endpoint.
+   - Displays completed lessons, practice attempts, assessment attempts and average graded score.
+   - Shows per-subject completion bars and recent lesson activity linked to the lesson page.
+   - Does not invent listening-time metrics; the UI explicitly says listening time is not measured.
+   - Added static UI coverage in `backend/test_release_foundations.py`.
+2. Student podcast library:
+   - Added `podcast_production.list_student_podcasts(student_id)`.
+   - Added authenticated `GET /api/v1/student/podcasts`.
+   - Listing requires an active lesson entitlement, a published topic, an approved podcast audio asset and an approved podcast script linked to that asset.
+   - Added a student-facing Podcast library page. Playback requests use the existing CSRF-protected short-lived private audio access route; no permanent storage URL is exposed.
+   - Added service, route-auth and UI wiring tests.
+   - The staging bucket currently contains no objects, so the library is expected to show an empty state until licensed audio is uploaded and reviewed.
+
+### Current provider state — read-only recheck
+- Render service `learnwise-staging-api`, ID `srv-dbkqcmt9fdbs73c2kdpg`, remains on `secondary-school-platform-foundation`; auto-deploy is off and the service is not suspended.
+- Latest Render deployment remains `dep-dbn2dcrl550s73f9ahag`, live on commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`, completed `2026-11-06T19:13:13.356186Z`. No deployment was triggered for the new student UI/API work.
+- Render health-check path remains blank. The last owner-supplied `/health` payload was `{"mode":"database","service":"secondary-school-api","status":"ok"}`; no new external health request was performed in this checkpoint.
+- Neon project `learnwise` / ID `spring-cloud-84267029`; staging branch `think-tank-staging` / ID `br-still-cherry-baz7g5hk` remains ready.
+- Read-only aggregate counts on staging: 13 migration records, 6 subjects, 0 topics, 0 students, 1 administrator and 6 audit events.
+- Private bucket `learnwise-private-audio` exists with private access and zero objects.
+- Do not rerun owner bootstrap; the owner administrator already exists.
+- Repository migrations 014–017 have passed disposable PostgreSQL CI and an isolated Neon rehearsal, but are **not recorded as applied to managed staging**. Do not deploy code requiring these migrations until a reviewed migration/deployment plan and the required owner approval are in place. Do not replay migrations autonomously.
+
+### Current limitations and next engineering work
+- The progress and podcast pages are committed and CI-verified, but are not deployed to Render.
+- The podcast library has no live audio to display; approved, licensed content and private storage E2E remain outstanding.
+- Continue with mobile/accessibility improvements, assessment results detail, authenticated synthetic-browser acceptance, admin CMS/assessment authoring and support workflows, and private audio route/range/revocation tests.
+- Do not send prompts to an external AI provider or enable AI tutoring; provider credentials/pricing, quota alerting and privacy/content QA remain pending.
+- Keep student registration and checkout disabled. SMTP delivery, Paystack sandbox, outbox scheduling/monitoring, NERDC source rights and 18-track mapping, qualified teacher sign-off, NDPA/DPIA, guardian consent, safeguarding/legal review, backup/restore, monitoring, independent security review and production approval remain open.
+- The owner-reported eight anonymous staging Playwright checks and authenticated admin page checks remain owner-reported evidence; the report/traces were not independently retrieved.
+- Never claim production readiness from CI, the staging health response or anonymous browser checks alone.
+
+### Safety and handoff
+- Keep PR #1 open, draft and unmerged; do not modify `main` or the legacy university Telegram bot.
+- No Render deployment, Neon staging migration, environment-variable change, payment, object upload, student-account creation or production action was performed in this checkpoint.
+- At the next session, re-fetch the branch head, PR, exact-head CI and provider state before editing. Continue with the highest-priority safe engineering task and append a dated checkpoint after its exact-head tests pass.

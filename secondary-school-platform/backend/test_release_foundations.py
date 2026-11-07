@@ -93,5 +93,16 @@ class StudentAssessmentHistoryUiTests(unittest.TestCase):
   self.assertIn("Human review requested",source)
   self.assertIn("Assessment attempts",source)
 
+
+class StudentSavedLessonsUiTests(unittest.TestCase):
+ def test_saved_lessons_page_uses_authenticated_api_and_safe_links(self):
+  page=Path(__file__).resolve().parents[1]/"frontend"/"index.html"
+  source=page.read_text(encoding="utf-8")
+  self.assertIn('data-page="saved"',source)
+  self.assertIn("studentApi('/api/v1/student/saved-lessons')",source)
+  self.assertIn("studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topic.id)",source)
+  self.assertIn("studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topicId)",source)
+  self.assertIn("id=\"savedLessons\"",source)
+
 if __name__ == "__main__":
  unittest.main()

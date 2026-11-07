@@ -66,6 +66,43 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python -m unittest -v test_postgres_student_journey
+      - name: Seed disposable authenticated browser fixtures
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+          AUTH_RATE_LIMIT_PEPPER: ci-only-pepper-not-a-real-secret-000000000000
+        run: python ../browser-acceptance/seed_fixtures.py
+      - name: Set up Node for authenticated browser acceptance
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright and Chromium
+        working-directory: secondary-school-platform/browser-acceptance
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Start API against disposable PostgreSQL
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+          APP_ENV: development
+          AUTH_RATE_LIMIT_PEPPER: ci-only-pepper-not-a-real-secret-000000000000
+          PUBLIC_APP_URL: http://127.0.0.1:8000
+        run: |
+          nohup gunicorn --bind 127.0.0.1:8000 --workers 1 --threads 4 app:app >/tmp/thinktank-api.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/thinktank-api.log
+          exit 1
+      - name: Run anonymous and authenticated browser acceptance on disposable fixtures
+        working-directory: secondary-school-platform/browser-acceptance
+        env:
+          STAGING_BASE_URL: http://127.0.0.1:8000
+          CI_ADMIN_EMAIL: ci-owner@thinktank.invalid
+          CI_ADMIN_PASSWORD: Ephemeral-CI-Admin-Password-Only-2026!
+        run: npm test
 
   container-build:
     runs-on: ubuntu-latest

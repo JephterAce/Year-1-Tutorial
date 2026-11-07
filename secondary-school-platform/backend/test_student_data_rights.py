@@ -7,6 +7,21 @@ class StudentDataRightsRouteTests(unittest.TestCase):
         from app import app
         self.client = app.test_client()
 
+    def test_self_service_export_requires_student_session(self):
+        with patch("student_data_rights._student", return_value=None):
+            response = self.client.get("/api/v1/student/data-export")
+        self.assertEqual(response.status_code, 401)
+
+    def test_export_queries_are_student_scoped_and_never_select_secrets(self):
+        from pathlib import Path
+        source = (Path(__file__).resolve().parent / "student_data_export.py").read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count("WHERE student_id=%s"), 9)
+        self.assertNotIn("SELECT password_hash", source)
+        self.assertNotIn("SELECT answer_key", source)
+        self.assertNotIn("SELECT provider_payload", source)
+        self.assertIn("assessment_answers", source)
+        self.assertIn("security_notice", source)
+
     def test_student_request_list_requires_session(self):
         with patch("student_data_rights._student", return_value=None):
             response = self.client.get("/api/v1/student/data-rights/requests")

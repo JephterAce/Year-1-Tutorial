@@ -454,3 +454,18 @@ The student and admin profile/assessment additions require a fresh GitHub Action
 **Still not production-ready:** no approved curriculum corpus/rights and teacher sign-offs, no published topics, no podcast assets, no real SMTP delivery proof, no Paystack sandbox acceptance, no private audio provider E2E, incomplete CMS/assessment authoring and admin UAT, incomplete privacy/child safeguarding/legal approvals, and no backup/restore, monitoring or independent security sign-off.
 
 **Protected boundaries:** PR #1 remains draft/open/unmerged; main and legacy university bot untouched; registration and checkout disabled; no production deployment or live payment authorized.
+
+
+---
+
+## Verified update — 7 November 2026 (podcast access hardening)
+
+Development head: `090438017e7b326c2327a995036278c3bb90ea8e`.
+
+Exact-head CI passed on push run [42412897995](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42412897995) and PR run [42412902759](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42412902759). Both passed unit/security, frontend/admin JavaScript syntax, all 17 disposable PostgreSQL migrations, schema integration, assessment/payment E2E, synthetic registration-to-results journey and non-publishing container build.
+
+The student progress dashboard and podcast library are implemented. Podcast listing and private playback require an active entitlement, a published topic, approved audio and an approved linked podcast script. Direct audio access independently enforces script approval. No permanent object URL is exposed.
+
+Render has not been updated; latest live deployment remains `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`. Neon managed staging remains at 13 migrations, 6 subjects, 0 topics, 0 students, 1 administrator and 6 audit events; private audio bucket is empty. Migrations 014–017 are not applied to managed staging.
+
+The platform is not production-ready. Curriculum rights/content, teacher review, SMTP/Paystack sandbox, private audio provider E2E, full CMS/admin/student UAT, privacy/child safeguarding/legal approvals, monitoring, backup/restore, independent security review and production authorization remain open. PR #1 remains draft/open/unmerged; main and the legacy bot remain untouched.

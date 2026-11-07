@@ -54,3 +54,28 @@ No managed staging migration has been run as part of this work.
 - Keep PR #1 draft and unmerged pending owner review.
 - Do not deploy code against a database that is behind its required schema.
 - If main advances, compare its changed files with the development branch before syncing.
+
+
+## Read-only source checksum comparison — 7 November 2026
+
+Queried the managed staging table `learnwise_migration_history` and compared each recorded `source_blob_sha` with the GitHub blob SHA for the same canonical backend migration file on the development branch.
+
+<badge>13/13 applied migrations match</badge>
+
+| Migration | Managed recorded SHA | Development GitHub blob SHA | Result |
+|---|---|---|---|
+| 001_platform_hardening | 7447de19cd4df12ac8c09ab1b6c36888a653a1d7 | 7447de19cd4df12ac8c09ab1b6c36888a653a1d7 | Match |
+| 002_identity_security | 2b0a6128c8b4922585f796f26809a55c87bdc811 | 2b0a6128c8b4922585f796f26809a55c87bdc811 | Match |
+| 003_nerdc_curriculum_metadata | bfa5d05a0529417142e6541e3cc95f44b058e44a | bfa5d05a0529417142e6541e3cc95f44b058e44a | Match |
+| 004_student_profiles_and_assessments | 137f3ea137dff054c2530ad51d67cb1711f7ef59 | 137f3ea137dff054c2530ad51d67cb1711f7ef59 | Match |
+| 005_student_data_exports | 20e77fe54697c8f9e942e0e41e98507f376030b8 | 20e77fe54697c8f9e942e0e41e98507f376030b8 | Match |
+| 006_payment_notification_outbox | 57a1c9e6a710df9d1e6c72d17cdde27f37f07267 | 57a1c9e6a710df9d1e6c72d17cdde27f37f07267 | Match |
+| 007_student_sessions_and_rate_limits | 3cf339eb3ffd5b1243e69622bff29bf2638c8a59 | 3cf339eb3ffd5b1243e69622bff29bf2638c8a59 | Match |
+| 008_assessment_immutability | 492d3c250c68fa552183bfad9abfe596c64318ec | 492d3c250c68fa552183bfad9abfe596c64318ec | Match |
+| 009_curriculum_versioning_and_review | b2a5e24c851921e0e01206742d98b3eb7469d3f7 | b2a5e24c851921e0e01206742d98b3eb7469d3f7 | Match |
+| 010_curriculum_publication_guard | 5a676852ee969098c503cd841dfcf177d8da3e92 | 5a676852ee969098c503cd841dfcf177d8da3e92 | Match |
+| 011_curriculum_source_immutability | 15ff126155bfcc8c157183e9b4a6911076fc6307 | 15ff126155bfcc8c157183e9b4a6911076fc6307 | Match |
+| 012_assessment_issue_reporting | 1bb1c8dffe53e7feb73fbba14ef7b84c48226d6a | 1bb1c8dffe53e7feb73fbba14ef7b84c48226d6a | Match |
+| 013_admin_sessions_and_audit_guard | 548e463479b322b4197e8a605f63d03b6993fdf8 | 548e463479b322b4197e8a605f63d03b6993fdf8 | Match |
+
+This establishes that the 13 applied migration source blobs match the repository files. It does not establish that the pending migrations 014–019 are safe to apply to live staging; they remain unapplied and require upgrade rehearsal from the current 001–013 state plus explicit approval.

@@ -56,6 +56,17 @@ jobs:
         env:
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python rehearse_migrations.py
+      - name: Rehearse guarded backup and restore to a disposable local database
+        env:
+          PGPASSWORD: postgres
+          SOURCE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+          RESTORE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/thinktank_restore_rehearsal
+          CONFIRM_RESTORE_TARGET: thinktank_restore_rehearsal
+        run: |
+          createdb -h localhost -U postgres thinktank_restore_rehearsal
+          bash ../ops/backup_restore_rehearsal.sh
+          restored_migrations=$(psql "$RESTORE_DATABASE_URL" -v ON_ERROR_STOP=1 -Atc "SELECT count(*) FROM learnwise_schema_migrations")
+          test "$restored_migrations" = "20"
       - name: Run PostgreSQL schema integration tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal

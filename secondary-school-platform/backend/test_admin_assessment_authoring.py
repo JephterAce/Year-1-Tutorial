@@ -36,6 +36,15 @@ class AssessmentQuestionValidationTests(unittest.TestCase):
                 "answer_key": {"correct_option_ids": ["a", "a"]},
             })
 
+    def test_multiple_select_rejects_non_string_option_ids(self):
+        with self.assertRaises(AssessmentInputError):
+            _question_payload({
+                "question_type": "multiple_select",
+                "prompt": "Select all correct statements",
+                "options": [{"id": "a", "text": "A"}, {"id": "b", "text": "B"}],
+                "answer_key": {"correct_option_ids": [{"unexpected": "object"}]},
+            })
+
     def test_true_false_requires_boolean_answer(self):
         with self.assertRaises(AssessmentInputError):
             _question_payload({

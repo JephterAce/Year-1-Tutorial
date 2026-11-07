@@ -874,3 +874,13 @@ Fetch latest branch head and exact-head CI before any further changes. Documenta
 
 ### Additional migration checksum evidence — 7 November 2026
 Read-only comparison of managed Neon learnwise_migration_history.source_blob_sha against the development branch's canonical backend migration GitHub blob SHA returned exact matches for all applied migrations 001–013 (13/13). No source drift was detected in the applied sequence. Pending migrations 014–019 remain unapplied; they still require an upgrade rehearsal from the actual 001–013 state, backup/rollback evidence and explicit owner approval.
+
+
+### Latest provider and CI checkpoint — 7 November 2026
+- Current branch head ee2cc4306279772ecb05a3813eb33266c134d497.
+- Exact-head push CI 42416698937 and PR CI 42416702456 both passed.
+- New read-only staging-health job runs on every push/PR workflow and verified public /health: HTTP 200, JSON status=ok, mode=database, service=secondary-school-api. This matches the previously recorded healthy status.
+- CI passed 246 unit/security tests, Python compileall, JS/shell syntax, all 19 numbered migrations on disposable PostgreSQL, local backup/restore to a separate disposable DB (20 migration-history rows restored), schema integration, assessment/payment E2E, synthetic student journey, 14 Playwright tests and non-publishing container build.
+- Read-only Neon comparison confirmed exact GitHub blob SHA matches for all 13 applied managed-staging migrations. Migrations 014–019 remain unapplied.
+- Render remains on live deployment dep-dbn2dcrl550s73f9ahag, SHA 0f343fff800b619fdaff76f5ee97225ec6c3dbdf, completed 2026-11-06T19:13:13.356Z. Development branch is 213 commits ahead. No failed/in-progress deployment event; auto-deploy off; no deploy performed.
+- Public health is verified by CI; Render's healthCheckPath itself is still empty and was not changed.

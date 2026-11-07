@@ -41,6 +41,32 @@ def _uuid(value):
         return None
 
 
+@data_rights.get("/api/v1/student/data-export")
+def download_student_data_export():
+    student = _student()
+    if not student:
+        return jsonify({"error": "unauthenticated"}), 401
+    try:
+        from student_data_export import build_student_export, StudentExportError
+        payload = build_student_export(student["student_id"])
+        with connection() as conn:
+            conn.execute(
+                """INSERT INTO audit_events(student_id,event_type,entity_type,entity_id,details)
+                   VALUES (%s,'student.data_export.downloaded','student_data_export','self','{}'::jsonb)""",
+                (student["student_id"],),
+            )
+        response = jsonify(payload)
+        response.headers["Content-Disposition"] = 'attachment; filename="think-tank-my-data.json"'
+        response.headers["Cache-Control"] = "private, no-store"
+        response.headers["Pragma"] = "no-cache"
+        return response, 200
+    except StudentExportError:
+        return jsonify({"error": "student_export_unavailable"}), 404
+    except Exception:
+        current_app.logger.exception("Student self-service export failed")
+        return jsonify({"error": "student_export_unavailable"}), 503
+
+
 @data_rights.get("/api/v1/student/data-rights/requests")
 def list_student_requests():
     student = _student()

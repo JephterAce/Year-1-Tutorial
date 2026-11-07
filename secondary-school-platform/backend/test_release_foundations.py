@@ -76,7 +76,7 @@ class StudentProgressUiTests(unittest.TestCase):
  def test_podcast_library_uses_authorized_private_audio_access(self):
   page=Path(__file__).resolve().parents[1]/"frontend"/"index.html"
   source=page.read_text(encoding="utf-8")
-  self.assertIn("data-page=\\"podcasts\\"",source)
+  self.assertIn('data-page="podcasts"',source)
   self.assertIn("studentApi('/api/v1/student/podcasts')",source)
   self.assertIn("studentApi('/api/v1/topics/'+encodeURIComponent(item.topic_id)",source)
   self.assertIn("player.src=data.audio_url",source)

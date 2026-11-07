@@ -855,3 +855,18 @@ This increment is committed to the development branch only. It is not yet a comp
 4. Prepare but do not execute an isolated Neon migration rehearsal for 014–019 until owner authorises it; current managed staging remains at 013.
 5. Obtain the required provider accounts, licensed NERDC sources, teacher/legal/safeguarding reviewers and written deployment approval through secure external channels.
 6. Do not merge PR #1, deploy staging, change environment variables, run managed migrations, activate live payments, upload media or launch production without explicit owner approval.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (authenticated student rights journey verified)
+
+- Latest fully tested application commit: a057289c4930b86b6bdd5176bd71e61a9536f044.
+- Exact-head push run 42416064502 and PR run 42416068375 both passed.
+- 246 unit/security tests passed; Python compileall, JavaScript syntax and backup script shell syntax passed.
+- Disposable PostgreSQL baseline plus migrations 001–019, schema integration, assessment/payment E2E and synthetic student journey passed.
+- All 14 Playwright tests passed. The authenticated student flow signs in using an ephemeral synthetic student, submits and withdraws an access/export request, downloads a scoped JSON data export, and asserts password hashes, answer keys and provider payloads are absent. The admin assessment create/question/publish journey and restricted data-rights queue also pass.
+- Browser acceptance uses only disposable CI PostgreSQL fixtures; no live staging account or payment is created.
+- An async form-reset bug found by the browser test has been fixed by capturing the form reference before awaiting the API.
+
+Fetch latest branch head and exact-head CI before any further changes. Documentation-only updates after this tested application commit must not be represented as new application test evidence unless their own exact-head workflows pass.

@@ -107,3 +107,10 @@ Both runs passed unit/security tests, JavaScript syntax checks, disposable Postg
 - Render `learnwise-staging-api` remains on deployment `dep-dbn2dcrl550s73f9ahag`, commit `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`; auto-deploy is off. No deployment was triggered.
 - PR #1 remains open/draft/unmerged. Main and the legacy university bot remain untouched.
 - Staging migration/deployment approval and production-launch approval are separate explicit owner decisions. Neither has been granted.
+
+
+### Additional authenticated student acceptance — 7 November 2026
+
+Latest tested application commit a057289c4930b86b6bdd5176bd71e61a9536f044 passed exact-head push [42416064502](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416064502) and PR [42416068375](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416068375).
+
+The suite passed 246 unit/security tests, Python/JavaScript/shell syntax checks, baseline plus migrations 001–019 on disposable PostgreSQL, schema integration, assessment/payment E2E, synthetic registration-to-results, non-publishing container build and 14 Playwright tests. The browser tests include a real authenticated synthetic student session, data-rights request submission/withdrawal, own-data JSON download and secret/answer-key exclusion assertions. No managed staging data was touched.

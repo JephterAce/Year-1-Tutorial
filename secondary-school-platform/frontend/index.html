@@ -23,6 +23,7 @@
  <a class="nav" href="#progress" data-page="progress"><span class="ico">◷</span><span>My progress</span></a>
  <div class="navlabel">Your account</div>
  <a class="nav" href="#saved" data-page="saved"><span class="ico">♡</span><span>Saved lessons</span></a>
+ <a class="nav" href="#podcasts" data-page="podcasts"><span class="ico">♫</span><span>Podcast library</span></a>
  <a class="nav" href="#assessments" data-page="assessments"><span class="ico">✓</span><span>My assessments</span></a>
  <a class="nav" href="#profile" data-page="profile"><span class="ico">◉</span><span>My profile</span></a>
  <a class="nav" href="account.html"><span class="ico">↪</span><span>Sign in / Register</span></a>
@@ -89,6 +90,10 @@
   <p class="tip">Progress is based on saved learning records. Listening time is not yet measured, so no listening-time estimate is shown.</p>
  </section>
  <section class="page" id="saved"><div class="sectionhead" style="margin-top:0"><div><h2>Saved lessons</h2><p>Keep useful topics close at hand.</p></div></div><div class="panel">You haven't saved any lessons yet.</div></section>
+ <section class="page" id="podcasts">
+  <div class="sectionhead" style="margin-top:0"><div><h2>Podcast library</h2><p>Listen to approved two-presenter episodes attached to lessons you have unlocked.</p></div><button class="link" type="button" onclick="loadPodcastLibrary()">Refresh library</button></div>
+  <div class="panel"><div id="podcastList" aria-live="polite">Sign in to view your podcast library.</div><audio id="podcastPlayer" controls preload="none" style="width:100%;margin-top:16px"></audio><p id="podcastStatus" aria-live="polite" style="font-size:12px;color:var(--muted)"></p></div>
+ </section>
  <section class="page" id="assessments"><div class="sectionhead" style="margin-top:0"><div><h2>My assessments</h2><p>Your practice attempts, automatically calculated scores and feedback.</p></div><a class="primary" href="assessment.html" style="text-decoration:none">Open assessments</a></div><div class="notice">Published objective assessments are designed to be graded automatically by the server. Your score and explanations will appear here after submission; no manual marking is needed for supported question types.</div><div class="stats"><div class="stat"><small>Assessments completed</small><strong id="assessmentCount">0</strong><span>Updates automatically</span></div><div class="stat"><small>Average score</small><strong id="assessmentAverage">—</strong><span>After your first attempt</span></div><div class="stat"><small>Passed</small><strong id="assessmentPassed">0</strong><span>Based on published pass marks</span></div><div class="stat"><small>Pending results</small><strong id="assessmentPending">0</strong><span>Immediate release where configured</span></div></div><div class="panel" style="margin-top:16px"><h3>Assessment history</h3><div id="assessmentHistory" aria-live="polite">Sign in to view your attempts.</div></div></section>
  <section class="page" id="profile"><div class="sectionhead" style="margin-top:0"><div><h2>Your learner profile</h2><p>Personalise your learning space and manage your account details.</p></div></div><div class="notice">Your profile is private by default. Display name, username and bio are saved to your signed-in account. Photo storage and visibility changes are not enabled.</div><div class="profilelayout"><div class="panel profilecard"><div class="profileavatar" id="profileAvatar">S</div><label class="primary uploadlabel" for="profilePhoto">Choose profile photo</label><input id="profilePhoto" type="file" accept="image/png,image/jpeg,image/webp" hidden onchange="previewProfilePhoto(event)"><p style="font-size:11px;color:var(--muted)">Use a clear, appropriate image. Avoid uploading sensitive documents.</p><div class="privacytag">🔒 Private profile by default</div></div><div class="panel"><div class="profilefields"><label>Display name<input id="profileName" maxlength="60" placeholder="How should we address you?"></label><label>Username<input id="profileUsername" maxlength="24" placeholder="Choose a username"></label><label>Email address<input type="email" id="profileEmail" placeholder="Your email address" readonly></label><label>Class<select id="profileClass" disabled><option>SS1</option><option selected>SS2</option><option>SS3</option></select></label><label class="full">Short bio<textarea id="profileBio" maxlength="240" placeholder="Tell us a little about your learning goals (optional)"></textarea><small>Maximum 240 characters. Avoid sharing your phone number, home address or other private details.</small></label><label class="full">Profile visibility<select id="profileVisibility"><option value="private">Private — only you</option><option value="classmates">Classmates (only if safeguarding settings allow)</option></select></label></div><div class="actions"><button class="primary" onclick="saveStudentProfile()">Save profile</button><button class="link" onclick="clearProfilePreview()">Clear preview</button></div><p id="profilePreviewMessage" aria-live="polite" style="font-size:12px;color:var(--muted)"></p></div></div><div class="panel" style="margin-top:16px"><h3>Privacy and data choices</h3><p style="font-size:12px;color:var(--muted)">Your learning account data is used to provide lessons, payments, assessments and support. Optional marketing or reuse for unrelated services requires separate permission and is off by default.</p><label class="consentrow"><input type="checkbox" id="marketingConsent"> I separately agree to receive optional learning and product updates by email.</label></div></section>
  <section class="page" id="help"><div class="sectionhead" style="margin-top:0"><div><h2>Help & support</h2><p>We're building a simple way to get learning and account support.</p></div></div><div class="panel"><b>Need help?</b><p style="color:var(--muted)">Support contact details will be published before launch. Never send payment PINs, passwords or card details to support.</p></div></section>
@@ -112,7 +117,39 @@ const topics=[
 ["Physics","Work, energy and power","Connect force, work, energy transfer and power.","Term allocation pending",1000,"⚛️"],
 ["Physics","Waves and sound","Explore wave properties and sound behaviour.","Term allocation pending",1000,"⚛️"]
 ];
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',assessments:'My assessments',profile:'My profile',help:'Help & support'})[id]||'Overview';if(id==='catalog')renderCatalog();if(id==='profile')loadStudentProfile();if(id==='progress')loadDashboard();if(id==='assessments')loadAssessmentHistory();window.scrollTo(0,0)}
+async function loadPodcastLibrary(){
+ const target=document.getElementById('podcastList'),status=document.getElementById('podcastStatus');
+ target.textContent='Loading approved podcasts…';status.textContent='';
+ try{
+  const data=await studentApi('/api/v1/student/podcasts');
+  const items=data.items||[];target.replaceChildren();
+  if(!items.length){target.textContent='No approved podcasts are available for your account yet. Episodes appear here after their lesson, script and private audio have all passed review.';return}
+  items.forEach(item=>{
+   const row=document.createElement('article');row.style.cssText='display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #e7ebf2';
+   const icon=document.createElement('div');icon.textContent='♫';icon.setAttribute('aria-hidden','true');icon.style.cssText='width:42px;height:42px;border-radius:12px;background:#edf2ff;color:#4562dc;display:grid;place-items:center;font-size:21px';
+   const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+   const title=document.createElement('strong');title.textContent=item.title||item.topic_title;
+   const detail=document.createElement('p');detail.style.cssText='margin:3px 0;color:#68758b;font-size:11px';
+   const duration=item.duration_seconds?Math.ceil(Number(item.duration_seconds)/60)+' min':'Duration not supplied';
+   detail.textContent=(item.subject||'Lesson')+' · '+item.class_level+' · '+duration;
+   const button=document.createElement('button');button.className='primary';button.type='button';button.textContent='Listen';
+   button.addEventListener('click',()=>playPodcast(item,button));
+   info.append(title,detail);row.append(icon,info,button);target.append(row);
+  });
+ }catch(e){target.textContent=e.message||'Unable to load your podcast library.'}
+}
+async function playPodcast(item,button){
+ const player=document.getElementById('podcastPlayer'),status=document.getElementById('podcastStatus');
+ if(button)button.disabled=true;
+ status.textContent='Checking your lesson access…';
+ try{
+  const data=await studentApi('/api/v1/topics/'+encodeURIComponent(item.topic_id)+'/audio/'+encodeURIComponent(item.asset_id)+'/access',{},'POST');
+  player.src=data.audio_url;player.load();await player.play();
+  status.textContent='Now playing: '+(item.title||item.topic_title);
+ }catch(e){status.textContent=e.message||'This podcast could not be played.'}
+ finally{if(button)button.disabled=false}
+}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',assessments:'My assessments',profile:'My profile',help:'Help & support',podcasts:'Podcast library'})[id]||'Overview';if(id==='catalog')renderCatalog();if(id==='profile')loadStudentProfile();if(id==='progress')loadDashboard();if(id==='podcasts')loadPodcastLibrary();if(id==='assessments')loadAssessmentHistory();window.scrollTo(0,0)}
 document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
 function previewProfilePhoto(event){const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>2*1024*1024){alert('Choose a JPG, PNG or WebP image under 2 MB.');event.target.value='';return}const reader=new FileReader();reader.onload=()=>{document.getElementById('profileAvatar').style.backgroundImage='url('+reader.result+')';document.getElementById('profileAvatar').textContent=''};reader.readAsDataURL(file)}
 function studentCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}

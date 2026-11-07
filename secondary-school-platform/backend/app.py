@@ -720,6 +720,8 @@ from admin_data import admin_data
 app.register_blueprint(admin_data)
 from admin_assessments import admin_assessments
 app.register_blueprint(admin_assessments)
+from student_data_rights import data_rights
+app.register_blueprint(data_rights)
 
 
 # Private lesson audio: signed access is scoped to an approved asset and active entitlement.

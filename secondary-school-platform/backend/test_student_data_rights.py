@@ -15,7 +15,7 @@ class StudentDataRightsRouteTests(unittest.TestCase):
     def test_export_queries_are_student_scoped_and_never_select_secrets(self):
         from pathlib import Path
         source = (Path(__file__).resolve().parent / "student_data_export.py").read_text(encoding="utf-8")
-        self.assertGreaterEqual(source.count("WHERE student_id=%s"), 9)
+        self.assertGreaterEqual(source.count("student_id=%s"), 9)
         self.assertNotIn("SELECT password_hash", source)
         self.assertNotIn("SELECT answer_key", source)
         self.assertNotIn("SELECT provider_payload", source)

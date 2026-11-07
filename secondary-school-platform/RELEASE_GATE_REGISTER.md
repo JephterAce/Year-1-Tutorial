@@ -114,3 +114,7 @@ Both runs passed unit/security tests, JavaScript syntax checks, disposable Postg
 Latest tested application commit a057289c4930b86b6bdd5176bd71e61a9536f044 passed exact-head push [42416064502](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416064502) and PR [42416068375](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42416068375).
 
 The suite passed 246 unit/security tests, Python/JavaScript/shell syntax checks, baseline plus migrations 001–019 on disposable PostgreSQL, schema integration, assessment/payment E2E, synthetic registration-to-results, non-publishing container build and 14 Playwright tests. The browser tests include a real authenticated synthetic student session, data-rights request submission/withdrawal, own-data JSON download and secret/answer-key exclusion assertions. No managed staging data was touched.
+
+
+### Managed staging migration checksum comparison — 7 November 2026
+All 13 applied migration source_blob_sha values in managed Neon learnwise_migration_history exactly match the GitHub blob SHAs of canonical backend migrations 001–013 on the development branch (13/13). This is a read-only source-integrity comparison. Migrations 014–019 remain unapplied; clean disposable CI replay is not a substitute for an isolated upgrade rehearsal from the managed 001–013 state.

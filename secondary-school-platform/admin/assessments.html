@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#101b35">
+<title>Think Tank · Assessment authoring</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#172033;background:#f4f6fb;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;line-height:1.55}a{color:#3157c8}.skip{position:absolute;left:12px;top:-100px;background:#fff;padding:10px;z-index:10}.skip:focus{top:12px}
+.wrap{max-width:1180px;margin:24px auto;padding:16px}.top,.row{display:flex;justify-content:space-between;align-items:center;gap:14px}.top{margin-bottom:18px;flex-wrap:wrap}h1{font-size:26px;margin:0}h2{font-size:17px;margin:0 0 12px}.muted{color:#637089}.card{background:#fff;border:1px solid #e1e7f0;border-radius:14px;padding:18px;margin-bottom:15px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-weight:700;font-size:13px}.field input,.field select,.field textarea{width:100%;font:inherit;border:1px solid #d5deea;border-radius:9px;padding:10px 12px;min-height:44px;background:#fff;color:#172033}.field textarea{min-height:105px;resize:vertical}.btn{min-height:44px;border:0;border-radius:9px;padding:10px 15px;background:#172746;color:#fff;font:inherit;font-weight:700;cursor:pointer}.btn.alt{background:#eaf0ff;color:#3152bd}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.msg{min-height:22px;color:#52617a}.tablewrap{overflow:auto;border:1px solid #e4e9f1;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}th,td{text-align:left;padding:11px;border-bottom:1px solid #e8edf4;vertical-align:top}th{background:#f8f9fc;color:#65718a}tr:last-child td{border-bottom:0}.status{display:inline-block;border-radius:20px;padding:3px 8px;background:#fff1d9;color:#875d18;font-size:11px;font-weight:700}.status.published{background:#e3f7eb;color:#176c49}.question{border:1px solid #e3e9f2;border-radius:10px;padding:12px;margin:10px 0}.hidden{display:none}.hint{font-size:12px;color:#66748b}.error{color:#9d2d2d}
+:focus-visible{outline:3px solid #4564e8;outline-offset:3px}
+@media(max-width:680px){.wrap{margin:10px auto;padding:12px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.card{padding:14px}h1{font-size:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<main class="wrap" id="main" tabindex="-1">
+<header class="top"><div><h1>Assessment authoring</h1><div class="muted">Create draft assessments, add objective questions and publish immutable versions.</div></div><nav aria-label="Administrator pages" class="actions"><a class="btn alt" href="/admin/operations">Operations</a><a class="btn alt" href="/admin/reviews">Review queue</a><a class="btn alt" href="/admin">Studio</a></nav></header>
+<section class="card" id="loginCard"><h2>Administrator access</h2><p class="muted">Sign in through the protected administrator login to manage assessments.</p><p id="loginMsg" class="msg" aria-live="polite"></p><a class="btn" href="/admin/login">Open administrator sign in</a></section>
+<section id="workspace" class="hidden">
+<section class="card"><div class="row"><div><h2>Assessment register</h2><p class="muted">Only draft assessments can be edited. Published assessments are immutable.</p></div><button class="btn alt" id="refresh">Refresh</button></div><p id="listMsg" class="msg" aria-live="polite"></p><div class="tablewrap"><table><thead><tr><th>Assessment</th><th>Class</th><th>Subject</th><th>Questions</th><th>Status</th><th>Action</th></tr></thead><tbody id="assessmentRows"></tbody></table></div></section>
+<section class="card"><h2>Create assessment draft</h2><form id="createForm">
+<div class="grid">
+<label class="field">Title<input name="title" required minlength="3" maxlength="180"></label>
+<label class="field">Subject<select name="subject_id" id="subject" required><option value="">Loading subjects…</option></select></label>
+<label class="field">Class<select name="class_level" required><option>SS1</option><option>SS2</option><option>SS3</option></select></label>
+<label class="field">Pass mark (%)<input name="pass_mark_percent" type="number" min="0" max="100" step="0.5" value="50" required></label>
+<label class="field">Maximum attempts<input name="max_attempts" type="number" min="1" max="10" value="1" required></label>
+<label class="field">Allowed question counts<input name="allowed_question_counts" value="5,10,20" required><span class="hint">Comma-separated counts; each must be available in the assessment.</span></label>
+</div>
+<label class="field">Description<textarea name="description" maxlength="2000"></textarea></label>
+<button class="btn">Create draft</button><p class="msg" id="createMsg" aria-live="polite"></p>
+</form></section>
+<section class="card hidden" id="editor">
+<div class="row"><div><h2 id="editorTitle">Question editor</h2><p id="editorMeta" class="muted"></p></div><button class="btn alt" id="closeEditor" type="button">Close</button></div>
+<form id="questionForm">
+<div class="grid">
+<label class="field">Question type<select name="question_type" id="questionType"><option value="single_choice">Single choice</option><option value="multiple_select">Multiple select</option><option value="true_false">True / false</option><option value="numeric">Numeric</option><option value="exact_text">Exact text</option></select></label>
+<label class="field">Points<input name="points" type="number" min="0.01" max="1000" step="0.01" value="1" required></label>
+</div>
+<label class="field">Question prompt<textarea name="prompt" required minlength="5" maxlength="4000" placeholder="Write the question clearly."></textarea></label>
+<label class="field" id="optionsField">Options (JSON)<textarea name="options" placeholder='[{"id":"a","text":"Option A"},{"id":"b","text":"Option B"}]'></textarea><span class="hint">Required for single choice and multiple select. Use unique option IDs.</span></label>
+<label class="field">Answer key (JSON)<textarea name="answer_key" required placeholder='{"correct_option_id":"a"}'></textarea><span class="hint">Single: {"correct_option_id":"a"} · Multiple: {"correct_option_ids":["a","b"]} · True/false: {"correct":true} · Numeric: {"value":"12.5"}</span></label>
+<label class="field" id="toleranceField">Numeric tolerance<input name="numeric_tolerance" type="number" min="0" step="any" value="0"></label>
+<label class="field" id="acceptedField">Accepted text answers (JSON array)<textarea name="accepted_answers" placeholder='["photosynthesis","photo synthesis"]'></textarea></label>
+<label class="field">Explanation<textarea name="explanation" maxlength="4000"></textarea></label>
+<button class="btn">Add question to draft</button><p class="msg" id="questionMsg" aria-live="polite"></p>
+</form>
+<div class="row"><h2>Question preview</h2><button class="btn alt" id="reloadDetail" type="button">Refresh preview</button></div>
+<div id="questionList" aria-live="polite"></div>
+<div class="actions"><button class="btn" id="publish" type="button">Publish assessment</button><span class="hint">Publishing is permission-gated and makes the assessment immutable.</span></div>
+<p class="msg" id="publishMsg" aria-live="polite"></p>
+</section>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const cookie=n=>{const v=document.cookie.split('; ').find(x=>x.startsWith(n+'='));return v?decodeURIComponent(v.slice(n.length+1)):''};
+async function api(path,body,method='GET'){const headers={'Accept':'application/json'};if(body!==undefined)headers['Content-Type']='application/json';if(method!=='GET')headers['X-CSRF-Token']=cookie('learnwise_admin_csrf');const r=await fetch(path,{method,credentials:'same-origin',headers,body:body===undefined?undefined:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+function el(tag,text){const node=document.createElement(tag);node.textContent=text??'';return node}
+let selectedAssessment=null;
+async function boot(){
+ try{const me=await api('/api/v1/admin/auth/me');$('loginCard').classList.add('hidden');$('workspace').classList.remove('hidden');$('loginMsg').textContent=me.admin.email+' · '+me.admin.role;
+ const subjects=await api('/api/v1/admin/assessment-subjects');const select=$('subject');select.replaceChildren(el('option','Choose subject'));select.firstChild.value='';subjects.items.forEach(s=>{const o=el('option',s.name);o.value=s.id;select.append(o)});
+ await loadAssessments();
+ }catch(e){$('loginMsg').textContent='Sign in required. '+e.message}
+}
+async function loadAssessments(){
+ $('listMsg').textContent='Loading assessments…';$('assessmentRows').replaceChildren();
+ try{const d=await api('/api/v1/admin/assessments');$('listMsg').textContent=d.items.length+' assessment(s)';
+ if(!d.items.length){const tr=document.createElement('tr'),td=el('td','No assessment drafts or published assessments yet.');td.colSpan=6;tr.append(td);$('assessmentRows').append(tr);return}
+ d.items.forEach(a=>{const tr=document.createElement('tr');const title=el('td',a.title+' · v'+a.version);const cls=el('td',a.class_level);const subject=el('td',a.subject);const count=el('td',a.question_count);const state=el('td');const badge=el('span',a.status);badge.className='status '+a.status;state.append(badge);const action=el('td');const b=el('button','Open');b.className='btn alt';b.type='button';b.addEventListener('click',()=>openAssessment(a.id));action.append(b);tr.append(title,cls,subject,count,state,action);$('assessmentRows').append(tr)})}
+ catch(e){$('listMsg').textContent='Unable to load assessments: '+e.message}
+}
+$('createForm').addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(e.currentTarget);let counts;try{counts=f.get('allowed_question_counts').split(',').map(x=>Number(x.trim()))}catch{$('createMsg').textContent='Enter comma-separated question counts.';return}
+ const payload={title:f.get('title'),subject_id:f.get('subject_id'),class_level:f.get('class_level'),pass_mark_percent:Number(f.get('pass_mark_percent')),max_attempts:Number(f.get('max_attempts')),allowed_question_counts:counts,description:f.get('description')};
+ try{const d=await api('/api/v1/admin/assessments',payload,'POST');$('createMsg').textContent='Draft created. Add questions before publication.';e.currentTarget.reset();await loadAssessments();await openAssessment(d.assessment_id)}
+ catch(x){$('createMsg').textContent='Could not create draft: '+x.message}
+});
+async function openAssessment(id){selectedAssessment=id;$('editor').classList.remove('hidden');$('questionMsg').textContent='';$('publishMsg').textContent='';await loadDetail();$('editor').scrollIntoView({behavior:'smooth',block:'start'})}
+async function loadDetail(){if(!selectedAssessment)return;try{const d=await api('/api/v1/admin/assessments/'+encodeURIComponent(selectedAssessment));const a=d.assessment;$('editorTitle').textContent=a.title;$('editorMeta').textContent=a.class_level+' · '+a.subject+' · '+a.status+' · v'+a.version;$('questionList').replaceChildren();if(!d.questions.length)$('questionList').append(el('p','No questions added yet.'));d.questions.forEach((q,i)=>{const box=document.createElement('article');box.className='question';box.append(el('strong',(i+1)+'. '+q.question_type+' · '+q.points+' point(s)'),el('p',typeof q.prompt==='string'?q.prompt:JSON.stringify(q.prompt)));if(q.options)box.append(el('p','Options: '+JSON.stringify(q.options)));if(q.explanation)box.append(el('p','Explanation: '+q.explanation));$('questionList').append(box)});const editable=a.status==='draft';$('questionForm').querySelectorAll('input,textarea,select,button').forEach(x=>x.disabled=!editable);$('publish').disabled=!editable}
+ catch(e){$('questionList').textContent='Unable to load assessment: '+e.message}}
+$('questionForm').addEventListener('submit',async e=>{e.preventDefault();if(!selectedAssessment)return;const f=new FormData(e.currentTarget);let options=null,key,accepted=null;try{if(f.get('options').trim())options=JSON.parse(f.get('options'));key=JSON.parse(f.get('answer_key'));if(f.get('accepted_answers').trim())accepted=JSON.parse(f.get('accepted_answers'))}catch{$('questionMsg').textContent='Options, answer key and accepted answers must contain valid JSON.';return}
+ const payload={question_type:f.get('question_type'),prompt:f.get('prompt'),options,answer_key:key,accepted_answers:accepted,numeric_tolerance:f.get('numeric_tolerance')===''?0:Number(f.get('numeric_tolerance')),points:Number(f.get('points')),explanation:f.get('explanation')};
+ try{await api('/api/v1/admin/assessments/'+encodeURIComponent(selectedAssessment)+'/questions',payload,'POST');$('questionMsg').textContent='Question added.';e.currentTarget.reset();await loadDetail();await loadAssessments()}
+ catch(x){$('questionMsg').textContent='Could not add question: '+x.message}
+});
+$('publish').addEventListener('click',async()=>{if(!selectedAssessment)return;if(!confirm('Publish this assessment? Published assessments cannot be edited.'))return;$('publish').disabled=true;try{const d=await api('/api/v1/admin/assessments/'+encodeURIComponent(selectedAssessment)+'/publish',{},'POST');$('publishMsg').textContent='Published successfully · '+d.question_count+' questions. This version is now immutable.';await loadDetail();await loadAssessments()}catch(e){$('publishMsg').textContent='Publication blocked: '+e.message;$('publish').disabled=false}});
+$('refresh').addEventListener('click',loadAssessments);$('reloadDetail').addEventListener('click',loadDetail);$('closeEditor').addEventListener('click',()=>{$('editor').classList.add('hidden');selectedAssessment=null});
+$('questionType').addEventListener('change',()=>{const t=$('questionType').value;$('optionsField').classList.toggle('hidden',!['single_choice','multiple_select'].includes(t));$('toleranceField').classList.toggle('hidden',t!=='numeric');$('acceptedField').classList.toggle('hidden',t!=='exact_text')});
+boot();
+</script>
+</body></html>

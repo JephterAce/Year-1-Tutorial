@@ -724,3 +724,37 @@ This increment is committed to the development branch only. It is not yet a comp
 - Keep PR #1 open, draft and unmerged; do not modify `main` or the legacy university Telegram bot.
 - No Render deployment, Neon staging migration, environment-variable change, payment, object upload, student-account creation or production action was performed in this checkpoint.
 - At the next session, re-fetch the branch head, PR, exact-head CI and provider state before editing. Continue with the highest-priority safe engineering task and append a dated checkpoint after its exact-head tests pass.
+
+
+---
+
+## Continuation checkpoint — 7 November 2026 (podcast playback authorization hardening)
+
+### Exact-head verification
+- Current development branch head: `090438017e7b326c2327a995036278c3bb90ea8e`.
+- GitHub Actions push run `42412897995` and PR run `42412902759` both completed successfully on this exact head.
+- Both jobs passed: unit/security tests, frontend/admin JavaScript syntax, disposable PostgreSQL replay of migrations 001–017, schema integration, assessment/payment E2E, synthetic registration-to-results journey and container build without publishing.
+- The earlier exact-head student progress/podcast library run `42412752132` and PR run `42412756438` also passed.
+
+### Additional security correction
+- The student topic-detail endpoint now hides podcast audio unless the asset is linked to an approved podcast script.
+- The private audio access endpoint independently enforces the same approved-script condition for `podcast_audio`, in addition to asset review, published topic and active entitlement checks. A caller cannot bypass the library by guessing an asset ID.
+- Added a route test proving direct playback is rejected when there is no approved linked script.
+- No external audio provider was contacted and no audio object was uploaded.
+
+### Current provider snapshot
+- Render remains unchanged: service `learnwise-staging-api` is configured to the development branch, auto-deploy is off, and latest live deployment remains `dep-dbn2dcrl550s73f9ahag` on `0f343fff800b619fdaff76f5ee97225ec6c3dbdf`. No deployment was triggered.
+- Neon staging branch `think-tank-staging` remains ready. Read-only aggregate counts: 13 migration records, 6 subjects, 0 topics, 0 students, 1 administrator, 6 audit events. Private bucket `learnwise-private-audio` remains empty.
+- Repository migrations 014–017 remain unapplied to managed staging. Do not deploy the newer code or replay these migrations until a reviewed plan and owner approval exist.
+- Last owner-supplied staging health response remains `{"mode":"database","service":"secondary-school-api","status":"ok"}`; it was not re-requested in this engineering increment.
+
+### Remaining work
+- Build authenticated synthetic-browser acceptance using disposable fixtures; current staging browser suite is eight anonymous/read-only checks reported passed by the owner.
+- Complete mobile and accessibility checks, assessment result detail and history UX, admin CMS/assessment authoring/finance/support workflows, student export/correction/deletion UAT, and private audio range/revocation/provider tests.
+- Keep AI tutoring disabled until provider, pricing, budget alerting, privacy and content-quality gates pass.
+- Keep student registration and checkout disabled until SMTP and Paystack sandbox acceptance and safeguarding/privacy approvals pass.
+- External blockers remain authorised NERDC source materials and digital reuse rights for all 18 class/subject tracks, qualified teacher sign-off, NDPA/DPIA and child/guardian consent review, safeguarding lead and Nigerian legal review, monitoring/alerts, backup/restore, independent security review and explicit production approval.
+
+### Safety
+- PR #1 stays open, draft and unmerged. `main` and the legacy university Telegram bot remain untouched.
+- No deployment, managed staging migration, environment-variable change, account creation, payment, storage upload or production action occurred.

@@ -677,3 +677,12 @@ This checkpoint records the latest connected-provider inspection and the owner's
 7. Name an alert recipient/on-call owner and run a controlled notification test; arrange an independent security assessment.
 
 Production/student onboarding remains blocked until all applicable release gates have documentary evidence and separate owner approval.
+
+
+### Latest staging execution update — 8 November 2026
+- **Render:** latest deployment `dep-dbo9jk0u01pc73ekc330` is **live** on commit `36141466a8226a6f5e4d91b1d6a08f1ebe1d2c79`. Private-audio key and byte-range validation hardening is deployed. Auto-deploy remains disabled.
+- **CI and health:** workflow run [42478184387](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42478184387) passed all three jobs. Its post-deployment staging health job recorded HTTP 200 and JSON `status=ok`, `mode=database`, `service=secondary-school-api`. API tests included PostgreSQL integration and disposable-fixture browser acceptance; they did not test real learner accounts or external provider delivery.
+- **SMTP:** owner-only staging diagnostic is enabled, but the recorded attempt returned `smtp_diagnostic_unavailable`; Brevo delivery remains failed/unverified. The diagnostic now logs only bounded failure phase and exception class. Do not retry until logs and rate-limit window are checked.
+- **Private storage:** owner reports R2 credentials configured directly in Render; their presence has not been independently inspected. No object PUT/GET/checksum, unsigned denial, cross-bucket isolation or deletion acceptance has been run. Keep export worker disabled. Audio hardening deployment does not prove live audio upload/playback acceptance.
+- **Other gates remain open:** Paystack sandbox E2E; live-staging authenticated browser acceptance; safe synthetic student invitation and verification/reset lifecycle; curriculum rights and qualified teacher review; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration; monitoring alert delivery; second administrator; independent security review.
+- **Release restrictions:** public student registration, exports, live payments, production launch and PR merge remain disabled/not authorised. `main` remains untouched. See `DEPENDENCY_EXECUTION_CHECKPOINT_2026-11-08.md` for detailed evidence and blockers.

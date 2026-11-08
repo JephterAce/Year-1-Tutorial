@@ -856,3 +856,15 @@ Production/student onboarding remains blocked until all applicable release gates
 - Previous CI/browser results predate this deployment. This documentation push triggers fresh read-only staging health and browser checks against the deployed service. These do not constitute authenticated live-staging acceptance.
 
 No storage object test, live audio playback, Paystack sandbox transaction, production deploy, PR merge or main-branch change was performed in this step.
+
+
+## Final verification after storage-diagnostic enablement — 8 November 2026, 17:12 UTC
+
+- Render deployment `dep-dboapnh5efls73dbg5ug` is live on `771f5afa225a67503dd3d5d786a7cd7eb89c61ee`; the only environment change was enabling the staging-only owner storage diagnostic flag.
+- Post-deployment health check on the subsequent branch push returned HTTP 200 and JSON `status=ok`, `mode=database`, `service=secondary-school-api` (workflow `42503698390`, staging-health job).
+- Post-deployment live read-only browser acceptance `42503693149` passed **10/10**. In addition to the nine baseline checks, it verified the synthetic QA and storage diagnostic endpoints reject anonymous callers. This was after the deployment and flag enablement; it did not use an authenticated owner session or create test data.
+- Exact-head push CI `42503693130` passed all three jobs on commit `54868ed2b6ef42ebde4485877407399978113b55`: API/security tests, PostgreSQL migration and restore rehearsal, schema/lifecycle/assessment/payment/student-journey tests, authenticated+anonymous browser tests on disposable fixtures, container build, and staging health.
+- The owner-only storage diagnostic is available at `https://learnwise-staging-api.onrender.com/admin/operations`. Its actual R2/audio object probes remain unexecuted until the owner signs in and clicks **Run private storage acceptance**. Do not report storage as passed before the returned results confirm all five checks for each bucket.
+- Synthetic QA feature remains disabled. The next authenticated live-staging test requires a dedicated mailbox and verified SMTP delivery, then an owner-triggered synthetic invitation. No learner account or consent has been fabricated.
+
+All other human/provider/recovery release gates remain open: Paystack sandbox; approved/licensed curriculum and teacher sign-off; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restore; monitoring alert delivery; second administrator; independent security review.

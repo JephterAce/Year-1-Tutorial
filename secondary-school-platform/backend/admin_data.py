@@ -68,7 +68,7 @@ def payments():
     try:
         limit=max(1,min(int(request.args.get("limit","50")),100))
         with connection() as conn:
-            rows=conn.execute("""SELECT id,provider_reference,amount_kobo,currency,status,created_at,verified_at
+            rows=conn.execute("""SELECT p.id,p.provider_reference,p.amount_kobo,p.currency,p.status,p.created_at,p.verified_at
               FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false ORDER BY p.created_at DESC LIMIT %s""",(limit,)).fetchall()
             _audit(conn,session,"admin.payment_records.viewed","payment_transactions",len(rows))
         return jsonify({"items":[{"id":str(r["id"]),"reference":r["provider_reference"],
@@ -88,17 +88,17 @@ def finance_summary():
     try:
         with connection() as conn:
             rows = conn.execute(
-                """SELECT status,count(*) AS transaction_count,
-                          COALESCE(sum(amount_kobo),0) AS amount_kobo,
-                          count(*) FILTER (WHERE verified_at IS NULL) AS unverified_count
-                   FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false GROUP BY status ORDER BY status"""
+                """SELECT p.status,count(*) AS transaction_count,
+                          COALESCE(sum(p.amount_kobo),0) AS amount_kobo,
+                          count(*) FILTER (WHERE p.verified_at IS NULL) AS unverified_count
+                   FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false GROUP BY p.status ORDER BY p.status"""
             ).fetchall()
             exceptions = conn.execute(
                 """SELECT
-                     count(*) FILTER (WHERE status='successful' AND verified_at IS NULL) AS unverified_successes,
-                     count(*) FILTER (WHERE status IN ('initialized','pending')
-                       AND created_at < now()-interval '24 hours') AS stale_pending,
-                     count(*) FILTER (WHERE status IN ('refunded','reversed')) AS reversed_or_refunded
+                     count(*) FILTER (WHERE p.status='successful' AND p.verified_at IS NULL) AS unverified_successes,
+                     count(*) FILTER (WHERE p.status IN ('initialized','pending')
+                       AND p.created_at < now()-interval '24 hours') AS stale_pending,
+                     count(*) FILTER (WHERE p.status IN ('refunded','reversed')) AS reversed_or_refunded
                    FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false"""
             ).fetchone()
             _audit(conn, session, "admin.finance_summary.viewed", "payment_transactions", len(rows))

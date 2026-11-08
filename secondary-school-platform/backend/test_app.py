@@ -221,6 +221,26 @@ class AdminSmtpDiagnosticRouteTests(unittest.TestCase):
         audit.assert_called_once()
         self.assertEqual(audit.call_args.args[1], "smtp_diagnostic_sent")
 
+    def test_smtp_diagnostic_logs_safe_failure_phase_and_exception_class(self):
+        with patch.dict(os.environ, {
+            "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True):
+            with patch("app._current_admin", return_value=self.owner):
+                with patch("admin_auth.reserve_admin_smtp_diagnostic", side_effect=RuntimeError("sensitive provider detail")):
+                    with patch("admin_auth.record_admin_audit"):
+                        with self.assertLogs("app", level="WARNING") as captured:
+                            response = self.client.post(
+                                "/api/v1/admin/diagnostics/smtp",
+                                headers={"X-CSRF-Token": "test-csrf"},
+                            )
+        self.assertEqual(response.status_code, 503)
+        self.assertTrue(any(
+            "phase=rate_limit_reservation" in line and "exception_type=RuntimeError" in line
+            for line in captured.output
+        ))
+        self.assertFalse(any("sensitive provider detail" in line for line in captured.output))
+
+
     def test_smtp_diagnostic_is_never_available_outside_staging(self):
         with patch.dict(os.environ, {
             "APP_ENV": "production", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"

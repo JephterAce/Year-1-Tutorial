@@ -234,3 +234,8 @@ The current GitHub connector exposes workflow/run reads and reruns but no `workf
 The latest application deployment remains `dep-dbo3n5hsrm7s73at12j0` on application commit `a19214d647478b37702fb52e336fc8a3638f05bb` (the Render deployment was built from that application code; subsequent commits are documentation/workflow-only). The post-deployment health job in run `42465816566` passed HTTP 200 with JSON `status=ok`, `mode=database`, `service=secondary-school-api`.
 
 Release restrictions remain unchanged: no public onboarding or production launch. SMTP/recovery, Paystack sandbox, real private audio, licensed curriculum and teacher approval, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed recovery, monitoring alert delivery, second administrator, independent security review and R2 object acceptance remain outstanding.
+
+
+## Deployment SHA clarification — 8 November 2026
+
+For avoidance of ambiguity: Render deployment `dep-dbo3n5hsrm7s73at12j0` was built from Git commit `f73f14592d9a21af803f01e6408dd06d4bb269a3` (Render's deployment record confirms this). GitHub Actions run `42465816566` later tested branch head `a19214d647478b37702fb52e336fc8a3638f05bb`, and its post-deployment health job passed, but that does **not** mean Render deployed `a19214d`. Subsequent commits `20836ee`, `3d5ee6d` and `7bbdbff` are checkpoint/workflow documentation or workflow-only changes; Render auto-deploy is disabled, so they were not deployed. The currently live Render deployment remains `dep-dbo3n5hsrm7s73at12j0` on `f73f145`.

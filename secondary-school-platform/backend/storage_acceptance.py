@@ -73,7 +73,7 @@ def _unsigned_denied(endpoint, region, bucket, key):
     except ClientError as exc:
         if _status_code(exc) in (401, 403):
             return True
-        raise StorageAcceptanceError("Unsigned object access was not denied.") from None
+        raise StorageAcceptanceError("Unsigned object access was not denied.") from exc
     raise StorageAcceptanceError("Private object was readable without credentials.")
 
 
@@ -195,7 +195,7 @@ def run_private_storage_acceptance():
         "region": os.environ.get("DATA_EXPORT_AWS_REGION") or os.environ.get("R2_REGION", "auto"),
         "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET") or os.environ.get("R2_BUCKET_NAME", ""),
     }
-    missing = [name for name, value in required.items() if name != "region" and not isinstance(value, str) or name != "region" and not value.strip()]
+    missing = [name for name, value in required.items() if name != "region" and (not isinstance(value, str) or not value.strip())]
     if missing:
         results["r2_exports"] = {
             "configured": False, "passed": False,

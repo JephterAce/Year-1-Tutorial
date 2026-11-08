@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from identity_email import send_identity_link
+from identity_email import send_identity_link, send_admin_diagnostic
 
 
 class IdentityEmailDeliveryTests(unittest.TestCase):
@@ -50,6 +50,23 @@ class IdentityEmailDeliveryTests(unittest.TestCase):
         with patch.dict(os.environ, {"PUBLIC_APP_URL": "https://thinktank.example.test"}):
             with self.assertRaises(ValueError):
                 send_identity_link("student@example.test", "token", "other")
+
+    def test_admin_diagnostic_contains_no_token_or_link(self):
+        env = {
+            "SMTP_HOST": "smtp.example.test",
+            "SMTP_USERNAME": "ci-smtp-user",
+            "SMTP_PASSWORD": "ci-smtp-password",
+            "SMTP_FROM": "no-reply@example.test",
+            "SMTP_PORT": "587",
+        }
+        with patch.dict(os.environ, env), patch("identity_email.smtplib.SMTP") as smtp_class:
+            client = smtp_class.return_value.__enter__.return_value
+            send_admin_diagnostic("admin@example.test")
+        message = client.send_message.call_args.args[0]
+        self.assertEqual(message["To"], "admin@example.test")
+        self.assertIn("staging email-delivery test", message["Subject"])
+        self.assertNotIn("token=", message.get_content())
+        self.assertNotIn("https://", message.get_content())
 
 
 if __name__ == "__main__":

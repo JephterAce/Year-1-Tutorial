@@ -77,9 +77,9 @@ test("anonymous assessment and private-audio actions fail closed", async ({ requ
 
 test("synthetic QA and storage diagnostics require an authenticated owner", async ({ request }) => {
   const qa = await request.post("/api/v1/admin/qa-identities");
-  const localFixture = (process.env.STAGING_BASE_URL || "").startsWith("http://127.0.0.1");
-  if (localFixture) expect([401, 404]).toContain(qa.status());
-  else expect(qa.status()).toBe(401);
+  // 401 means the route is enabled but owner authentication is required;
+  // 404 means the feature gate is safely disabled. Both must fail closed.
+  expect([401, 404]).toContain(qa.status());
   const qaBody = await qa.json().catch(() => ({}));
   expect(qaBody.created).not.toBe(true);
 

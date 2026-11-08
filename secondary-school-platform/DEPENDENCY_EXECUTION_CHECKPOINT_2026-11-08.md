@@ -169,3 +169,33 @@ Run a one-off S3-compatible test from the staging service runtime or a trusted o
 ### Updated disposition
 
 R2 bucket creation and public-domain disablement: previously verified. Render deployment: verified live. Owner-reported credential configuration: acknowledged, not independently inspected. Synthetic upload/retrieval/checksum, unsigned denial, bucket isolation, and deletion: not run; remain outstanding pending an execution path that can safely use the Render-held secrets.
+
+
+## Staging deployment follow-up — 8 November 2026, 09:07 WAT
+
+The current branch head `f73f14592d9a21af803f01e6408dd06d4bb269a3` was deployed to the existing Render staging service `learnwise-staging-api` (Frankfurt, Free plan) as deployment `dep-dbo3n5hsrm7s73at12j0`.
+
+- Render build completed successfully at 09:06:40Z.
+- Render deployment completed with status `live` at 09:06:52Z.
+- Render application logs show Gunicorn 23.0.0 listening on `0.0.0.0:8000`, both workers booted, and Render reported `Your service is live`.
+- The service remains attached to `secondary-school-platform-foundation`; auto-deploy remains disabled.
+- No production service, `main` branch, or PR merge was touched.
+
+The latest exact-head GitHub Actions run before this deployment, `42465080496`, completed successfully on `f73f14592d9a21af803f01e6408dd06d4bb269a3`. Its three jobs passed: API/unit/security and local disposable-PostgreSQL/browser acceptance, non-publishing container build, and public staging health. The health job ran before the 09:06 deployment, so it is not post-deploy health evidence.
+
+### Remaining immediate staging acceptance
+
+The repository includes a separate `workflow_dispatch` workflow at `.github/workflows/think-tank-staging-browser.yml` for authenticated browser acceptance against the live staging URL. The available GitHub connector in this execution can read workflow runs and logs but does not expose a workflow-dispatch action. Therefore this workflow has not been dispatched and authenticated browser acceptance against the newly deployed Render instance remains outstanding. Do not claim it passed.
+
+A post-deployment HTTP health check also remains to be repeated after this deployment. Render deployment status and Gunicorn startup logs are positive deployment evidence, but are not substitutes for a fresh HTTP 200 / JSON `status=ok` response.
+
+### Current staging disposition
+
+- **Deployed:** branch head `f73f14592d9a21af803f01e6408dd06d4bb269a3`, deployment `dep-dbo3n5hsrm7s73at12j0`, status `live`.
+- **Passed:** latest exact-head CI run `42465080496` (three jobs).
+- **Not yet re-verified after this deploy:** public `/health` endpoint.
+- **Not run against live staging:** authenticated Playwright browser acceptance.
+- **Still deferred:** R2 object-level PUT/GET/checksum, unsigned denial, bucket-boundary and deletion tests; export worker remains disabled.
+- **Still release-blocking:** SMTP delivery/recovery, Paystack sandbox E2E, private audio acceptance, authorised curriculum and teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review.
+
+No learner data or live payment was used. No production launch or PR merge is authorised by this checkpoint.

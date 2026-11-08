@@ -885,3 +885,17 @@ This does **not** mean an identity was created or invitation delivery verified. 
 - No student account was created. Student public registration remains disabled. The staging deployment has not been re-tested after the 17:25 environment update yet; trigger/record a fresh health and read-only browser check before claiming post-update health.
 
 No secrets were read or changed, no data was created, and no production/PR/main action occurred.
+
+
+## Verification closure after fail-closed QA gate correction — 8 November 2026, 17:29 UTC
+
+- Render staging deployment `dep-dbob0qh5efls73dc3tg0` is live and succeeded after setting `STAGING_QA_IDENTITY_ENABLED=false`. The independent storage diagnostic flag remains enabled for the authenticated owner-only operations control.
+- The first read-only browser rerun correctly exposed an overly strict test expectation: a disabled QA feature returns HTTP 404, not HTTP 401. The app behavior was safe; the test was corrected to accept either 401 (enabled but owner-authenticated) or 404 (feature disabled), for both QA and storage diagnostics. No application security gate was weakened.
+- Final exact-head commit: `69ac72efe2bd07fe4419821cf80b315196ba55bf`.
+- Push workflow `42505118443`: all three jobs passed (API/security + PostgreSQL migration/lifecycle/student journey/authenticated disposable browser suite; container build; live staging health).
+- PR workflow `42505121608`: passed on the same exact head.
+- Live staging read-only browser workflow `42505118340`: **10/10 passed** after the staging safety deployment. It confirmed student pages, registration controls without submitting data, mobile/keyboard access, anonymous identity/private learning/assessment/audio denial, QA/storage diagnostic fail-closed responses, admin identity denial and admin login separation.
+- This is still anonymous/read-only live acceptance, not authenticated live QA. No synthetic account exists; QA issuance stays disabled pending a dedicated mailbox and verified SMTP delivery.
+- Storage data-plane acceptance is still outstanding. The owner-only control is available at `/admin/operations`; an authenticated owner must run it to test synthetic object PUT/GET/checksum/unsigned denial/delete for private audio and R2. No storage pass is claimed.
+
+The staging-health CI check passed after the 17:25 environment deployment. Public registration, export worker and live payments remain disabled. No production deployment, PR merge, main-branch change, paid upgrade or real student data operation occurred.

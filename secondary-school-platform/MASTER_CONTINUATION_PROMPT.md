@@ -1293,3 +1293,30 @@ No external credentials, provider transactions, licensed source material, legal 
 
 ### Exact execution boundary
 No Render environment variables were changed; no deploy, migration, database write, bucket mutation, payment, email send, QA-account creation, PR merge, main-branch change or production action was performed in this follow-on. This is an evidence-gathering checkpoint, not a claim that SMTP, storage or authenticated acceptance passed.
+
+
+## Authoritative follow-on — Brevo HTTPS migration and storage diagnostics (8 November 2026, 22:48 UTC)
+
+This section supersedes earlier SMTP-specific remediation instructions above. Do not restore SMTP delivery or ask for SMTP host/user/password. The staging application now uses the Brevo transactional HTTPS API.
+
+### Verified implementation and deployment
+- `backend/identity_email.py` sends transactional messages to Brevo `POST https://api.brevo.com/v3/smtp/email` using the `api-key` header and JSON `sender`, `to`, `subject`, and `textContent`.
+- Email verification and password reset retain the existing one-time token purpose, expiry, HTTPS `PUBLIC_APP_URL`, generic response behavior and no-token logging. Synthetic QA invitation remains staging-only, short-lived, isolated and fail-closed; failed email submission or audit triggers account revocation.
+- Owner-only diagnostic at the existing `/api/v1/admin/diagnostics/smtp` route is now a Brevo API diagnostic (route path retained for compatibility). It requires staging, explicit diagnostic flag, authenticated admin, CSRF and `settings.manage`; rate limiting and audit remain. A Brevo `messageId` means API acceptance, not proof of mailbox delivery. The admin must confirm actual receipt before QA invitation.
+- Exact-code workflow [42531848081](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42531848081) passed all jobs, including unit/security, syntax, disposable migration and backup/restore rehearsals, PostgreSQL integration, synthetic QA lifecycle, assessment/payment/student journey, authenticated disposable browser suite, container build and staging health. Live read-only browser workflow [42531848240](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42531848240) passed. CI authenticated browser tests use disposable fixtures and do not replace live authenticated staging acceptance.
+- Render staging deploy `dep-dbofnvajnfac73eor480` is live on application commit `31fdde1e05ef6ab8bb360e86e7df560a21246149`. Render logs show the new container started and service live. This execution network could not independently fetch the post-deploy public health endpoint; do not claim a fresh HTTP 200 without a new verified check.
+- Storage acceptance now reports only safe metadata: exception class, bounded provider code, HTTP status, retryability and missing setting names. No provider response body, credential, endpoint, object key or user content is returned.
+
+### Required external configuration — not yet completed
+- Add `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` directly in Render Environment. The sender email must already be verified in Brevo. Optional `BREVO_SENDER_NAME=Think Tank`. The API key is not an SMTP key. Do not paste secrets into chat or repository. No Brevo key or sender value has yet been set by this workflow.
+- Private audio storage accepts dedicated `AUDIO_STORAGE_ACCESS_KEY_ID`, `AUDIO_STORAGE_SECRET_ACCESS_KEY`, `AUDIO_STORAGE_ENDPOINT_URL_S3`, `AUDIO_STORAGE_REGION`, `AUDIO_STORAGE_BUCKET`, with backward-compatible `AWS_*` fallbacks.
+- R2 exports accept canonical `DATA_EXPORT_AWS_ACCESS_KEY_ID`, `DATA_EXPORT_AWS_SECRET_ACCESS_KEY`, `DATA_EXPORT_AWS_ENDPOINT_URL_S3`, `DATA_EXPORT_AWS_REGION`, `DATA_EXPORT_STORAGE_BUCKET`, or aliases `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT_URL`, `R2_REGION`, `R2_BUCKET_NAME`. Cloudflare R2 endpoint uses signing region `auto`. R2 credential must have Object Read & Write, scoped only to `think-tank-private-exports`. Keep audio and export buckets/credentials separate. No new token or permissions change has been made; diagnostic must validate actual access.
+
+### Exact next actions and release order
+1. Owner adds Brevo API key and verified sender directly in Render Environment; no secrets in chat.
+2. Owner signs in at `https://learnwise-staging-api.onrender.com/admin/operations`, runs the email diagnostic and confirms the message actually arrived. Do not issue QA invitation merely because Brevo returned a message ID.
+3. Owner runs private storage acceptance from the same authenticated Operations page. Require both audio and R2 to pass upload, retrieval, SHA-256 comparison, unsigned access denial, and delete/absence. If failed, use only safe returned provider code/status and missing setting names to correct configuration and permissions, then rerun.
+4. Only after actual email receipt and both storage probes pass, temporarily enable the staging-only synthetic QA identity issuance flag, send the invitation, verify the mailbox and sign in. Complete authenticated live-staging acceptance using the synthetic identity only; then revoke/expire it and disable issuance.
+5. Keep public registration, live payments, export worker, production deployment, PR merge and `main` changes disabled unless separately approved.
+
+The owner-only operations require a live administrator browser session and CSRF. The connected GitHub/Render/Neon tools do not expose that session. Do not bypass auth, forge cookies, issue QA identities directly in SQL, or fabricate a test pass. Stop only at the real owner/credential gate; continue all read-only checks and safe branch work independently.

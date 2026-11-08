@@ -878,7 +878,8 @@ def admin_private_storage_diagnostic():
     if (os.environ.get("APP_ENV", "").strip().lower() != "staging" or
             not _feature_enabled("STAGING_STORAGE_DIAGNOSTICS_ENABLED")):
         return jsonify({"error": "not_found"}), 404
-    if request.data:
+    payload = request.get_json(silent=True)
+    if request.data and payload != {}:
         return jsonify({"error": "request_body_not_allowed"}), 400
     session = _current_admin(require_csrf=True)
     if not session:

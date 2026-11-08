@@ -599,3 +599,9 @@ The current development branch and open draft PR head is fc77dbc714af2103b50f58c
 SMTP/password recovery verification; Paystack sandbox E2E; private audio storage/playback acceptance; authorised NERDC materials and teacher review (zero topics in staging); child safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restore/PITR and RPO/RTO; monitoring/incident-alert verification; independent security review; export bucket provisioning, second approver, scheduled worker and subject-scoped exports.
 
 Production release remains blocked. Migration 020 and its matching code deployment require a fresh passing exact-head CI run, isolated upgrade evidence and explicit owner approval before staging promotion.
+
+
+### Repository pointer — 8 November 2026
+- Latest verified development-branch head before the final handover update: `c421b4e305731c8850b6b3bd93e856578fbbd27c`.
+- The branch is 30 commits ahead of the deployed Render SHA `c5805a6fc463fd040e64e8223d58ed3dbf37d143`; it is not deployed.
+- PR #1 remains open as a draft and unmerged. The current GitHub connection returned no fresh exact-head workflow run/status for this head. The last relevant run `42459497431` had passing health and container-build jobs but a failing API test job; the two missing test-fixture fields were corrected afterward, and a fresh run is still required.

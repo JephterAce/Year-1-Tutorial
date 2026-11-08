@@ -31,6 +31,18 @@ jobs:
       - name: Install Chromium
         working-directory: secondary-school-platform/browser-acceptance
         run: npx playwright install --with-deps chromium
+      - name: Verify R2 synthetic object is not anonymously readable
+        env:
+          R2_PUBLIC_OBJECT_URL: https://pub-09ee0a4e92a445889e76a1ca94db79a3.r2.dev/qa-acceptance/think-tank-r2-anon-20261108.txt
+        run: |
+          set -euo pipefail
+          code=$(curl --silent --show-error --connect-timeout 15 --max-time 30 \
+            --output /dev/null --write-out '%{http_code}' "$R2_PUBLIC_OBJECT_URL")
+          echo "Anonymous R2 object HTTP status: $code"
+          case "$code" in
+            403|404) echo "Anonymous object access is denied." ;;
+            *) echo "::error::Expected 403 or 404 for a private R2 object; received $code"; exit 1 ;;
+          esac
       # Keep this live-service workflow read-only. The authenticated.spec.js suite
       # creates/publishes an assessment and writes export/privacy-request records;
       # run that suite only against isolated disposable fixtures, never live staging.

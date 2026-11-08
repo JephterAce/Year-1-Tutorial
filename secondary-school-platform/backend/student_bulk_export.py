@@ -55,7 +55,7 @@ def _storage():
         versioning = client.get_bucket_versioning(Bucket=cfg["bucket"])
     except Exception as exc:
         raise ExportWorkerError("export_bucket_configuration_unverified") from exc
-    if versioning.get("Status") == "Enabled":
+    if versioning.get("Status") in {"Enabled", "Suspended"}:
         raise ExportWorkerError("export_bucket_versioning_must_be_disabled")
     return client, cfg["bucket"]
 

@@ -202,11 +202,11 @@ def process_one_export():
         ttl_hours = min(max(int(os.environ.get("DATA_EXPORT_TTL_HOURS", "24")), 1), EXPORT_TTL_HOURS)
         expires_at = generated_at + timedelta(hours=ttl_hours)
 
-        with connection() as conn:
-            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        with connection() as snapshot_conn:
+            snapshot_conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             # The first query establishes the repeatable-read snapshot before streaming.
-            conn.execute("SELECT 1").fetchone()
-            chunks = _export_chunks(conn, job, generated_at)
+            snapshot_conn.execute("SELECT 1").fetchone()
+            chunks = _export_chunks(snapshot_conn, job, generated_at)
             content_type = "application/x-ndjson" if job["export_format"] == "json" else "text/csv; charset=utf-8"
             checksum, byte_count = _multipart_upload(
                 client, bucket, data_key, chunks, content_type, export_id
@@ -225,7 +225,6 @@ def process_one_export():
                 "sha256": checksum,
                 "consistency": "single repeatable-read, read-only PostgreSQL snapshot",
             }
-            # Count is read from the exported stream by the independent count query below.
             count_query = "SELECT count(*) AS n FROM students"
             count_params = []
             if job["export_scope"] == "individual":
@@ -234,13 +233,15 @@ def process_one_export():
             else:
                 count_query, count_params = _student_query(job["filters"] or {})
                 count_query = "SELECT count(*) AS n FROM (" + count_query + ") AS selected_students"
-            manifest["record_count"] = int(conn.execute(count_query, count_params).fetchone()["n"])
+            manifest["record_count"] = int(snapshot_conn.execute(count_query, count_params).fetchone()["n"])
             client.put_object(
                 Bucket=bucket, Key=manifest_key,
                 Body=json.dumps(manifest, ensure_ascii=False, separators=(",", ":")).encode("utf-8"),
                 ContentType="application/json",
                 Metadata={"export-id": export_id, "classification": "restricted"},
             )
+        # Persist completion only after both private objects exist and the read snapshot closes.
+        with connection() as conn:
             conn.execute(
                 """UPDATE student_data_exports
                    SET status='completed',storage_key=%s,manifest_storage_key=%s,

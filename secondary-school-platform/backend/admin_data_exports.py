@@ -244,9 +244,9 @@ def cancel_export(export_id):
         with connection() as conn:
             row = conn.execute(
                 """UPDATE student_data_exports SET status='cancelled'
-                   WHERE id=%s AND status='queued' AND approved_at IS NULL
-                     AND requested_by_admin_id=%s RETURNING id""",
-                (export_id, session["admin_id"]),
+                   WHERE id=%s AND status='queued'
+                     AND (requested_by_admin_id=%s OR approved_by_admin_id=%s) RETURNING id""",
+                (export_id, session["admin_id"], session["admin_id"]),
             ).fetchone()
             if not row:
                 return jsonify({"error": "export_not_cancellable"}), 409

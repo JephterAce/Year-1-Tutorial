@@ -213,3 +213,83 @@ This checkpoint records the latest connected-provider inspection and the owner's
 7. Name an alert recipient/on-call owner and run a controlled notification test; arrange an independent security assessment.
 
 Production/student onboarding remains blocked until all applicable release gates have documentary evidence and separate owner approval.
+
+
+### Latest staging diagnostic deployment — 8 November 2026, 12:58 WAT
+- Improved SMTP failure-phase observability is now deployed to staging in Render deployment `dep-dbo67aajnfac73e0kt2g`, commit `fa8d3377aac13068cc17801874c85a48c504a9e4`; Render status `live`.
+- Exact-commit GitHub Actions run [42474098220](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42474098220) completed successfully: API/security suite, post-deploy staging health, and non-publishing container build. PostgreSQL migration/schema, assessment/payment, student journey, browser acceptance and disposable backup/restore rehearsals passed in the API job.
+- The diagnostic now records only a bounded failure phase and exception class. No provider details or secrets are logged. The owner-reported SMTP attempt remains failed/unverified; no retry was made. Brevo delivery is not cleared.
+- No PR merge, `main` change, production deploy, public registration, or live payment occurred.
+
+### Draft sign-off templates — not approvals
+Use the following records to collect actual accountable human sign-off. A blank or unsigned template does not clear a release gate. Attach evidence, date, reviewer identity/qualification, scope, exceptions and expiry/review date to each signed record.
+
+#### Subject-teacher curriculum review (repeat for each of the 18 class/subject combinations)
+- Class: SS1 / SS2 / SS3
+- Subject: English Language / General Mathematics / Further Mathematics / Biology / Chemistry / Physics
+- Teacher name and qualification:
+- Evidence of subject/teaching competence:
+- Curriculum/source version and source URL/reference:
+- Rights/licence and permitted reuse confirmed (yes/no; evidence):
+- Topic sequence, learning outcomes and assessment alignment reviewed (yes/no):
+- Corrections or exclusions required:
+- Decision: approve / approve with conditions / reject
+- Signature and date:
+
+#### Safeguarding lead appointment and review
+- Appointed lead and organisation:
+- Relevant safeguarding experience/training:
+- Reporting/escalation contact and deputy:
+- Child-safety policy, moderation, staff conduct and incident-response procedures reviewed:
+- Risk assessment and unresolved risks:
+- Decision and conditions:
+- Signature and date:
+
+#### Guardian consent and child-data processing approval
+- Legal basis and purpose for each data category:
+- Guardian identity/authority verification method:
+- Child-appropriate notice and guardian notice version:
+- Separate consent choices (account, learning records, communications, audio/media where applicable):
+- Withdrawal, access, correction and deletion route:
+- Retention/deletion schedule:
+- Consent evidence location and access restrictions:
+- Safeguarding escalation and complaints route:
+- Approved by safeguarding/privacy owner; date/version:
+
+#### NDPA/DPIA and Nigerian legal review
+- Qualified Nigerian counsel/privacy reviewer and credentials:
+- Controller/processor roles and vendor/subprocessor list:
+- Data inventory, purposes, lawful bases, data flows and cross-border transfers:
+- Necessity/proportionality, child-specific risks and mitigations:
+- Security controls, breach response, rights handling and retention:
+- Required notices/contracts/registrations identified:
+- Opinion: approved / conditional / not approved; conditions:
+- Signed report reference and date:
+
+#### Second administrator appointment
+- Full name and verified organisation email (record outside public repository):
+- Role and least-privilege permissions:
+- Identity verification and MFA confirmed:
+- Training on two-person export approval, audit logs and incident escalation:
+- Appointment approved by owner; date:
+- Acceptance by appointee; date:
+
+#### Independent security review
+- Independent reviewer/firm and conflict-of-interest declaration:
+- Scope: application, authentication, authorisation, child data, APIs, storage, payments, deployment and incident response:
+- Test environment and written authorisation reference:
+- Findings by severity and evidence:
+- Remediation owner and retest evidence:
+- Residual-risk acceptance by accountable owner:
+- Final opinion and date:
+
+#### Backup, monitoring and operational acceptance
+- Approved RPO/RTO, retention, recovery owner and budget:
+- Managed backup/PITR source and restore target:
+- Isolated restore evidence, integrity checks and measured RPO/RTO:
+- Alert recipient/on-call owner and escalation path:
+- Synthetic alert sent/received/acknowledged timestamps:
+- Operational runbook owner and review date:
+- Approval and date:
+
+These templates are preparatory only. They do not constitute legal advice, guardian consent, teacher endorsement, provider verification, or independent assurance. Public student onboarding and production release remain blocked until the applicable evidence is completed and the owner separately authorises release.

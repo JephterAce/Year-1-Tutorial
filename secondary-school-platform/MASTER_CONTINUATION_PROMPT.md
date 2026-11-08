@@ -1146,7 +1146,7 @@ Current branch: `secondary-school-platform-foundation`. Latest code commit promo
 6. Curriculum licensing and teacher sign-off, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator and independent security review require real appointments/evidence.
 7. Managed backup restoration and monitoring alert delivery require an approved recovery target/RPO/RTO and named alert recipient. No paid snapshot/monitoring resources without owner approval.
 
-Safeguards remain: student public registration disabled; synthetic QA feature disabled by default; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deploy; no merge; no main change; no paid upgrades; no real student data.
+Safeguards remain: student public registration explicitly disabled; synthetic QA identity is staging-only and owner/CSRF/permission gated with a fixed configured recipient and 24-hour expiry; storage diagnostics are staging-only and owner/CSRF/permission gated; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deploy; no merge; no main change; no paid upgrades; no real student data.
 
 
 ### Staging diagnostics controls — 8 November 2026, 16:47 UTC

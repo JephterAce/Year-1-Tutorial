@@ -14,6 +14,16 @@ async function signInAdmin(page) {
   await expect(page).toHaveURL(/\/admin$/);
 }
 
+test("owner operations workspace exposes guarded staging acceptance controls", async ({ page }) => {
+  await signInAdmin(page);
+  await page.goto("/admin/operations");
+  await expect(page.locator("#qaIdentityCard")).toBeVisible();
+  await expect(page.locator("#storageDiagnosticCard")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Send synthetic QA invitation" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run private storage acceptance" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Revoke issued QA identity" })).toBeDisabled();
+});
+
 test("authenticated administrator creates, reviews and publishes a draft assessment", async ({ page }) => {
   await signInAdmin(page);
   await page.goto("/admin/assessments");

@@ -616,3 +616,10 @@ Production release remains blocked. Migration 020 and its matching code deployme
 ### Green CI checkpoint and new export-browser run — 8 November 2026
 - Workflow run 42460191786 (run 1180, commit 7de9dd1d0da160e634673fc813a16befb147e383) completed with all three jobs successful: API tests, staging health and container build. Its API job passed 260 unit/security tests, syntax checks, all 20 migration replays/idempotency, local backup/restore, PostgreSQL schema integration, assessment/payment E2E, registration-to-results and the existing authenticated/anonymous browser suite.
 - A second run 42460225765 (run 1184, commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) includes the new export request/cancel/self-approval browser test and anonymous /admin/exports redirect check. At the latest inspection, unit/security, syntax, migration replay, backup/restore, PostgreSQL integration, assessment/payment E2E and student journey all passed; Playwright installation/browser acceptance was still in progress.
+
+
+### Full exact-code CI pass — 8 November 2026
+- Workflow run 42460225765 (run 1184, tested code commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) completed with all three jobs successful: api-tests, staging-health and container-build.
+- All 260 unit/security tests passed; Python, admin/frontend JavaScript and shell syntax passed; all 20 numbered migrations replayed and replayed idempotently; backup/restore rehearsal passed; PostgreSQL schema integration passed; assessment/payment E2E passed; registration-to-results passed; anonymous and authenticated Playwright acceptance passed, including the new admin export request/cancel flow and requester self-approval prohibition.
+- The workflow also verified staging health HTTP 200, status=ok, mode=database, service=secondary-school-api. The container was built but not published.
+- The tested code commit is an ancestor of the current branch; subsequent commits only update project records. The new code is still not deployed to Render. Migration 020 remains only on the isolated rehearsal branch.

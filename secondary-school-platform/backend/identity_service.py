@@ -211,7 +211,7 @@ def request_password_reset(email):
     with connection() as conn:
         _rate_limit("password_reset", email, limit=5)
         student = conn.execute(
-            "SELECT id FROM students WHERE lower(email)=%s AND account_status='active'",
+            "SELECT id FROM students WHERE lower(email)=%s AND account_status='active' AND is_synthetic_qa=false",
             (email,),
         ).fetchone()
         if student:

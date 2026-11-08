@@ -589,3 +589,17 @@ The branch remains `ready`. Neon project snapshot listing returned an empty list
 The absence of approved source records and topics confirms that no curriculum content is currently approved for publication. Teacher appointments, source licensing and curriculum review must be completed before populating/publishing lessons.
 
 The account lifecycle review also confirmed the current email-verification handler activates a pending student after email verification, while the schema records guardian-consent state separately. A safe synthetic QA flow must explicitly distinguish test identities from real students and must not represent test policy acceptance as guardian consent. No such account was created and public registration remains disabled.
+
+
+## Neon private-audio storage data-plane smoke-test attempt — 8 November 2026
+
+A fresh test was attempted using Neon branchable object storage on staging branch `think-tank-staging` and the existing private bucket `learnwise-private-audio`.
+
+- Neon confirms branchable object storage is enabled and the bucket access level is `private`.
+- A 76-byte synthetic, non-learner test payload was prepared locally; SHA-256: `51c91a36fe71f41c9f98db8df59e8794783e5e114e8b61c5e33a80115e81793b`.
+- A 5-minute presigned PUT URL was issued by Neon, with the request content type bound to `text/plain`.
+- The transfer host could not resolve the Neon storage hostname (`curl` DNS resolution failure; HTTP 000). The PUT did not reach the storage service.
+- A subsequent Neon object-list query for prefix `qa-acceptance/` returned zero objects. No test object was created and there was nothing to delete.
+- This attempt therefore **failed at network/DNS transport** and does not pass upload, retrieval, checksum, private access denial, playback, range or deletion acceptance. No presigned URL or credential is retained in this record.
+
+The same external execution environment has previously failed DNS resolution to this Neon storage host. The live application storage configuration remains unverified. Do not infer provider failure from this execution-host DNS issue; repeat data-plane acceptance from a network/runtime that can resolve the endpoint, preferably from the staging service itself, using synthetic bytes only.

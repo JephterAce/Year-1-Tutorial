@@ -221,3 +221,16 @@ This confirms the deployed staging endpoint is healthy after the deployment. The
 A read-only Neon query on staging branch `think-tank-staging` confirmed 20 migration-history rows, 1 admin user, 0 students, 6 subjects, 0 topics and 6 audit events. The staging branch and the pre-migration backup branch both report Neon state `ready`; this metadata does not constitute a managed restore drill.
 
 No other release restrictions are lifted. R2 object tests remain deferred/not run; export worker remains disabled; provider, curriculum, legal, safeguarding, managed-recovery, monitoring, second-admin and independent-security gates remain open.
+
+
+## Safe live-staging browser workflow adjustment — 8 November 2026
+
+The dedicated manual staging browser workflow `.github/workflows/think-tank-staging-browser.yml` was reviewed before execution. Its previous `npm test` command ran both read-only anonymous checks and authenticated write tests. The authenticated tests create and publish an assessment, queue/cancel an export request, and submit/withdraw a student privacy request. They are not appropriate for the live staging database, which currently has one administrator and zero students.
+
+The workflow was therefore changed in commit `3d5ee6d61ec197cc12ebdf13bf34391911e18efe` to run only `staging.spec.js` against the live staging URL. This suite checks public health, student-facing page delivery, registration/recovery form presence, mobile layout, and anonymous access denial; it does not submit registrations, payments, exports or privacy requests. The authenticated suite remains reserved for isolated disposable fixtures.
+
+The current GitHub connector exposes workflow/run reads and reruns but no `workflow_dispatch` action. Therefore the revised live-staging browser workflow has **not yet been dispatched**. The workflow file is committed on `secondary-school-platform-foundation`; it must be manually started from GitHub Actions. No live service data was changed by this adjustment. Render auto-deploy remains disabled, so this workflow-only commit has not been deployed to Render.
+
+The latest application deployment remains `dep-dbo3n5hsrm7s73at12j0` on application commit `a19214d647478b37702fb52e336fc8a3638f05bb` (the Render deployment was built from that application code; subsequent commits are documentation/workflow-only). The post-deployment health job in run `42465816566` passed HTTP 200 with JSON `status=ok`, `mode=database`, `service=secondary-school-api`.
+
+Release restrictions remain unchanged: no public onboarding or production launch. SMTP/recovery, Paystack sandbox, real private audio, licensed curriculum and teacher approval, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed recovery, monitoring alert delivery, second administrator, independent security review and R2 object acceptance remain outstanding.

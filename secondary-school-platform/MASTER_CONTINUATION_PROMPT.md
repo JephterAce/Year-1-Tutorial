@@ -1268,3 +1268,28 @@ Read-only verification was repeated against the current development branch and s
 
 No secrets were read or changed. No database writes, student creation, storage object creation, payment, PR merge, main-branch change, production deployment, paid upgrade or destructive action was performed during this verification.
 
+
+
+---
+
+## Follow-on execution — provider and authenticated acceptance attempt, 8 November 2026
+
+Current development branch head after the status/handover documentation commits: `5a80d067e16b20f5c9fad0451f17d929398d546d`. The latest Render application deployment remains `dep-dbob0qh5efls73dc3tg0`, live on `97f243d3a1daea2ad910f59c405066ab75484955`. The application file `secondary-school-platform/backend/app.py` has the same Git blob SHA at the deployed commit and current development head, so the owner-only diagnostic routes are the same source version. No new application deployment was necessary.
+
+### SMTP investigation
+- Queried Render application logs for SMTP diagnostic attempts. Three warnings were returned at 11:02:12Z, 11:02:17Z and 11:02:26Z; the messages deliberately suppress provider details. No successful SMTP submission or delivery evidence exists.
+- Inspected the SMTP implementation: it requires `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD`, optional `SMTP_PORT` (587 STARTTLS or 465 SSL), and a valid `SMTP_FROM` (defaults to SMTP_USERNAME). Identity links additionally require an HTTPS `PUBLIC_APP_URL`.
+- The application source records a bounded phase and exception class in its diagnostic failure log/audit; neither Render's secret values nor provider credentials are exposed to this workflow. The existing diagnostic is owner-authenticated and sends only to the signed-in administrator's own address.
+- No secret values were read, overwritten or rotated. SMTP remains blocked until the owner runs the diagnostic from the authenticated admin session and verifies receipt in the mailbox. If it fails again, inspect the redacted failure phase/class and verify the Brevo SMTP login (not API key), sender verification, host, port/TLS mode and account status in Brevo/Render.
+
+### Private storage and synthetic identity
+- Read the current `storage_acceptance.py` implementation. Its owner-only staging probe creates a synthetic WAV and independently tests the private Neon audio bucket and Cloudflare R2 export bucket: PUT, GET, SHA-256, unsigned access denial and DELETE/absence verification. It does not use learner data.
+- Queried Render logs for storage acceptance; no storage-probe execution logs were found in the available window. The diagnostic has not been shown to pass.
+- The endpoint requires an authenticated administrator session with `settings.manage`, valid CSRF, staging environment and the explicit feature flag. The connected Render/GitHub/Neon tools do not provide access to the user's browser session or an in-container command facility; therefore this workflow cannot impersonate the administrator or invoke the owner-only POST safely. No object was created in this follow-on.
+- Synthetic QA issuance is similarly owner-only and must send a verified mailbox invitation. No synthetic identity was issued and no authenticated live-student session was created. Public registration remains disabled.
+
+### External release gates
+No external credentials, provider transactions, licensed source material, legal opinions, guardian consents, named safeguarding appointment, second administrator, recovery objective or on-call contact can be fabricated or inferred. The remaining gates must be completed with the appropriate provider/authority and recorded evidence. Keep production, live payment, public registration and export worker disabled.
+
+### Exact execution boundary
+No Render environment variables were changed; no deploy, migration, database write, bucket mutation, payment, email send, QA-account creation, PR merge, main-branch change or production action was performed in this follow-on. This is an evidence-gathering checkpoint, not a claim that SMTP, storage or authenticated acceptance passed.

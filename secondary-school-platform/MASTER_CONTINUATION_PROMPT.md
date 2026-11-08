@@ -1320,3 +1320,38 @@ This section supersedes earlier SMTP-specific remediation instructions above. Do
 5. Keep public registration, live payments, export worker, production deployment, PR merge and `main` changes disabled unless separately approved.
 
 The owner-only operations require a live administrator browser session and CSRF. The connected GitHub/Render/Neon tools do not expose that session. Do not bypass auth, forge cookies, issue QA identities directly in SQL, or fabricate a test pass. Stop only at the real owner/credential gate; continue all read-only checks and safe branch work independently.
+
+
+---
+
+# Execution checkpoint — 9 November 2026 (live deployment reconciliation)
+
+## Exact verified state
+- Current development branch head before this documentation checkpoint: `47b5207319b46410cdbbda0c41a3bc4116871518`.
+- PR #1 is open, draft and unmerged. Main remains at `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`.
+- Exact-head PR CI run [42532066949](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42532066949) completed successfully: API tests, container build and staging-health jobs all passed.
+- Live read-only browser run [42532062468](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42532062468) passed. It is anonymous/read-only staging acceptance, not authenticated QA-user acceptance.
+- Render workspace: Emmanuel's workspace, ID `tea-da2svh0ae00c73cs4qq0`. Service `learnwise-staging-api`, ID `srv-dbkqcmt9fdbs73c2kdpg`, Free plan, Frankfurt, Docker, auto-deploy off.
+- Latest Render deploy `dep-dbofnvajnfac73eor480` is live on application commit `31fdde1e05ef6ab8bb360e86e7df560a21246149`.
+- GitHub compare from deployed application commit to branch head shows only two documentation files changed: `secondary-school-platform/MASTER_CONTINUATION_PROMPT.md` and `secondary-school-platform/STATUS.md`. No runtime code change is pending deployment; do not trigger a redundant redeploy for documentation-only commits.
+- Neon staging project `spring-cloud-84267029`, branch `br-still-cherry-baz7g5hk`, state Ready. Read-only counts: 0 students, 1 active administrator, 6 subjects, 0 topics, 0 curriculum source records, 21 migrations (001–021).
+- Neon lists private buckets `learnwise-private-audio` and `think-tank-private-exports`; audio bucket object list is empty. No managed Neon snapshots exist and the snapshot schedule is empty.
+
+## Brevo and storage: critical configuration distinction
+- Current deployed `backend/identity_email.py` sends mail using Brevo HTTPS API, not SMTP. It requires `BREVO_API_KEY` and `BREVO_SENDER_EMAIL`; optional `BREVO_SENDER_NAME`; `PUBLIC_APP_URL` must be the HTTPS staging origin. Old SMTP variables/SMTP key do not satisfy these requirements. Sender identity must be verified in Brevo.
+- Render integration does not expose an environment-variable read/list action. Never claim secret variables are present or absent based on a connector read; the current owner-reported values are not independently inspectable here. Never ask the owner to paste secrets into chat.
+- Owner must add Brevo API key and verified sender directly in Render Environment. Then owner signs in at `https://learnwise-staging-api.onrender.com/admin/operations`, runs the email diagnostic and confirms actual receipt in the controlled mailbox. A Brevo API message ID alone is not proof of mailbox receipt.
+- Owner must also run the private storage acceptance control from the same authenticated Operations page. Require PASS for both audio and R2: PUT, GET, SHA-256 match, unsigned-access denial, deletion and confirmed absence. Use only safe bounded diagnostic output to troubleshoot.
+- Do not issue the synthetic QA invitation until actual Brevo mailbox receipt and both private storage probes pass. Keep public registration disabled.
+
+## Next operator actions
+1. Wait for owner to add `BREVO_API_KEY` and `BREVO_SENDER_EMAIL` directly in Render; do not request their values.
+2. Have owner run the owner-only email diagnostic and confirm mailbox receipt.
+3. Have owner run private audio + R2 storage acceptance and provide only the non-secret results.
+4. If both pass, proceed with short-lived synthetic QA invitation, authenticated live staging acceptance, then revoke/expire the identity and disable QA issuance.
+5. Continue Paystack sandbox, curriculum rights/teacher approval, privacy/safeguarding/legal approvals, managed recovery, monitoring/alerts, second administrator and independent security review.
+6. Re-fetch branch, PR, CI, Render deploy and Neon state before every mutation. Do not redeploy unless runtime code changes and exact-head CI passes.
+7. Update both `STATUS.md` and this master prompt after each meaningful milestone.
+
+## Release posture
+**NOT READY** for public onboarding or production. No live payment, public registration, production deploy, paid upgrade, destructive database action, PR merge or main-branch modification was performed in this checkpoint. Keep PR #1 open/draft/unmerged and main untouched.

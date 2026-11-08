@@ -293,3 +293,14 @@ Use the following records to collect actual accountable human sign-off. A blank 
 - Approval and date:
 
 These templates are preparatory only. They do not constitute legal advice, guardian consent, teacher endorsement, provider verification, or independent assurance. Public student onboarding and production release remain blocked until the applicable evidence is completed and the owner separately authorises release.
+
+
+## Current verified staging checkpoint — 8 November 2026, 16:51 UTC
+
+- Current branch head d66cca79bb12221de7228ffc8b49e4b5167f6f66; PR #1 remains draft/open/unmerged; main unchanged.
+- Application deployment dep-dboaenuc6qcc73d3lc00 is live on a9b7bacd4c3069651319df79ce95ec932a7797fc. Push CI 42501847900 and PR CI 42501852204 passed; live read-only browser 42501847936 passed 10/10. Staging health returned HTTP 200 / status=ok / mode=database / service=secondary-school-api.
+- Synthetic QA lifecycle is implemented, migration 021 applied and CI-tested. Owner-only create/revoke/expiry controls are enabled in staging; no synthetic account has been created. Owner invitation/verification and authenticated live acceptance remain outstanding.
+- Owner-only storage acceptance endpoint/UI is enabled in staging. It performs synthetic private audio and R2 PUT/GET/checksum/unsigned-denial/DELETE from the Render runtime. The probe has not yet been run. Cloudflare R2 inventory shows one bucket only and r2.dev disabled; both Neon storage buckets are private. Cross-bucket denial remains outstanding without a second R2 bucket/credential.
+- Public student registration, export worker and live payments remain disabled. Staging database has zero student rows, zero synthetic QA rows, one active admin, zero approved curriculum sources and zero topics.
+- Still release-blocking: actual SMTP delivery/account recovery; owner-run storage and synthetic QA acceptance; Paystack sandbox; licensed curriculum and qualified teacher review; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration/RPO/RTO; monitoring alert delivery; second administrator; independent security review. Production remains NOT READY.
+

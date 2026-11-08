@@ -1,6 +1,10 @@
 name: Think Tank staging read-only browser acceptance
 
 on:
+  push:
+    branches: [secondary-school-platform-foundation]
+    paths:
+      - ".github/workflows/think-tank-staging-browser.yml"
   workflow_dispatch:
     inputs:
       staging_base_url:

@@ -147,7 +147,7 @@ The owner reported that the two R2 S3 credentials have now been configured direc
 
 ### Deployment state
 
-The staging deployment for commit `358c3ebcefff2cb689f9323f0e7bbd44cf89fd7b`, deployment `dep-dbo3d93rjlhs73aahtng`, was independently queried and returned status `live` (started 08:45:24Z; finished 08:46:02Z). The service remains `learnwise-staging-api` on branch `secondary-school-platform-foundation`; auto-deploy remains disabled. The Render service metadata interface available to this run does not expose environment-variable presence or secret values, so the owner's report is recorded as an owner assertion rather than independently verified secret configuration.
+The staging deployment for commit `358c3ebcefff2cb689f9323f0e7bbd44cf89fd7b`, deployment `dep-dbo3d93rjlhs73aahtng`, was independently queried and returned status `live` (started 08:45:24Z; finished 08:46:02Z). The Render service remains `learnwise-staging-api` on branch `secondary-school-platform-foundation`; auto-deploy remains disabled. The Render service metadata interface available to this run does not expose environment-variable presence or secret values, so the owner's report is recorded as an owner assertion rather than independently verified secret configuration.
 
 ### Requested object tests — not executed
 
@@ -239,3 +239,44 @@ Release restrictions remain unchanged: no public onboarding or production launch
 ## Deployment SHA clarification — 8 November 2026
 
 For avoidance of ambiguity: Render deployment `dep-dbo3n5hsrm7s73at12j0` was built from Git commit `f73f14592d9a21af803f01e6408dd06d4bb269a3` (Render's deployment record confirms this). GitHub Actions run `42465816566` later tested branch head `a19214d647478b37702fb52e336fc8a3638f05bb`, and its post-deployment health job passed, but that does **not** mean Render deployed `a19214d`. Subsequent commits `20836ee`, `3d5ee6d` and `7bbdbff` are checkpoint/workflow documentation or workflow-only changes; Render auto-deploy is disabled, so they were not deployed. The currently live Render deployment remains `dep-dbo3n5hsrm7s73at12j0` on `f73f145`.
+
+
+## Verification continuation — 8 November 2026, 09:12 WAT
+
+### Exact-head GitHub checks
+
+The latest branch head at the time of this verification was `1b3463fbf381ba9917a01aeeb45c6d8ad085bb71`. Both the push workflow `42466020956` and PR workflow `42466026453` completed successfully on this exact head. Each run passed all three jobs:
+- `api-tests`: unit/security tests, Python/JavaScript/operations-script syntax, disposable PostgreSQL migration replay, local backup/restore rehearsal, schema integration, assessment/payment E2E, registration-to-results student journey, and anonymous/authenticated Playwright acceptance against disposable fixtures.
+- `container-build`: application container built without publishing.
+- `staging-health`: public staging health assertion completed successfully.
+
+The push run's health job log explicitly records HTTP 200 and JSON `status='ok'`, `mode='database'`, `service='secondary-school-api'` from `https://learnwise-staging-api.onrender.com/health`. This is a fresh post-deployment health check on 8 November at 09:10:14Z. It does not mean the latest GitHub documentation commit was deployed to Render.
+
+Run links:
+- Push: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42466020956
+- PR: https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42466026453
+
+### Live staging browser workflow
+
+The revised workflow file `.github/workflows/think-tank-staging-browser.yml` remains read-only and runs only `staging.spec.js`. A read of the latest workflow-run collection did not return a run for this workflow; no completed live-staging browser acceptance result is available to record. The GitHub connector still does not expose a workflow-dispatch operation. Do not infer that the workflow passed from the owner's confirmation that the Run workflow action was tapped; a completed run ID and job result are required.
+
+### Render operational signals
+
+Render event history confirms the latest staging deployment `dep-dbo3n5hsrm7s73at12j0` completed successfully at 09:06:52Z, and the build completed at 09:06:40Z. Startup logs show Gunicorn 23.0.0 listening on port 8000, workers booted, and Render's `Your service is live` message. No failure event was present in the returned recent event page.
+
+The metrics query returned CPU and memory samples, but no HTTP request-count, HTTP-latency or instance-count series in the queried interval. CPU and memory values are not sufficient to establish traffic or alert delivery. The Render service remains on Free/Frankfurt with auto-deploy disabled. Monitoring alert recipient and delivery test remain unverified.
+
+### Managed recovery state
+
+A fresh read-only Neon query confirms:
+- staging branch `think-tank-staging` is `ready`;
+- backup branch `think-tank-staging-backup-2026-11-08` is `ready`;
+- migration rehearsal branches remain present and `ready`;
+- project snapshot list is empty;
+- staging branch automatic snapshot schedule is empty.
+
+A ready Neon branch is not a completed backup restore drill. No snapshot schedule was enabled because retention/cost and approved RPO/RTO remain undecided. Managed restore and recovery sign-off remain outstanding.
+
+### Release posture
+
+No production deployment, PR merge, main-branch change, live payment, export worker activation or learner-data processing occurred. PR #1 remains open/draft/unmerged. Public student onboarding remains blocked by the external gates already recorded above.

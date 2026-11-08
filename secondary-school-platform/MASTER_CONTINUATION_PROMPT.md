@@ -1075,7 +1075,7 @@ Detailed evidence: `secondary-school-platform/DEPENDENCY_EXECUTION_CHECKPOINT_20
 ### Synthetic QA lifecycle design checkpoint — 8 November 2026
 - Read and reviewed the live identity implementation. Existing public registration creates pending student rows and writes privacy-notice/terms acceptance records; it is not safe to reuse for synthetic QA.
 - Added `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md` as the implementation contract. Required controls include staging-only flag + APP_ENV check, owner session/CSRF/permission, fixed configured QA mailbox, hashed single-use verification, explicit immutable synthetic marker, default-deny learner-data access, expiry/revocation, audit and safe cleanup.
-- The spec is not implementation. Do not create an account or claim authenticated live acceptance until the lifecycle is implemented and tested. Never write guardian consent or policy acceptance as a QA shortcut.
+- The initial spec was subsequently implemented, CI-tested and deployed to staging. No live synthetic account has been provisioned; authenticated live acceptance remains blocked by unverified SMTP and the unconfigured dedicated QA mailbox. Never write guardian consent or policy acceptance as a QA shortcut.
 - PR workflow run [42497551018](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497551018) passed all three jobs, including PostgreSQL migration/integration and disposable authenticated browser tests, staging health and container build. These tests do not prove authenticated live-staging acceptance.
 
 

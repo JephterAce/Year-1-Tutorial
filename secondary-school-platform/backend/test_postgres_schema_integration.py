@@ -24,9 +24,9 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
             rows = conn.execute(
                 "SELECT version FROM learnwise_schema_migrations ORDER BY version"
             ).fetchall()
-            self.assertEqual(len(rows), 21)
+            self.assertEqual(len(rows), 22)
             self.assertEqual(rows[0][0], "000_DATABASE_SCHEMA.sql")
-            self.assertEqual(rows[-1][0], "020_private_student_export_approval.sql")
+            self.assertEqual(rows[-1][0], "021_synthetic_qa_identity.sql")
 
 
     def test_ai_quota_and_lesson_content_tables_exist(self):
@@ -73,6 +73,30 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
                         conn.execute("UPDATE audit_events SET entity_id='tampered' WHERE id=%s",
                                      (row[0],))
 
+
+    def test_synthetic_qa_identity_schema_is_default_deny(self):
+        with psycopg.connect(self.dsn) as conn:
+            columns = {
+                row[0] for row in conn.execute(
+                    """SELECT column_name FROM information_schema.columns
+                       WHERE table_schema='public' AND table_name='students'"""
+                ).fetchall()
+            }
+            self.assertTrue({"is_synthetic_qa", "synthetic_qa_expires_at"}.issubset(columns))
+            constraints = {
+                row[0] for row in conn.execute(
+                    """SELECT conname FROM pg_constraint
+                       WHERE conrelid='students'::regclass"""
+                ).fetchall()
+            }
+            self.assertIn("students_synthetic_qa_expiry_pair", constraints)
+            token_constraint = conn.execute(
+                """SELECT pg_get_constraintdef(oid) FROM pg_constraint
+                   WHERE conrelid='identity_tokens'::regclass
+                     AND conname='identity_tokens_purpose_check'"""
+            ).fetchone()
+            self.assertIsNotNone(token_constraint)
+            self.assertIn("verify_qa_email", token_constraint[0])
 
     def test_private_export_approval_schema_is_present(self):
         with psycopg.connect(self.dsn) as conn:

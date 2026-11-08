@@ -1147,3 +1147,10 @@ Current branch: `secondary-school-platform-foundation`. Latest code commit promo
 7. Managed backup restoration and monitoring alert delivery require an approved recovery target/RPO/RTO and named alert recipient. No paid snapshot/monitoring resources without owner approval.
 
 Safeguards remain: student public registration disabled; synthetic QA feature disabled by default; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deploy; no merge; no main change; no paid upgrades; no real student data.
+
+
+### Staging diagnostics controls — 8 November 2026, 16:47 UTC
+- Added owner-only private storage acceptance control in /admin/operations, backed by POST /api/v1/admin/diagnostics/storage. It tests private audio and R2 export PUT/GET/SHA-256/unsigned-denial/DELETE from the Render runtime using synthetic WAV bytes. Feature flag is enabled on staging; one attempt per admin per 15 minutes. Not yet executed; owner click is required to use the signed-in admin session.
+- Added synthetic QA invitation/revoke/expiry controls to the same page. The staging-only QA flag is enabled and a QA recipient is configured to the confirmed owner mailbox. Public student registration remains disabled. No QA account exists yet; owner must click the invitation control, verify the emailed link and sign in. SMTP failure rolls back the pending identity.
+- Deployment dep-dboaenuc6qcc73d3lc00 is live on a9b7bacd4c3069651319df79ce95ec932a7797fc. Push CI 42501474162 and PR CI 42501478189 passed all jobs. Read-only live browser run 42501474212 passed 9/9 before environment-flag update; this docs push triggers a fresh health/browser check.
+- The storage test verifies unsigned access denial, not cross-bucket denial; a second bucket-scoped credential/known alternate R2 bucket is still needed for that separate control.

@@ -1070,3 +1070,10 @@ Detailed evidence: `secondary-school-platform/DEPENDENCY_EXECUTION_CHECKPOINT_20
 - A Neon private-audio data-plane smoke test was attempted with a 76-byte synthetic payload and a short-lived presigned PUT. The execution host could not resolve the Neon storage hostname (HTTP 000); the bucket prefix was subsequently confirmed empty. No object was uploaded. This remains blocked, not passed. The test payload SHA-256 and full result are recorded in the dependency checkpoint.
 - Latest docs-only updates were recorded in `STATUS.md` and `DEPENDENCY_EXECUTION_CHECKPOINT_2026-11-08.md`. No production changes or staging application deployment were triggered.
 - Latest verified full platform CI run before the newest docs-only record: [42497412130](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497412130), all jobs passed on commit `1fd1753cf571b0c20e46286dfca2451bd9b4cdaf`. Newer documentation commits have their own checks in progress; verify those before declaring the branch head green.
+
+
+### Synthetic QA lifecycle design checkpoint — 8 November 2026
+- Read and reviewed the live identity implementation. Existing public registration creates pending student rows and writes privacy-notice/terms acceptance records; it is not safe to reuse for synthetic QA.
+- Added `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md` as the implementation contract. Required controls include staging-only flag + APP_ENV check, owner session/CSRF/permission, fixed configured QA mailbox, hashed single-use verification, explicit immutable synthetic marker, default-deny learner-data access, expiry/revocation, audit and safe cleanup.
+- The spec is not implementation. Do not create an account or claim authenticated live acceptance until the lifecycle is implemented and tested. Never write guardian consent or policy acceptance as a QA shortcut.
+- PR workflow run [42497551018](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497551018) passed all three jobs, including PostgreSQL migration/integration and disposable authenticated browser tests, staging health and container build. These tests do not prove authenticated live-staging acceptance.

@@ -30,18 +30,18 @@ def _rate_limit(email, limit=6, action="admin_login", window_minutes=15):
             """INSERT INTO auth_rate_limits(action_key,subject_hash,window_started_at,attempts)
                VALUES (%s,%s,now(),1)
                ON CONFLICT(action_key,subject_hash) DO UPDATE SET
-                 window_started_at=CASE WHEN auth_rate_limits.window_started_at < now()-interval '15 minutes'
+                 window_started_at=CASE WHEN auth_rate_limits.window_started_at < now()-(%s * interval '1 minute')
                    THEN now() ELSE auth_rate_limits.window_started_at END,
-                 attempts=CASE WHEN auth_rate_limits.window_started_at < now()-interval '15 minutes'
+                 attempts=CASE WHEN auth_rate_limits.window_started_at < now()-(%s * interval '1 minute')
                    THEN 1 ELSE auth_rate_limits.attempts+1 END,
-                 blocked_until=CASE WHEN auth_rate_limits.window_started_at < now()-interval '15 minutes'
+                 blocked_until=CASE WHEN auth_rate_limits.window_started_at < now()-(%s * interval '1 minute')
                    THEN NULL WHEN auth_rate_limits.attempts >= %s
                    THEN now()+(%s * interval '1 minute') ELSE auth_rate_limits.blocked_until END
-               RETURNING attempts,blocked_until""", (action, key, window_minutes, window_minutes, window_minutes, limit, window_minutes)
+               RETURNING attempts,blocked_until""",
+            (action, key, window_minutes, window_minutes, window_minutes, limit, window_minutes)
         ).fetchone()
     if row["attempts"] > limit or (row["blocked_until"] and row["blocked_until"] > datetime.now(timezone.utc)):
         raise AdminAuthError("Email or password is incorrect.")
-
 
 def login_admin(email, password):
     email = email.strip().lower() if isinstance(email, str) else ""

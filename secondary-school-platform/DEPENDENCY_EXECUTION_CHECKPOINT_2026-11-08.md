@@ -473,3 +473,22 @@ A fresh post-deploy HTTP `/health` response was not independently captured in th
 The owner-only SMTP diagnostic code is included in this deployed commit, but `ADMIN_SMTP_DIAGNOSTIC_ENABLED` remains off by default and was not enabled in Render. No SMTP message was sent; Brevo delivery and password-reset email delivery remain unverified. No student account was created and public registration remains disabled.
 
 R2 object-level acceptance, Paystack sandbox provider E2E, private audio storage/playback, managed recovery restoration, monitoring alert delivery, curriculum rights/teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator and independent security review remain outstanding. Do not activate exports, live payments, public onboarding or production release until the relevant evidence and approvals exist.
+
+
+## Staging SMTP diagnostic enabled — 8 November 2026, 10:56 UTC
+
+The owner explicitly requested enabling the protected SMTP diagnostic for a controlled delivery test. Render service `learnwise-staging-api` was updated with the non-secret feature flag:
+
+- `ADMIN_SMTP_DIAGNOSTIC_ENABLED=true`
+
+The existing SMTP credential values were not read, changed, or exposed. The change was applied only to the staging service. Render deployment `dep-dbo5aj95efls73ctfeeg` built successfully and reached status `live` at 10:56:50 UTC, using branch commit `30e02438ffaf55548c3b309d5483d704282b8258`. Render service auto-deploy remains disabled.
+
+GitHub Actions checks for commit `30e02438ffaf55548c3b309d5483d704282b8258` completed successfully, including API tests, browser acceptance, container build, and staging-health job. The staging-health job preceded the environment-triggered deployment; it is not a post-deploy health result.
+
+### SMTP diagnostic delivery — pending owner interaction
+
+The diagnostic is available only to an authenticated owner administrator with the `settings.manage` permission, staging `APP_ENV`, CSRF protection and a separate one-attempt-per-hour rate limit. It sends a fixed token-free message to the signed-in administrator's own email address.
+
+No diagnostic email has yet been sent, so Brevo delivery is **not verified**. To perform the authorised test, the owner must sign in at `https://learnwise-staging-api.onrender.com/admin/operations`, open the **Staging email delivery test** card, and press **Send test email to my admin address** once. Confirm receipt in the same mailbox and report whether it arrived (including spam/promotions folders if absent). Never paste SMTP credentials or verification/reset links into chat.
+
+Account verification and password-reset email delivery remain unverified until an eligible controlled staging account exists and the full lifecycle is tested. Public student registration remains disabled.

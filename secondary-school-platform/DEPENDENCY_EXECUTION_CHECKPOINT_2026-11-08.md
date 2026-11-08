@@ -603,3 +603,19 @@ A fresh test was attempted using Neon branchable object storage on staging branc
 - This attempt therefore **failed at network/DNS transport** and does not pass upload, retrieval, checksum, private access denial, playback, range or deletion acceptance. No presigned URL or credential is retained in this record.
 
 The same external execution environment has previously failed DNS resolution to this Neon storage host. The live application storage configuration remains unverified. Do not infer provider failure from this execution-host DNS issue; repeat data-plane acceptance from a network/runtime that can resolve the endpoint, preferably from the staging service itself, using synthetic bytes only.
+
+
+## Synthetic QA identity lifecycle design — 8 November 2026
+
+The current registration service is unsuitable for QA provisioning: it writes privacy-notice and terms acceptance rows, and those must not be repurposed as guardian consent. Public registration remains disabled. The current authentication session also has no synthetic identity boundary.
+
+A new implementation contract was added at `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md`. It requires staging-only activation, owner-authenticated + CSRF-protected provisioning, a fixed configured QA mailbox, hashed one-time verification, an explicit immutable synthetic marker, default-deny access to learner-data routes, expiry/revocation, audit and cleanup. The document is a design checkpoint only; no schema, route, account, or deployment has been changed. Authenticated live browser acceptance remains blocked until implementation, CI and explicit staging promotion.
+
+## Latest PR CI result — 8 November 2026
+
+Workflow run [42497551018](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497551018) completed successfully across all three jobs:
+- API tests, syntax checks, PostgreSQL migration replay/idempotency, backup/restore rehearsal, schema integration, assessment/payment E2E, student journey and disposable authenticated browser acceptance.
+- Public staging health.
+- Non-publishing application container build.
+
+This is CI evidence only. It does not clear real provider storage, SMTP, Paystack, managed recovery, alert delivery or authenticated live-staging gates.

@@ -940,3 +940,38 @@ The staging-health CI check passed after the 17:25 environment deployment. Publi
 - **Immediate owner configuration required:** add `BREVO_API_KEY` and the verified `BREVO_SENDER_EMAIL` directly in Render Environment. Do not share either value in chat. Then sign in at `https://learnwise-staging-api.onrender.com/admin/operations`, run the staging email delivery test and confirm receipt. Only after receipt is confirmed may the synthetic QA invitation be issued.
 - Next: run the private storage acceptance control and inspect the safe per-bucket results. It must show upload, retrieval, checksum match, unsigned access denial and deletion for both private audio and R2. Resolve any returned missing setting names or provider error code, then rerun. Only after email receipt and storage acceptance, enable the staging-only QA issuance flag, send the temporary synthetic invitation, verify it, and complete authenticated live-staging browser acceptance. Disable/revoke the synthetic account after testing.
 - Synthetic QA issuance remains disabled; public registration, live payments and export worker remain disabled. No synthetic student, test object, real learner data, payment, migration, production deploy or PR merge was performed. PR #1 remains draft/open/unmerged; `main` remains untouched.
+
+
+## Live deployment reconciliation — 9 November 2026
+
+### Verified live source and release references
+- Development branch head at this checkpoint: `47b5207319b46410cdbbda0c41a3bc4116871518`.
+- PR #1: open, draft, unmerged; base `main` remains at `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`.
+- Exact-head PR CI run [42532066949](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42532066949) completed successfully. Jobs: API tests, container build and staging health — all success.
+- Live read-only staging browser run [42532062468](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42532062468) completed successfully. This is anonymous/read-only browser acceptance, not authenticated synthetic-user acceptance.
+- Render workspace confirmed from the connected account: Emmanuel's workspace. Service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) remains Free, Frankfurt, Docker, branch `secondary-school-platform-foundation`, auto-deploy off.
+- Latest Render deployment `dep-dbofnvajnfac73eor480` is **live** on application commit `31fdde1e05ef6ab8bb360e86e7df560a21246149`.
+- GitHub comparison of deployed application commit to branch head shows exactly two commits ahead, and only documentation files changed: `MASTER_CONTINUATION_PROMPT.md` and `STATUS.md`. No application runtime code is ahead of the live deployment; therefore a redeploy is not needed for these documentation-only commits.
+- Render deployment metadata confirms live status. The successful live staging-health workflow on branch head provides current HTTP health evidence; the Render log query did not return a separate `/health` request row, so cite the workflow rather than claiming a direct manual fetch.
+
+### Read-only Neon staging verification
+- Project `learnwise` (`spring-cloud-84267029`), branch `think-tank-staging` (`br-still-cherry-baz7g5hk`) is Ready.
+- Database counts: 0 students, 1 active administrator, 6 subjects, 0 topics, 0 curriculum source records.
+- Migration history contains 21 entries, from `001_platform_hardening` through `021_synthetic_qa_identity`.
+- `learnwise-private-audio` and `think-tank-private-exports` are listed as private buckets. The audio bucket currently has no objects.
+- No managed Neon snapshots are listed and the branch snapshot schedule is empty. A managed backup/restore drill remains outstanding.
+
+### Current configuration and owner-only gates
+- Render environment-variable values are not readable through the connected Render tools. Do not claim that Brevo or storage credentials are present based on code or historical reports.
+- Current deployed email code requires `BREVO_API_KEY` and `BREVO_SENDER_EMAIL`; SMTP variables alone are not sufficient. Sender must be verified in Brevo. The owner must add these values directly in Render, then run the owner-authenticated email diagnostic at `/admin/operations` and confirm actual mailbox receipt.
+- The same owner-authenticated Operations page must run private storage acceptance from the Render runtime. Require separate PASS for private audio and R2: upload, retrieval, SHA-256 match, unsigned denial, deletion and confirmed absence.
+- Do not issue the synthetic QA invitation until real email receipt and both storage probes pass. Keep public registration disabled.
+- Paystack sandbox, authorised curriculum/reuse rights and teacher review, safeguarding/guardian consent/NDPA/DPIA/Nigerian legal review, managed recovery, monitoring/alert delivery, second administrator and independent security review remain outstanding.
+- Release decision remains **NOT READY** for public student onboarding or production. No live payment, production deployment, paid upgrade, destructive database operation, PR merge or main-branch change was performed.
+
+### Next execution
+1. Owner adds the Brevo transactional API key and verified sender in Render Environment (never in chat).
+2. Owner runs email diagnostic and confirms mailbox receipt.
+3. Owner runs private audio + R2 storage acceptance and shares only the non-secret diagnostic result.
+4. Continue through temporary synthetic QA invitation and authenticated staging acceptance only after both gates pass; then revoke the synthetic identity and disable issuance.
+5. Continue remaining release gates; update this status and the master continuation prompt after each verified milestone.

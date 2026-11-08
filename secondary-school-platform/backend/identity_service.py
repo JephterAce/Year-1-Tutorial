@@ -109,10 +109,15 @@ def verify_student_email(raw_token):
     token_hash = _digest(raw_token)
     with connection() as conn:
         token = conn.execute(
-            """SELECT id,student_id FROM identity_tokens
-               WHERE token_hash=%s AND purpose='verify_email'
-                 AND consumed_at IS NULL AND expires_at > now()
-               FOR UPDATE""", (token_hash,)
+            """SELECT t.id,t.student_id,t.purpose,s.is_synthetic_qa,s.synthetic_qa_expires_at
+               FROM identity_tokens t JOIN students s ON s.id=t.student_id
+               WHERE t.token_hash=%s
+                 AND t.purpose IN ('verify_email','verify_qa_email')
+                 AND t.consumed_at IS NULL AND t.expires_at > now()
+                 AND ((t.purpose='verify_email' AND s.is_synthetic_qa=false)
+                   OR (t.purpose='verify_qa_email' AND s.is_synthetic_qa=true
+                       AND s.synthetic_qa_expires_at > now()))
+               FOR UPDATE OF t,s""", (token_hash,)
         ).fetchone()
         if not token:
             raise IdentityError("This verification link is invalid or has expired.")
@@ -133,7 +138,8 @@ def login_student(email, password):
         _rate_limit("login", email, limit=8)
         student = conn.execute(
             """SELECT id,password_hash,account_status FROM students
-               WHERE lower(email)=%s""", (email,)
+               WHERE lower(email)=%s
+                 AND (is_synthetic_qa=false OR synthetic_qa_expires_at > now())""", (email,)
         ).fetchone()
         # Constant-work fallback reduces account-enumeration timing differences.
         if not student:
@@ -164,11 +170,13 @@ def authenticate_session(session_id):
     with connection() as conn:
         row = conn.execute(
             """SELECT s.id AS student_id,s.email,s.username,s.display_name,s.class_level,
+                      s.is_synthetic_qa,s.synthetic_qa_expires_at,
                       ss.csrf_token_hash,ss.id AS session_row_id
                FROM student_sessions ss JOIN students s ON s.id=ss.student_id
                WHERE ss.session_id_hash=%s AND ss.revoked_at IS NULL
                  AND ss.expires_at > now() AND s.account_status='active'
-                 AND s.email_verified_at IS NOT NULL""",
+                 AND s.email_verified_at IS NOT NULL
+                 AND (s.is_synthetic_qa=false OR s.synthetic_qa_expires_at > now())""",
             (hash_session_id(session_id),),
         ).fetchone()
         if row:
@@ -241,3 +249,104 @@ def reset_student_password(raw_token, new_password):
         conn.execute("UPDATE student_sessions SET revoked_at=now() WHERE student_id=%s AND revoked_at IS NULL",
                      (token["student_id"],))
     return True
+
+
+
+def provision_synthetic_qa_student():
+    """Create one short-lived synthetic identity without writing consent records."""
+    if (
+        os.environ.get("APP_ENV", "").strip().lower() != "staging"
+        or os.environ.get("STAGING_QA_IDENTITY_ENABLED", "").strip().lower() not in {"1", "true", "yes", "on"}
+        or os.environ.get("STUDENT_REGISTRATION_ENABLED", "").strip().lower() in {"1", "true", "yes", "on"}
+    ):
+        raise IdentityError("Synthetic QA provisioning is unavailable.")
+    email = normalise_email(os.environ.get("STAGING_QA_EMAIL", ""))
+    username = "qa_" + secrets.token_hex(8)
+    temporary_password = secrets.token_urlsafe(24)
+    password_hash = hash_password(temporary_password)
+    raw_token, token_hash = create_one_time_token()
+    with connection() as conn:
+        _rate_limit("synthetic_qa_provision", email, limit=1)
+        try:
+            student = conn.execute(
+                """INSERT INTO students(
+                       email,username,display_name,class_level,password_hash,
+                       account_status,profile_visibility,marketing_opt_in,
+                       is_synthetic_qa,synthetic_qa_expires_at
+                   )
+                   VALUES (%s,%s,'Synthetic QA Student','SS1',%s,
+                           'pending','private',false,true,now()+interval '24 hours')
+                   RETURNING id,email,username,display_name,class_level,synthetic_qa_expires_at""",
+                (email, username, password_hash),
+            ).fetchone()
+        except Exception as exc:
+            if getattr(exc, "sqlstate", None) == "23505":
+                raise IdentityError("A synthetic QA identity already exists or the configured mailbox is in use.") from None
+            raise
+        conn.execute(
+            """INSERT INTO identity_tokens(student_id,purpose,token_hash,expires_at)
+               VALUES (%s,'verify_qa_email',%s,now()+interval '30 minutes')""",
+            (student["id"], token_hash),
+        )
+    return {
+        "student": dict(student),
+        "verification_token": raw_token,
+        "temporary_password": temporary_password,
+    }
+
+
+def revoke_synthetic_qa_student(student_id):
+    """Revoke an explicitly marked QA identity and all its sessions/tokens."""
+    with connection() as conn:
+        student = conn.execute(
+            """SELECT id FROM students
+               WHERE id=%s AND is_synthetic_qa=true
+               FOR UPDATE""",
+            (student_id,),
+        ).fetchone()
+        if not student:
+            raise IdentityError("Synthetic QA identity was not found.")
+        conn.execute(
+            "UPDATE student_sessions SET revoked_at=now() WHERE student_id=%s AND revoked_at IS NULL",
+            (student_id,),
+        )
+        conn.execute(
+            "UPDATE identity_tokens SET consumed_at=now() WHERE student_id=%s AND consumed_at IS NULL",
+            (student_id,),
+        )
+        conn.execute(
+            """UPDATE students SET account_status='closed',email_verified_at=NULL,
+                      updated_at=now()
+               WHERE id=%s AND is_synthetic_qa=true""",
+            (student_id,),
+        )
+    return True
+
+
+def expire_synthetic_qa_students():
+    """Close expired QA identities and revoke all associated credentials."""
+    with connection() as conn:
+        rows = conn.execute(
+            """SELECT id FROM students
+               WHERE is_synthetic_qa=true AND synthetic_qa_expires_at<=now()
+                 AND account_status IN ('pending','active')
+               FOR UPDATE"""
+        ).fetchall()
+        ids = [row["id"] for row in rows]
+        if not ids:
+            return 0
+        conn.execute(
+            "UPDATE student_sessions SET revoked_at=now() WHERE student_id=ANY(%s) AND revoked_at IS NULL",
+            (ids,),
+        )
+        conn.execute(
+            "UPDATE identity_tokens SET consumed_at=now() WHERE student_id=ANY(%s) AND consumed_at IS NULL",
+            (ids,),
+        )
+        conn.execute(
+            """UPDATE students SET account_status='closed',email_verified_at=NULL,
+                      updated_at=now()
+               WHERE id=ANY(%s) AND is_synthetic_qa=true""",
+            (ids,),
+        )
+    return len(ids)

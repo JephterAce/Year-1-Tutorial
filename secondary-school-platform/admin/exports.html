@@ -66,7 +66,8 @@
 </div>
 </main>
 <script>
-const $=id=>document.getElementById(id);\nlet currentAdminId='';
+const $=id=>document.getElementById(id);
+let currentAdminId='';
 const cookie=n=>{const v=document.cookie.split('; ').find(x=>x.startsWith(n+'='));return v?decodeURIComponent(v.slice(n.length+1)):''};
 async function api(path,body,method='GET'){
  const headers={'Accept':'application/json'};

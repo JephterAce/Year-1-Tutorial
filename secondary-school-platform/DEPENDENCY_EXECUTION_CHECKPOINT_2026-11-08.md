@@ -139,3 +139,33 @@ The Render environment update completed successfully. Deployment `dep-dbo3ahrm8h
 A direct external health check could not be completed through the available connected tools in this run. Do not mark post-deploy health as re-verified based solely on the deployment status. The prior owner-reported health response remains historical evidence only.
 
 The checkpoint file itself was then updated on `secondary-school-platform-foundation` with commit `c241717a2aff80c417a483ef0111d3f5554b2884`. Render auto-deploy is disabled, so this documentation-only commit was not deployed. No changes were made to `main`, and PR #1 remains open/unmerged.
+
+
+## R2 object acceptance attempt — 8 November 2026
+
+The owner reported that the two R2 S3 credentials have now been configured directly in Render. Secret values were not requested, read, copied, or exposed in this workflow.
+
+### Deployment state
+
+The staging deployment for commit `358c3ebcefff2cb689f9323f0e7bbd44cf89fd7b`, deployment `dep-dbo3d93rjlhs73aahtng`, was independently queried and returned status `live` (started 08:45:24Z; finished 08:46:02Z). The service remains `learnwise-staging-api` on branch `secondary-school-platform-foundation`; auto-deploy remains disabled. The Render service metadata interface available to this run does not expose environment-variable presence or secret values, so the owner's report is recorded as an owner assertion rather than independently verified secret configuration.
+
+### Requested object tests — not executed
+
+The following acceptance tests remain **NOT RUN**, not passed:
+1. Upload a synthetic object to `think-tank-private-exports`.
+2. Retrieve it and compare exact bytes/checksum.
+3. Request the object without authentication and confirm access is denied.
+4. Confirm the credential cannot access a different bucket (and, if supported, that an alternate bucket-scoped credential cannot access this bucket).
+5. Delete the synthetic object and verify it is absent.
+
+Reason: the available connected Cloudflare interface exposes account-management API requests, not authenticated S3-compatible object operations using the secret values stored inside Render. The Render interface available in this run can inspect deployment/service metadata and update environment variables, but does not provide a shell/exec facility or a way to invoke an in-container one-off test. No application test endpoint for this purpose was located in the repository search performed during this run. The external unauthenticated probe could not reach the R2 endpoint because outbound DNS resolution from the execution environment failed; therefore no HTTP denial status was observed. The R2 public `r2.dev` domain remains disabled according to the previously verified bucket configuration, but that is not a substitute for an HTTP unauthenticated-denial test against the S3 endpoint.
+
+No test object was created, retrieved, or deleted; no bucket-boundary result is claimed. No test data or learner data was uploaded. Keep `DATA_EXPORT_WORKER_ENABLED=false` and do not treat R2 object acceptance as complete.
+
+### Safe completion procedure
+
+Run a one-off S3-compatible test from the staging service runtime or a trusted operator environment with the two Render-held secrets, using a newly generated random key under a dedicated test prefix. The test must: PUT a fixed synthetic byte payload; GET it and compare SHA-256 and byte length; issue an unsigned GET and require a 403/401 denial (or equivalent S3 AccessDenied); attempt a bucket-boundary operation using a credential restricted to a different test bucket, requiring denial; DELETE the test key using the intended bucket-scoped credential; and finally HEAD/GET the key to confirm absence. Capture status codes, bucket/key (non-sensitive), byte length and checksum only—never credential values or signed URLs. If a separate bucket-scoped credential is not available, mark cross-bucket isolation as not tested rather than weakening permissions or creating broad credentials. Do not enable the export worker.
+
+### Updated disposition
+
+R2 bucket creation and public-domain disablement: previously verified. Render deployment: verified live. Owner-reported credential configuration: acknowledged, not independently inspected. Synthetic upload/retrieval/checksum, unsigned denial, bucket isolation, and deletion: not run; remain outstanding pending an execution path that can safely use the Render-held secrets.

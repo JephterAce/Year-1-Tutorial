@@ -1006,3 +1006,33 @@ Owner approval was received to apply migration 020 and deploy the tested code to
 
 ### Owner-confirmed post-deployment health — 8 November 2026
 The owner opened `https://learnwise-staging-api.onrender.com/health` and supplied the response `{"mode":"database","service":"secondary-school-api","status":"ok"}`. Mark public staging health verified after deployment. The only immediate live acceptance item still outstanding is authenticated browser acceptance against the deployed Render service; do not request or receive passwords in chat.
+
+
+### Release-gate execution audit — 8 November 2026
+
+This checkpoint records the latest connected-provider inspection and the owner's live admin-page confirmation. It supersedes earlier statements that migration 020 or the live admin exports page had not yet been verified, but it does not clear the external release gates below.
+
+- **Live admin acceptance:** owner confirmed that the authenticated `/admin/exports` page loads on the deployed staging service. This verifies that page only; it is not a full authenticated browser acceptance run against every workflow.
+- **Render:** `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) is live on the `secondary-school-platform-foundation` branch, Free plan, Frankfurt region, with auto-deploy disabled. Latest deployment `dep-dbo2l1h5efls73cnf8j0` completed successfully. The Render event feed shows successful build/deploy events and no failure events in the returned window. Error-log query returned no rows. HTTP request/latency and CPU metrics returned no data; memory returned one sample (~85 MB). Render notification setting is `default`; no test alert or delivery evidence is available.
+- **Neon staging:** project `learnwise` is in `aws-eu-central-1`; branch `think-tank-staging` is ready. Read-only counts: 0 students, 6 subjects, 0 topics, 1 active admin, 20 migration-history rows. Latest migration is `020_private_student_export_approval`, applied 2026-11-08T07:53:34Z; recorded source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`.
+- **Private storage:** existing `learnwise-private-audio` is private and empty. Created a separate private staging bucket `think-tank-private-exports` at 2026-11-08T08:04:40Z and verified both buckets are private. No export credentials have been configured; the available Neon scoped-storage credential would grant branch-wide storage access rather than bucket-only access, so it was not issued. The worker remains disabled and unscheduled.
+- **Audio provider acceptance:** a synthetic WAV was prepared and a short-lived upload URL was issued, but the execution host could not resolve the Neon storage hostname. No object was uploaded; real upload/playback/range/revocation remains unverified.
+- **SMTP/password recovery:** Brevo variables were previously owner-reported as configured, but the connected Render tools cannot safely read variable presence and no live application delivery/reset confirmation is recorded. Mocked transport tests are not provider delivery evidence.
+- **Paystack:** no sandbox transaction/webhook/refund evidence is recorded; sandbox credentials and controlled test account remain required. Live payments remain disabled.
+- **NERDC:** source register records official acquisition routes, but full source capture/licensing and teacher sign-off for all 18 class/subject combinations are incomplete. Staging has zero topics; do not publish unlicensed or unreviewed content.
+- **Safeguarding/privacy/legal:** guardian consent evidence, safeguarding lead approval, NDPA/DPIA and retention approval, and qualified Nigerian legal review remain outstanding.
+- **Backup/recovery:** Neon snapshot list and staging-branch snapshot schedule are empty. The existing backup branch is ready, but its endpoint is unavailable for a read/restore test. The attempted snapshot operation was rejected because the staging branch is a non-root branch. Managed PITR/restore, measured RPO/RTO and recovery-owner sign-off remain outstanding. CI's disposable local backup/restore test is not a managed restore drill.
+- **Independent security review:** not performed by an independent reviewer. Automated tests and internal code checks do not substitute for it.
+- **Export approval:** only one active administrator exists, so two-person approval cannot yet be exercised. The private bucket is provisioned but credentials, a second authorised administrator, a controlled export test and worker scheduling are outstanding. No export job has run.
+- **Safety:** no production deployment, PR merge, main-branch change, live payment, owner-admin bootstrap, or student-data processing was performed in this audit. PR #1 remains open/draft/unmerged.
+
+### Owner actions required to clear external gates
+1. Verify the Brevo sender and run registration/verification plus password-reset delivery to an owner-controlled mailbox; keep registration closed except during a controlled test.
+2. Add Paystack sandbox credentials directly in the staging secret manager and authorise a controlled sandbox checkout/webhook/refund test. Never paste keys into chat.
+3. Decide whether export storage will use a separate S3-compatible provider with bucket-scoped credentials or accept Neon branch-wide storage credentials after a security review. Do not enable the worker before this decision and a second authorised administrator exist.
+4. Obtain written NERDC access/reuse terms and provide the authorised source material through an approved channel; appoint qualified subject teachers for the 18 mappings.
+5. Appoint Nigerian privacy/legal counsel and a safeguarding lead; obtain guardian-consent, NDPA/DPIA, retention and incident-response approvals.
+6. Confirm an approved backup/PITR plan and recovery owner; restore to an isolated branch and record measured RPO/RTO.
+7. Name an alert recipient/on-call owner and run a controlled notification test; arrange an independent security assessment.
+
+Production/student onboarding remains blocked until all applicable release gates have documentary evidence and separate owner approval.

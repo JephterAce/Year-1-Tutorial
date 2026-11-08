@@ -319,3 +319,45 @@ PR #1 remains open, draft and unmerged; base branch `main` remains unchanged. No
 The owner reports that the manually dispatched workflow `.github/workflows/think-tank-staging-browser.yml` completed with a green success indicator in GitHub Actions. On that basis, the live-staging browser workflow is recorded as **owner-reported passed**. The workflow is configured to run the read-only `staging.spec.js` suite only (public health, student-facing page, registration/recovery form presence, mobile layout and anonymous access denial); it does not perform authenticated write operations.
 
 The connected GitHub interface available for this checkpoint does not expose the workflow-dispatch run identifier or its job logs, so the green result has not been independently matched to a run ID or individual test output. Retain this distinction in audit records. This result does not close the separate SMTP/recovery, Paystack sandbox, private audio, R2 object, managed recovery, monitoring, curriculum, safeguarding, legal, second-administrator or independent-security gates.
+
+
+## Student account and password-reset investigation — 8 November 2026
+
+### Frontend inspection
+
+Inspected the complete `secondary-school-platform/frontend/account.html` on `secondary-school-platform-foundation`.
+
+- The page has a student registration form, sign-in form and password-reset request form.
+- The reset form has a submit handler for `POST /api/v1/auth/password-reset`.
+- On a successful HTTP response, it displays the server's generic confirmation message in `#resetMsg`.
+- On a failed HTTP request, it also displays a generic confirmation message, deliberately avoiding account-existence disclosure.
+- The API helper sends JSON to the same origin (unless `learnwise-api-base` is populated) and includes same-origin credentials.
+- The handler is present; source inspection does not prove that the deployed browser received this exact page/script or that a live browser request completed.
+
+### Backend inspection
+
+The Flask route `POST /api/v1/auth/password-reset` calls `request_password_reset(email)`. It sends a reset email only when that function returns a token and the associated student email can be retrieved. Exceptions are logged server-side, but the client still receives HTTP 202 with the same generic message.
+
+The earlier read-only Neon staging query reported **zero student accounts** and one administrator. Therefore, for the email address used in the attempted reset, no reset message should be sent unless a corresponding eligible student account exists. The generic response is intentional and does not prove SMTP delivery.
+
+The registration route is explicitly gated by `STUDENT_REGISTRATION_ENABLED`; when disabled it returns HTTP 503 with `registration_temporarily_disabled`. Do not enable public registration merely to create a test account.
+
+### Existing automated coverage
+
+Inspected `secondary-school-platform/backend/test_identity_routes.py`. It contains a mocked test asserting that a password-reset request for an unknown account returns HTTP 202 and the generic message. It also tests registration's consent requirement and a mocked verification-email call. The file's tests use mocks; they do not establish a live Brevo SMTP connection, real mailbox delivery, or live browser feedback. No test run was initiated as part of this source inspection.
+
+### Finding and disposition
+
+- **Correct student-facing interface:** confirmed from source.
+- **Registration blocked:** confirmed by backend feature-flag gate; this is intentional.
+- **Reset handler present:** confirmed in source.
+- **Reset email delivered:** not verified; with zero student accounts, no email is expected for an unknown address.
+- **Brevo SMTP credentials and sender:** owner previously reported the six environment-variable names exist and the sender address is verified; actual secret values and delivery remain unverified.
+- **Live browser click/response:** not independently verified. The user's report that the button appeared to do nothing remains a usability/production-browser observation requiring a trace from a controlled eligible test account.
+- **Public registration:** keep disabled. Do not create a student account through an alternative public interface.
+
+### Safe next test
+
+Use an isolated staging-only test account created through an approved administrative/test-fixture procedure, not public registration and not a real learner identity. Then submit a reset request through the actual account page, verify the generic on-page response, confirm Brevo receives the message, open the one-time link, complete password reset and sign in with the new password. Record timestamps and pass/fail outcomes without recording passwords, tokens, signed links or SMTP secrets. The available Render integration does not provide shell/exec access, and no safe administrative test-account creation action was available in this run; therefore this live test was **not performed**.
+
+No application code, feature flags, environment variables, database rows, live accounts or production settings were changed by this investigation. PR #1 remains unmerged; `main` remains untouched.

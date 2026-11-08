@@ -693,3 +693,14 @@ The Render deployment is confirmed live, but the green GitHub staging-health che
 - Paystack sandbox, teacher-reviewed/licensed curriculum, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review remain outstanding.
 
 No production deployment, live payment, public student registration, PR merge, main-branch change, paid infrastructure upgrade, or destructive database action was performed.
+
+
+## Post-deployment acceptance and second storage attempt — 8 November 2026, 16:37 UTC
+
+- Render staging deployment `dep-dboa96nig07c73a2dlf0` is live on code commit `9367331b2ad3f0640427a9c4119779acbbc70462`.
+- A fresh staging-health workflow after deployment passed. The public `/health` check returned healthy database-mode readiness.
+- Read-only live staging Playwright run `42500709060` passed 9/9 checks after deployment: health, student pages, account controls (without submitting forms), keyboard/mobile accessibility, anonymous learner/assessment/audio denial, anonymous admin denial, admin redirect and dedicated admin login page.
+- Authenticated browser tests passed against disposable CI fixtures only; they do not constitute authenticated live-staging acceptance.
+- Read-only Neon staging audit after migration 021: total students 0, synthetic QA students 0, real students 0, active admins 1, approved curriculum source records 0, topics 0.
+- Repeated the synthetic Neon object PUT attempt using a fresh presigned URL from the available execution network. DNS resolution failed before connection (HTTP 000 / curl exit 6). No object was created; this is not a provider-side failure. No object-level storage acceptance can be claimed until the same test runs from a network/runtime that resolves the Neon storage hostname, such as the Render service.
+

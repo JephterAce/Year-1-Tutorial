@@ -1,3 +1,34 @@
+## Current execution checkpoint — 8 November 2026, 16:35 UTC
+
+**Development branch:** `secondary-school-platform-foundation`  
+**Latest branch commit:** `9367331b2ad3f0640427a9c4119779acbbc70462`  
+**PR #1:** open, draft and unmerged. `main` remains untouched.  
+**Render staging:** `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`), deployment `dep-dboa96nig07c73a2dlf0` is live on the latest branch commit. Auto-deploy remains disabled; this was an explicit staging-only deploy.  
+**Neon staging:** `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`. Migration `021_synthetic_qa_identity` is recorded as applied with source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e` at `2026-11-08T16:21:46Z`.  
+**CI:** push run `42500044511` and PR run `42500050705` passed all jobs on commit `9367331b2ad3f0640427a9c4119779acbbc70462`.
+
+### Synthetic QA lifecycle — implemented, CI-verified and staging-deployed
+
+- Added migration 021: explicit `is_synthetic_qa` marker, mandatory expiry pairing, one active synthetic identity constraint, and a distinct `verify_qa_email` token purpose.
+- Added staging-only provisioning behind `STAGING_QA_IDENTITY_ENABLED`, requiring student public registration to remain disabled. Provisioning is owner-authenticated, CSRF-protected, `settings.manage`-gated, fixed to `STAGING_QA_EMAIL`, and rejects request bodies so recipients cannot be overridden.
+- Synthetic invitation tokens are hashed at rest and expire after 30 minutes; account expiry is 24 hours. A temporary password and one-time link are delivered only to the configured mailbox; API responses and logs do not contain them. SMTP/audit failure revokes the pending account.
+- Synthetic provisioning does not create guardian-consent or privacy/terms acceptance records. Synthetic sessions are default-deny except for identity confirmation and logout. Synthetic accounts are excluded from learner profiles, assessment, payment, data-rights and export paths.
+- Revocation/expiry invalidates sessions and tokens, closes the account and clears its mailbox address. Owner-only cleanup/revoke routes are audited. The account UI clearly labels synthetic sessions.
+- Tests cover route gates, email-failure rollback, synthetic session denial, export isolation, token hashing, no consent records, login, expiry and revocation. CI ran the PostgreSQL lifecycle tests and authenticated/anonymous Playwright browser suite against disposable fixtures; all passed.
+- No synthetic identity has been created. `STAGING_QA_IDENTITY_ENABLED` remains disabled by default, and `STAGING_QA_EMAIL` has not been configured. Brevo delivery remains unverified. Do not enable this flow until a dedicated QA mailbox is configured and delivery is verified.
+
+### Remaining acceptance and release blockers
+
+- Post-deployment health/browser verification on the newly deployed revision is still to be recorded separately from the CI run that preceded the manual Render deploy.
+- R2 private-object PUT/GET/checksum/unsigned-denial/DELETE has not been executed from the Render runtime. Export worker remains disabled.
+- Neon private-audio storage data-plane upload/retrieval and actual student playback remain unverified. The prior direct-network attempt was DNS-blocked. Synthetic QA identities cannot access learner audio; actual playback requires an approved lesson asset and entitlement.
+- Authenticated live-staging browser acceptance remains blocked pending a dedicated QA mailbox, SMTP delivery and safe QA account issuance. Disposable CI authenticated browser tests are not live-staging acceptance.
+- Paystack sandbox transaction/webhook/reconciliation, curriculum rights and teacher approval, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review remain outstanding.
+
+**Safeguards:** student registration disabled; synthetic QA feature disabled by default; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deployment; no PR merge; no changes to `main`.
+
+---
+
 # Current execution checkpoint — 2026-11-03 (supersedes older historical status below)
 
 **Development branch:** `secondary-school-platform-foundation`  

@@ -1,7 +1,6 @@
 """Brevo HTTPS transactional delivery for identity and admin messages; never logs bearer tokens."""
 import json
 import os
-import re
 from email.utils import parseaddr
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -78,7 +77,7 @@ def send_identity_link(email, token, purpose):
     else:
         raise ValueError("Unsupported identity email purpose")
     url = f"{base}/account.html?{urlencode({'action': action, 'token': token})}"
-    _send(email, subject, f"{intro} using this one-time link:\\n\\n{url}\\n\\nIf you did not request this, ignore this email. Do not share this link.")
+    _send(email, subject, f"{intro} using this one-time link:\n\n{url}\n\nIf you did not request this, ignore this email. Do not share this link.")
 
 
 def send_admin_diagnostic(email):
@@ -104,9 +103,9 @@ def send_synthetic_qa_invite(email, token, temporary_password):
         email,
         "Think Tank staging synthetic QA invitation",
         "A short-lived synthetic QA identity was created for controlled staging acceptance. "
-        "It is not a real learner account and must not be used with real learner information.\\n\\n"
-        f"Verify the mailbox using this one-time link (expires in 30 minutes):\\n{url}\\n\\n"
-        f"Temporary staging password (account expires within 24 hours):\\n{temporary_password}\\n\\n"
+        "It is not a real learner account and must not be used with real learner information.\n\n"
+        f"Verify the mailbox using this one-time link (expires in 30 minutes):\n{url}\n\n"
+        f"Temporary staging password (account expires within 24 hours):\n{temporary_password}\n\n"
         "Do not reuse this password or share the verification link. "
         "This synthetic account has no guardian-consent status and is blocked from learner records, "
         "assessments, payments, exports and private learning content."

@@ -315,7 +315,7 @@ def revoke_synthetic_qa_student(student_id):
             (student_id,),
         )
         conn.execute(
-            """UPDATE students SET account_status='closed',email_verified_at=NULL,
+            """UPDATE students SET account_status='closed',email=NULL,email_verified_at=NULL,
                       updated_at=now()
                WHERE id=%s AND is_synthetic_qa=true""",
             (student_id,),
@@ -344,7 +344,7 @@ def expire_synthetic_qa_students():
             (ids,),
         )
         conn.execute(
-            """UPDATE students SET account_status='closed',email_verified_at=NULL,
+            """UPDATE students SET account_status='closed',email=NULL,email_verified_at=NULL,
                       updated_at=now()
                WHERE id=ANY(%s) AND is_synthetic_qa=true""",
             (ids,),

@@ -692,3 +692,10 @@ Production/student onboarding remains blocked until all applicable release gates
 - **Passed:** read-only Playwright browser run [42497224093](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497224093), 9/9 tests against live staging. Verified public readiness, student page delivery, account form presence, keyboard/mobile accessibility, anonymous denial of student/private learning/assessment/audio APIs, and anonymous admin protection/redirects.
 - **Not passed / still outstanding:** authenticated live-staging browser acceptance. The live workflow deliberately excludes authenticated write tests because they create assessment/export/privacy-request records and there is no approved synthetic student test account. No live account or learner data was touched.
 - The read-only workflow now runs automatically when its workflow file changes on the development branch; its manual-dispatch option remains. No application deployment was triggered; Render auto-deploy is disabled.
+
+
+### Fresh Neon audit — 8 November 2026
+- Staging read-only counts: 0 students, 1 active administrator, 0 topics, 0 approved curriculum source records, 20 migration-history rows.
+- Snapshot listing is empty; automatic snapshot schedule for the staging branch is empty. Existing copied backup branch is not a managed snapshot or a verified restore. Managed recovery remains outstanding.
+- No database data or backup settings were changed.
+- The identity review confirms a QA provisioning design must keep synthetic records distinct and must never represent terms/privacy acceptance as guardian consent. Public registration remains disabled; no synthetic account was created.

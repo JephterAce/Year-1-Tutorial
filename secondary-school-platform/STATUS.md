@@ -630,3 +630,16 @@ Production release remains blocked. Migration 020 and its matching code deployme
 - Current branch head before this final status/handover update: `3a5cace1db3b9de2803b18f22c4974e69c4b963d`; it is 8 documentation-only commits ahead of the tested application-code commit. No application code changed after the green run.
 - Render remains live on `c5805a6fc463fd040e64e8223d58ed3dbf37d143`, auto-deploy off. Managed Neon remains at 19 migration records. Migration 020 remains only on isolated rehearsal branch `br-divine-bread-bah58gvn`.
 - PR #1 remains open, draft and unmerged. Production remains blocked.
+
+
+### Managed staging migration 020 and Render staging deployment — 8 November 2026
+
+- Owner explicitly approved applying migration 020 and deploying the tested application code to staging only. No production, main-branch, or PR-merge action was authorised or performed.
+- Managed Neon project `spring-cloud-84267029`, branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`: migration history now contains 20 entries; latest is `020_private_student_export_approval`. Recorded source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13` matches the canonical GitHub migration file. Verified all six new columns and all four new constraints are present.
+- Render service `learnwise-staging-api` deployment `dep-dbo2l1h5efls73cnf8j0` is `live` on branch `secondary-school-platform-foundation`, commit `c03b7e98aee4a046d300185eb5089b42f747a75c`. Build succeeded; Gunicorn started and worker processes booted. Service auto-deploy remains off; this was a manual staging deploy.
+- The deployed code commit is documentation-head `c03b7e9...`; application code remains the exact fully CI-tested commit `5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3`, with only documentation changes after it.
+- Live public `/health` HTTP response and authenticated browser acceptance have NOT yet been independently confirmed from this execution environment: the web fetch could not access the Render endpoint and outbound DNS resolution from the container failed. Render deployment status and process startup are verified, but they are not substitutes for an HTTP 200 health response or a real authenticated browser session. The CI health and synthetic Playwright tests remain green on the tested application commit.
+- The isolated migration-rehearsal branch remains separate; managed staging now has migration 020 applied. No owner-admin bootstrap was rerun. Export worker remains disabled; no private export bucket/credentials or schedule were provisioned.
+
+#### Remaining release blockers
+SMTP delivery/password recovery; Paystack sandbox E2E; private audio provider playback acceptance; licensed NERDC content and teacher sign-off; child safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration/RPO/RTO; monitoring and alert delivery; independent security review; second active owner administrator; private export bucket and worker scheduling. Staging is not production-ready.

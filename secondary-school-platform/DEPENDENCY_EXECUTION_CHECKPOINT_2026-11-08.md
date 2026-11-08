@@ -534,3 +534,18 @@ The improved diagnostic now records only the failure phase and exception class. 
 - Safe staging test-account design remains constrained by the need to distinguish synthetic QA records from real student records and never fabricate guardian consent. Public registration remains disabled.
 - R2/audio live object tests still require provider credentials accessible to the staging runtime and safe test fixtures. Paystack provider E2E still requires sandbox credentials and an owner-controlled test.
 - No managed recovery schedule, billable service, public onboarding, or live payment was enabled.
+
+
+## Private-audio hardening deployment — 8 November 2026
+
+The strict private-audio object-key and HTTP byte-range validation changes are now deployed to the existing staging service.
+
+- Commit: `36141466a8226a6f5e4d91b1d6a08f1ebe1d2c79`.
+- Render deployment: `dep-dbo9jk0u01pc73ekc330`.
+- Render status: **live**, finished at 15:49:01Z.
+- GitHub Actions run: `42478184387`; all three CI jobs completed successfully.
+- The changes validate object keys and reject malformed, multiple, reversed, empty and zero-length suffix byte ranges while retaining valid open-ended and suffix ranges.
+- A direct post-deployment HTTP health probe from the available external web interface could not reach the endpoint. Do not mark a fresh post-deploy health response as independently verified from this check. Earlier health evidence remains historical.
+- This deployment does **not** constitute live R2/audio object upload, retrieval, checksum, playback, access-denial or deletion acceptance. Those provider-level tests remain outstanding.
+
+No production deployment, `main` change, PR merge, public registration, live payment or learner-data operation was performed. Render auto-deploy remains disabled.

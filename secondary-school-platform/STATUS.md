@@ -709,7 +709,7 @@ Production/student onboarding remains blocked until all applicable release gates
 
 ### Synthetic QA lifecycle design checkpoint — 8 November 2026
 - Added `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md` on the development branch. It defines staging-only owner-authorised provisioning, configured-recipient-only invitation, hashed single-use verification, immutable synthetic identity marking, default-deny learner-data access, expiry/revocation, audit logging and cleanup.
-- This is a design contract only. No synthetic account route, schema marker, lifecycle or live account has been implemented. Existing student registration must not be reused because it writes privacy/terms acceptance records; no guardian-consent record may be fabricated.
+- This was the initial design checkpoint. The schema, service, owner-only routes, synthetic-session isolation and tests were subsequently implemented and deployed to staging; no live synthetic account has been created. Existing student registration must not be reused because it writes privacy/terms acceptance records; no guardian-consent record may be fabricated.
 - PR workflow run [42497551018](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497551018) completed successfully: API tests, PostgreSQL migration/integration and disposable authenticated browser suite, staging health, and container build all passed. This is CI against disposable fixtures, not authenticated acceptance against live Render.
 - Public student registration remains disabled; no staging application deployment, PR merge or main-branch change was made.
 

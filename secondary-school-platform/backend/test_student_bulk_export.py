@@ -82,7 +82,7 @@ class BulkExportWorkerTests(unittest.TestCase):
     def test_json_export_streams_one_complete_student_record_per_line(self):
         student_id = UUID("12345678-1234-4234-8234-123456789abc")
         conn = FakeConnection([{"id": student_id}])
-        job = {"export_format": "json", "filters": {}}
+        job = {"export_scope": "individual", "target_student_id": str(student_id), "export_format": "json", "filters": {}}
         payload = {
             "export_version": "1.0",
             "student": {"id": str(student_id), "email": "learner@example.test"},
@@ -106,7 +106,7 @@ class BulkExportWorkerTests(unittest.TestCase):
             "assessment_answers": [],
         }
         with patch("student_bulk_export.build_student_export", return_value=payload):
-            chunks = list(_export_chunks(conn, {"export_format": "csv", "filters": {}},
+            chunks = list(_export_chunks(conn, {"export_scope": "individual", "target_student_id": str(student_id), "export_format": "csv", "filters": {}},
                                          datetime.now(timezone.utc)))
         rows = list(csv.DictReader(io.StringIO(b"".join(chunks).decode("utf-8"))))
         self.assertEqual(len(rows), 1)

@@ -712,3 +712,25 @@ Production/student onboarding remains blocked until all applicable release gates
 - This is a design contract only. No synthetic account route, schema marker, lifecycle or live account has been implemented. Existing student registration must not be reused because it writes privacy/terms acceptance records; no guardian-consent record may be fabricated.
 - PR workflow run [42497551018](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497551018) completed successfully: API tests, PostgreSQL migration/integration and disposable authenticated browser suite, staging health, and container build all passed. This is CI against disposable fixtures, not authenticated acceptance against live Render.
 - Public student registration remains disabled; no staging application deployment, PR merge or main-branch change was made.
+
+
+
+### Synthetic QA lifecycle implementation and staging migration — 8 November 2026
+- Implemented the staging-only synthetic QA lifecycle on the development branch: migration 021; owner-session + CSRF + `settings.manage` provisioning/revoke/expiry endpoints; fixed configured mailbox; hashed one-time verification token; temporary password delivered only by email; 24-hour identity expiry; synthetic-session default-deny; and revoke/expiry invalidation.
+- Synthetic identities are excluded from admin learner counts/lists, payment/finance views, Paystack checkout, assessment creation, profile services, self-service exports, and approved bulk exports. QA provisioning writes no privacy/terms acceptance or guardian-consent records.
+- Added unit route tests, export-isolation tests, and disposable-PostgreSQL lifecycle tests covering token hashing, verification, login, no consent rows, expiry, session revocation, mailbox clearing and feature-flag fail-closed behavior.
+- Full push CI [42499289104](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499289104) and PR CI [42499293173](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499293173) passed all three jobs, including PostgreSQL synthetic QA lifecycle, migration replay, backup/restore rehearsal, schema integration, assessment/payment E2E, student journey, disposable authenticated browser acceptance, staging health and container build.
+- Migration 021 (`021_synthetic_qa_identity.sql`, source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e`) was rehearsed and recorded on Neon branch `think-tank-migration-rehearsal-2026-11-08` and then applied transactionally to staging branch `think-tank-staging`. Both now report 21 migration-history rows; staging has 0 students, 0 synthetic students, 1 active administrator and 0 consent rows.
+- No synthetic account was created. The feature remains disabled unless `APP_ENV=staging`, `STAGING_QA_IDENTITY_ENABLED=true`, `STUDENT_REGISTRATION_ENABLED=false`, and a configured `STAGING_QA_EMAIL` are all satisfied. SMTP delivery must work before provisioning can succeed.
+
+### R2 private-object acceptance — 8 November 2026
+- Cloudflare R2 control-plane object test passed against `think-tank-private-exports`: uploaded an 86-byte synthetic text object, retrieved exact matching bytes, verified SHA-256 `5ff962c3b80980c5ae718d0e10fa3e890119d9278b928989ef8dab364625ebb0`, confirmed listing metadata, deleted the object and confirmed the QA prefix was empty.
+- Bucket's managed `r2.dev` public domain is disabled and no custom domains are attached. This supports the private-access configuration check.
+- A direct anonymous GET could not be completed because the execution host could not resolve the `r2.dev` hostname. Therefore a request-level unsigned 403/404 is not claimed. This Cloudflare control-plane test also does not yet prove the Render application's configured S3 credentials work.
+
+### Neon private audio retry — 8 November 2026
+- Confirmed branchable storage enabled and `learnwise-private-audio` remains private on `think-tank-staging`. A fresh short-lived presigned PUT was attempted from the execution host; DNS resolution of the Neon storage hostname again failed. The `qa-acceptance/` prefix remains empty. No audio object was uploaded; playback, checksum, range, denial and deletion remain blocked.
+
+### Render staging deployment — 8 November 2026
+- Manually triggered staging deployment `dep-dboa3995efls73d9hd70` for exact CI-tested commit `c691d6026588ab36d2c5cd7de73fd9567a792b00`. Render build completed successfully; deployment rollout was still in progress at the time of this checkpoint. Auto-deploy remains disabled.
+- No production deployment, PR merge, main-branch change, live student registration or live payment was performed.

@@ -74,5 +74,31 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
                                      (row[0],))
 
 
+    def test_private_export_approval_schema_is_present(self):
+        with psycopg.connect(self.dsn) as conn:
+            columns = {
+                row[0] for row in conn.execute(
+                    """SELECT column_name FROM information_schema.columns
+                       WHERE table_schema='public' AND table_name='student_data_exports'"""
+                ).fetchall()
+            }
+            self.assertTrue({
+                "approved_by_admin_id", "approved_at", "manifest_storage_key",
+                "started_at", "attempt_count", "last_attempt_at",
+            }.issubset(columns))
+            constraints = {
+                row[0] for row in conn.execute(
+                    """SELECT conname FROM pg_constraint
+                       WHERE conrelid='student_data_exports'::regclass"""
+                ).fetchall()
+            }
+            self.assertTrue({
+                "student_data_exports_distinct_approver",
+                "student_data_exports_approval_pair",
+                "student_data_exports_attempt_count",
+                "student_data_exports_completed_manifest",
+            }.issubset(constraints))
+
+
 if __name__ == "__main__":
     unittest.main()

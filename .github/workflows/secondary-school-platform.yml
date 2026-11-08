@@ -143,6 +143,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
           APP_ENV: development
+          STUDENT_REGISTRATION_ENABLED: "false"
           AUTH_RATE_LIMIT_PEPPER: ci-only-pepper-not-a-real-secret-000000000000
           PUBLIC_APP_URL: http://127.0.0.1:8000
         run: |

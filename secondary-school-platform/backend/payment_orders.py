@@ -59,7 +59,7 @@ def create_topic_checkout(student_id, topic_id, opener=urlopen):
     with connection() as conn:
         student = conn.execute(
             """SELECT email FROM students
-               WHERE id=%s AND account_status='active' AND email_verified_at IS NOT NULL
+               WHERE id=%s AND account_status='active' AND email_verified_at IS NOT NULL AND is_synthetic_qa=false
                FOR SHARE""", (student_id,)
         ).fetchone()
         if not student:

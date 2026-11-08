@@ -1122,3 +1122,28 @@ Detailed evidence: `secondary-school-platform/DEPENDENCY_EXECUTION_CHECKPOINT_20
 - Read-only browser workflow [42499890634](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499890634) passed the R2 anonymous-denial step and all 9 live staging browser tests.
 - The temporary object was deleted through the Cloudflare API. A final list of the `qa-acceptance/` prefix returned zero objects.
 - The earlier local-container DNS failure is superseded for the R2 public-access check by this successful GitHub-runner HTTP 401. Neon private-audio DNS remains unresolved.
+
+
+
+## Continuation addendum — 8 November 2026, 16:35 UTC
+
+Current branch: `secondary-school-platform-foundation`. Latest code commit promoted to Render staging: `9367331b2ad3f0640427a9c4119779acbbc70462`. Latest documentation/workflow commit: `51e4efb152c762f9e350e4446d19dd86da8db0c5`. PR #1 remains draft/open/unmerged; main untouched.
+
+### Synthetic QA lifecycle
+- Migration 021 `021_synthetic_qa_identity.sql` is applied to Neon staging branch `think-tank-staging` with matching source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e`.
+- Render deploy `dep-dboa96nig07c73a2dlf0` is live on commit `9367331b2ad3f0640427a9c4119779acbbc70462`.
+- Owner-only staging QA issuance/revoke/expiry controls, 24-hour expiry, hashed 30-minute verification tokens, fixed configured mailbox, no consent rows, synthetic-session default deny, learner-data isolation and UI labelling are implemented.
+- Push CI `42500044511` and PR CI `42500050705` passed all jobs on the deployed code commit, including disposable PostgreSQL lifecycle tests and authenticated/anonymous browser acceptance.
+- No synthetic account exists. Keep `STAGING_QA_IDENTITY_ENABLED` off until a dedicated QA mailbox is configured and SMTP delivery is proven. Do not use a real learner or invent guardian consent.
+- The read-only live staging browser suite was expanded to run after every development-branch push. Run `42500709060` completed with 9/9 tests passed against the live staging service after the new deployment. This checks public health, pages, anonymous denial, mobile/keyboard behavior and admin redirect/login separation; it is not authenticated live-staging acceptance.
+
+### Current execution queue
+1. Complete the latest CI runs for documentation/workflow commit `51e4efb152c762f9e350e4446d19dd86da8db0c5`; keep branch checks green.
+2. Continue storage acceptance. A direct Neon storage presign was attempted earlier but the model-side network could not resolve the storage hostname. A repeat must run from the Render network using existing Render secrets. R2 and audio object upload/retrieval/checksum/unsigned-denial/delete remain unverified. Do not turn on the export worker.
+3. Actual audio playback still needs a teacher-approved lesson asset and valid learner entitlement; synthetic QA accounts are deliberately blocked from learner audio.
+4. SMTP/Brevo delivery is unverified; configure only through the provider/Render dashboards. Synthetic account issuance must fail closed if mail delivery fails.
+5. Paystack sandbox transaction/webhook/reconciliation requires sandbox credentials and a controlled sandbox transaction; live payments remain disabled.
+6. Curriculum licensing and teacher sign-off, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator and independent security review require real appointments/evidence.
+7. Managed backup restoration and monitoring alert delivery require an approved recovery target/RPO/RTO and named alert recipient. No paid snapshot/monitoring resources without owner approval.
+
+Safeguards remain: student public registration disabled; synthetic QA feature disabled by default; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deploy; no merge; no main change; no paid upgrades; no real student data.

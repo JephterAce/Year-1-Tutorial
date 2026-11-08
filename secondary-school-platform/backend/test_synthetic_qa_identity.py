@@ -65,6 +65,29 @@ class SyntheticQAIdentityRouteTests(unittest.TestCase):
             "temporary-password-never-return",
         )
 
+    def test_failed_invitation_revokes_pending_synthetic_identity(self):
+        student = {
+            "id": "synthetic-id",
+            "email": "qa@example.test",
+            "synthetic_qa_expires_at": datetime(2026, 11, 9, tzinfo=timezone.utc),
+        }
+        provisioned = {
+            "student": student,
+            "verification_token": "one-time-token",
+            "temporary_password": "temporary-password",
+        }
+        with patch.dict(os.environ, self.staging_flags), \
+             patch("app._current_admin", return_value=self.owner_session()), \
+             patch("identity_service.provision_synthetic_qa_student", return_value=provisioned), \
+             patch("identity_service.revoke_synthetic_qa_student") as revoke, \
+             patch("identity_email.send_synthetic_qa_invite", side_effect=RuntimeError("SMTP unavailable")), \
+             patch("admin_auth.record_admin_audit"):
+            response = self.client.post("/api/v1/admin/qa-identities")
+        self.assertEqual(response.status_code, 503)
+        revoke.assert_called_once_with("synthetic-id")
+        self.assertNotIn("one-time-token", response.get_data(as_text=True))
+        self.assertNotIn("temporary-password", response.get_data(as_text=True))
+
     def test_synthetic_session_can_confirm_identity_but_cannot_start_assessments(self):
         synthetic_session = {
             "student_id": "synthetic-id",

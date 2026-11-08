@@ -15,11 +15,13 @@ def validate_object_key(object_key):
     return object_key
 
 def storage_config():
+    # Dedicated audio settings take precedence. AWS_* remains a backwards-
+    # compatible alias for the existing Neon S3-compatible audio configuration.
     required = {
-        "access_key_id": os.environ.get("AWS_ACCESS_KEY_ID", ""),
-        "secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY", ""),
-        "endpoint_url": os.environ.get("AWS_ENDPOINT_URL_S3", ""),
-        "region": os.environ.get("AWS_REGION", ""),
+        "access_key_id": os.environ.get("AUDIO_STORAGE_ACCESS_KEY_ID") or os.environ.get("AWS_ACCESS_KEY_ID", ""),
+        "secret_access_key": os.environ.get("AUDIO_STORAGE_SECRET_ACCESS_KEY") or os.environ.get("AWS_SECRET_ACCESS_KEY", ""),
+        "endpoint_url": os.environ.get("AUDIO_STORAGE_ENDPOINT_URL_S3") or os.environ.get("AWS_ENDPOINT_URL_S3", ""),
+        "region": os.environ.get("AUDIO_STORAGE_REGION") or os.environ.get("AWS_REGION", ""),
         "bucket": os.environ.get("AUDIO_STORAGE_BUCKET", ""),
     }
     if not all(isinstance(v, str) and v.strip() for v in required.values()):

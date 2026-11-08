@@ -1,31 +1,48 @@
-## Current execution checkpoint — 8 November 2026, 16:35 UTC
+## Current execution checkpoint — 8 November 2026, 18:50 WAT
 
+**Project:** Think Tank senior-secondary learning platform.  
 **Development branch:** `secondary-school-platform-foundation`  
-**Latest branch commit:** `9367331b2ad3f0640427a9c4119779acbbc70462`  
-**PR #1:** open, draft and unmerged. `main` remains untouched.  
-**Render staging:** `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`), deployment `dep-dboa96nig07c73a2dlf0` is live on the latest branch commit. Auto-deploy remains disabled; this was an explicit staging-only deploy.  
-**Neon staging:** `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`. Migration `021_synthetic_qa_identity` is recorded as applied with source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e` at `2026-11-08T16:21:46Z`.  
-**CI:** push run `42500044511` and PR run `42500050705` passed all jobs on commit `9367331b2ad3f0640427a9c4119779acbbc70462`.
+**Current branch head before this documentation update:** `112f15f764299639763471f7813aea776a334358`  
+**PR #1:** open, draft, unmerged; base `main` remains at `5d6d93ceec31ff3eb6851d567e4d61f7477bc492`.  
+**Render staging:** `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`), latest deploy `dep-dbob0qh5efls73dc3tg0`, status `live`, deployed commit `97f243d3a1daea2ad910f59c405066ab75484955`. Auto-deploy is off; Free plan, Frankfurt.  
+**Neon staging:** project `learnwise` (`spring-cloud-84267029`), branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), state `ready`.  
+**Exact-head CI:** workflow run `42505261079` passed all three jobs on the branch head: API/security and PostgreSQL tests, non-publishing container build, and public staging health. Health job log confirms HTTP 200 and JSON `status=ok`, `mode=database`, `service=secondary-school-api`.  
+**Live browser acceptance:** read-only run `42505118340` passed 10/10 after the latest staging safety deployment. It is anonymous/read-only acceptance, not authenticated student acceptance.
 
-### Synthetic QA lifecycle — implemented, CI-verified and staging-deployed
+### Current staging alignment
 
-- Added migration 021: explicit `is_synthetic_qa` marker, mandatory expiry pairing, one active synthetic identity constraint, and a distinct `verify_qa_email` token purpose.
-- Added staging-only provisioning behind `STAGING_QA_IDENTITY_ENABLED`, requiring student public registration to remain disabled. Provisioning is owner-authenticated, CSRF-protected, `settings.manage`-gated, fixed to `STAGING_QA_EMAIL`, and rejects request bodies so recipients cannot be overridden.
-- Synthetic invitation tokens are hashed at rest and expire after 30 minutes; account expiry is 24 hours. A temporary password and one-time link are delivered only to the configured mailbox; API responses and logs do not contain them. SMTP/audit failure revokes the pending account.
-- Synthetic provisioning does not create guardian-consent or privacy/terms acceptance records. Synthetic sessions are default-deny except for identity confirmation and logout. Synthetic accounts are excluded from learner profiles, assessment, payment, data-rights and export paths.
-- Revocation/expiry invalidates sessions and tokens, closes the account and clears its mailbox address. Owner-only cleanup/revoke routes are audited. The account UI clearly labels synthetic sessions.
-- Tests cover route gates, email-failure rollback, synthetic session denial, export isolation, token hashing, no consent records, login, expiry and revocation. CI ran the PostgreSQL lifecycle tests and authenticated/anonymous Playwright browser suite against disposable fixtures; all passed.
-- No synthetic identity has been created. `STAGING_QA_IDENTITY_ENABLED` remains disabled by default, and `STAGING_QA_EMAIL` has not been configured. Brevo delivery remains unverified. Do not enable this flow until a dedicated QA mailbox is configured and delivery is verified.
+The seven commits between the Render deployment commit and the branch head contain documentation and the staging browser-acceptance specification only; the compare result contains no backend/frontend application runtime files. Therefore the currently deployed application code remains aligned with the branch's application code, and no redeploy is needed for those documentation/test-only changes. Render auto-deploy remains disabled.
 
-### Remaining acceptance and release blockers
+### Database and storage audit
 
-- Post-deployment health/browser verification on the newly deployed revision is still to be recorded separately from the CI run that preceded the manual Render deploy.
-- R2 private-object PUT/GET/checksum/unsigned-denial/DELETE has not been executed from the Render runtime. Export worker remains disabled.
-- Neon private-audio storage data-plane upload/retrieval and actual student playback remain unverified. The prior direct-network attempt was DNS-blocked. Synthetic QA identities cannot access learner audio; actual playback requires an approved lesson asset and entitlement.
-- Authenticated live-staging browser acceptance remains blocked pending a dedicated QA mailbox, SMTP delivery and safe QA account issuance. Disposable CI authenticated browser tests are not live-staging acceptance.
-- Paystack sandbox transaction/webhook/reconciliation, curriculum rights and teacher approval, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review remain outstanding.
+- Neon migration history contains 21 entries, versions 001–021. Migration 021 `021_synthetic_qa_identity` has source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e`, matching the current branch file.
+- Read-only staging counts: 0 students, 1 active administrator, 6 subjects, 0 topics, 0 curriculum source records.
+- Both `learnwise-private-audio` and `think-tank-private-exports` are private and currently contain no objects.
+- Neon branchable storage is enabled. The existing `learnwise-render-staging-storage` credential has branch-scoped `storage:read` and `storage:write` capabilities; it is not bucket-scoped.
+- No managed Neon snapshots are listed. The separate backup branch exists and is `ready`, but a managed restore drill and approved RPO/RTO remain outstanding.
+- R2 control-plane synthetic upload/retrieval/checksum/deletion and anonymous public-access denial (HTTP 401) were previously verified. The Render application's configured S3 credentials have not yet passed the in-runtime diagnostic. Neon private-audio data-plane acceptance also remains outstanding.
 
-**Safeguards:** student registration disabled; synthetic QA feature disabled by default; export worker disabled; live payments disabled; Render auto-deploy disabled; no production deployment; no PR merge; no changes to `main`.
+### Identity, email and live acceptance
+
+- Public student registration remains disabled.
+- Synthetic QA issuance is deliberately disabled pending verified SMTP delivery and a dedicated controlled mailbox. No synthetic student exists.
+- The owner-only private storage diagnostic remains available at `/admin/operations`; it must be run from the authenticated owner session. It tests synthetic audio and R2 object upload/retrieval/SHA-256/unsigned denial/deletion without learner data.
+- The previous administrator email test returned `smtp_diagnostic_unavailable` (HTTP 503). Render logs contain redacted diagnostic failures and do not expose provider details. The current application route records only a bounded failure phase and exception class; SMTP delivery is not passed.
+- Authenticated live browser acceptance therefore remains blocked until email delivery works, the synthetic invitation is issued and verified, and the temporary QA account is used for a controlled test.
+
+### Release gates still open
+
+1. Brevo sender/SMTP credential and real delivery/account-recovery verification.
+2. Render-runtime R2 and Neon audio object-level acceptance; actual protected audio playback additionally requires an approved lesson asset and entitlement.
+3. Paystack sandbox credentials and a controlled transaction/webhook/reconciliation test; live payments remain disabled.
+4. Authorised NERDC curriculum source/licensing and qualified teacher review of the 18 SS1–SS3 × six-subject mappings.
+5. Safeguarding lead, verified guardian consent, NDPA/DPIA, retention and processor/cross-border review, and Nigerian legal sign-off.
+6. Managed backup restoration, approved RPO/RTO/retention and recovery drill.
+7. Named monitoring/on-call recipient and successful alert delivery/incident drill.
+8. Second authorised administrator and independent security review.
+
+**Release decision: NOT READY for public student onboarding or production.** Keep PR #1 draft/unmerged; keep `main` untouched; keep registration, export worker and live payments disabled. No production deployment, paid upgrade, domain purchase, live payment, destructive action or real learner-data operation is authorised.
+
 
 ---
 

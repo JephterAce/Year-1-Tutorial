@@ -656,3 +656,11 @@ This is CI evidence only. It does not clear real provider storage, SMTP, Paystac
 - Authenticated live student acceptance remains outstanding. The synthetic QA flow is implemented and its disposable PostgreSQL + browser tests pass, but no staging QA identity was provisioned because SMTP/Brevo delivery has not been verified and the dedicated QA mailbox/feature flag are not enabled.
 - R2 control-plane object upload/retrieval/checksum/delete acceptance passed as recorded above; direct anonymous URL request remained DNS-blocked. Render application's S3 credentials remain untested.
 - Neon private audio upload/playback remains transport-blocked by execution-host DNS; no QA object exists in the private audio bucket.
+
+
+
+### R2 anonymous-denial verification completed — 8 November 2026
+- A second synthetic 86-byte object was uploaded to the private R2 bucket solely for a public-access check. The GitHub Actions runner made an unauthenticated GET to the exact managed `r2.dev` object URL and received **HTTP 401**, confirming denial of anonymous retrieval.
+- Read-only browser workflow [42499890634](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499890634) passed the R2 anonymous-denial step and all 9 live staging browser tests.
+- The temporary object was deleted through the Cloudflare API. A final list of the `qa-acceptance/` prefix returned zero objects.
+- The earlier local-container DNS failure is superseded for the R2 public-access check by this successful GitHub-runner HTTP 401. Neon private-audio DNS remains unresolved.

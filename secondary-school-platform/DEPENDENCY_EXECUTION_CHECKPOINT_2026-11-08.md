@@ -704,3 +704,23 @@ No production deployment, live payment, public student registration, PR merge, m
 - Read-only Neon staging audit after migration 021: total students 0, synthetic QA students 0, real students 0, active admins 1, approved curriculum source records 0, topics 0.
 - Repeated the synthetic Neon object PUT attempt using a fresh presigned URL from the available execution network. DNS resolution failed before connection (HTTP 000 / curl exit 6). No object was created; this is not a provider-side failure. No object-level storage acceptance can be claimed until the same test runs from a network/runtime that resolves the Neon storage hostname, such as the Render service.
 
+
+
+## Staging diagnostics controls and owner-run acceptance — 8 November 2026, 16:47 UTC
+
+### Private storage diagnostic
+
+Added a staging-only owner endpoint POST /api/v1/admin/diagnostics/storage and an owner control in /admin/operations. The endpoint requires an authenticated admin session, CSRF, settings.manage, no caller-supplied payload, a per-admin 15-minute rate limit, and STAGING_STORAGE_DIAGNOSTICS_ENABLED=true. It uses the Render runtime's existing private audio and R2 export credentials to upload a synthetic WAV, retrieve it, compare SHA-256, attempt unsigned access (must be denied), delete it, and verify it is absent. The operation writes only a bounded audit result. It does not use learner data and does not enable the export worker.
+
+Render flag is enabled and deployment dep-dboaenuc6qcc73d3lc00 is live on commit a9b7bacd4c3069651319df79ce95ec932a7797fc. The probe has not yet been run. The owner must sign in at /admin/operations and click “Run private storage acceptance”. The result will show separate audio/R2 outcomes. Cross-bucket denial remains untested because there is no second bucket-scoped credential/known alternate R2 bucket configured.
+
+### Synthetic QA invitation control
+
+Added owner-only create/revoke/expiry controls on /admin/operations. Staging QA flag is enabled and the QA recipient is configured to the previously confirmed owner mailbox. The route is staging-only, owner-authenticated, CSRF-protected and settings.manage-gated; public registration remains disabled. A short-lived synthetic identity is created only when the owner clicks “Send synthetic QA invitation”. Email failure causes automatic revocation. The email link expires after 30 minutes; the identity expires after 24 hours. No consent is fabricated and the synthetic identity cannot access learner data or private content. No synthetic account has been created yet; SMTP delivery and authenticated live browser acceptance remain outstanding until the owner completes the invitation and verification.
+
+### CI/deployment evidence
+
+- CI push run 42501474162 and PR run 42501478189 passed all jobs on commit a9b7bacd4c3069651319df79ce95ec932a7797fc, including storage diagnostic unit/route tests, PostgreSQL synthetic QA lifecycle, authenticated/anonymous local Playwright, disposable restore, migration replay, container build and staging health.
+- Render deployment dep-dboaenuc6qcc73d3lc00 is live on that commit. Post-deploy Render application log sample contained no error/exception/traceback messages.
+- Read-only live browser run 42501474212 passed 9/9 before the environment-flag deploy. This checkpoint push triggers a fresh read-only browser/health run after the environment update.
+

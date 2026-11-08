@@ -102,7 +102,7 @@ This establishes that the 13 applied migration source blobs match the repository
 - Rehearsal branch: `think-tank-migration-rehearsal-2026-11-08` (`br-divine-bread-bah58gvn`), created from the managed staging branch at the 001–019 state.
 - Applied migration `020_private_student_export_approval.sql` only on that isolated rehearsal branch. Read-only inspection confirmed all six new columns, four new check constraints, the approver foreign key and the approved-queue index.
 - Recorded the rehearsal migration history entry with source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`; this exactly matches the current development-branch migration file.
-- Managed staging remains at migrations 001–019. Migration 020 has **not** been applied there. No Render deployment was triggered.
+- This paragraph records the pre-promotion state at the time of the original migration-020 rehearsal. Later reconciliation entries supersede it: migration 020 and then migration 021 were applied transactionally to managed staging, with the verified counts recorded below.
 - This rehearsal verifies the additive DDL on a copy of the staging schema; full application CI and authenticated browser acceptance for the new export endpoints are still pending. Do not promote migration 020 until those checks pass and the owner approves the paired staging migration/deployment.
 
 

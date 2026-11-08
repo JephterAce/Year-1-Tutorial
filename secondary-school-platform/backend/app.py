@@ -724,29 +724,36 @@ def provision_staging_qa_identity():
     try:
         result = provision_synthetic_qa_student()
         student = result["student"]
-        record_admin_audit(
-            session["admin_id"], "synthetic_qa_invitation_requested",
-            "synthetic_qa_student", str(student["id"]),
-            {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
-        )
         try:
+            record_admin_audit(
+                session["admin_id"], "synthetic_qa_invitation_requested",
+                "synthetic_qa_student", str(student["id"]),
+                {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
+            )
             send_synthetic_qa_invite(
                 student["email"], result["verification_token"], result["temporary_password"]
             )
-        except Exception as exc:
-            revoke_synthetic_qa_student(student["id"])
             record_admin_audit(
-                session["admin_id"], "synthetic_qa_invitation_failed",
+                session["admin_id"], "synthetic_qa_invitation_sent",
                 "synthetic_qa_student", str(student["id"]),
-                {"failure_class": type(exc).__name__[:80]},
+                {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
             )
-            app.logger.error("Synthetic QA invitation delivery failed (%s)", type(exc).__name__)
+        except Exception as exc:
+            # Fail closed even if SMTP or the audit trail fails after provisioning.
+            try:
+                revoke_synthetic_qa_student(student["id"])
+            except Exception:
+                app.logger.error("Synthetic QA rollback failed (%s)", type(exc).__name__)
+            try:
+                record_admin_audit(
+                    session["admin_id"], "synthetic_qa_invitation_failed",
+                    "synthetic_qa_student", str(student["id"]),
+                    {"failure_class": type(exc).__name__[:80]},
+                )
+            except Exception:
+                app.logger.error("Synthetic QA failure audit could not be recorded")
+            app.logger.error("Synthetic QA invitation failed (%s)", type(exc).__name__)
             return jsonify({"error": "qa_invitation_delivery_failed"}), 503
-        record_admin_audit(
-            session["admin_id"], "synthetic_qa_invitation_sent",
-            "synthetic_qa_student", str(student["id"]),
-            {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
-        )
         return jsonify({
             "created": True,
             "synthetic_qa": True,

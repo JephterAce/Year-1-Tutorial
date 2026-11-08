@@ -872,6 +872,53 @@ def admin_smtp_diagnostic():
         return jsonify({"error": "smtp_diagnostic_unavailable", "message": "The diagnostic could not be sent. Check the staging email configuration."}), 503
 
 
+@app.post("/api/v1/admin/diagnostics/storage")
+def admin_private_storage_diagnostic():
+    # Performs only synthetic PUT/GET/unsigned-denial/DELETE probes. Never uses learner data.
+    if (os.environ.get("APP_ENV", "").strip().lower() != "staging" or
+            not _feature_enabled("STAGING_STORAGE_DIAGNOSTICS_ENABLED")):
+        return jsonify({"error": "not_found"}), 404
+    if request.data:
+        return jsonify({"error": "request_body_not_allowed"}), 400
+    session = _current_admin(require_csrf=True)
+    if not session:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    from admin_policy import require
+    try:
+        require(session.get("principal"), "settings.manage")
+    except PermissionError:
+        return jsonify({"error": "forbidden"}), 403
+    from admin_auth import reserve_admin_storage_diagnostic, record_admin_audit
+    phase = "rate_limit_reservation"
+    try:
+        reserve_admin_storage_diagnostic(session["email"])
+        phase = "storage_probe"
+        from storage_acceptance import run_private_storage_acceptance
+        result = run_private_storage_acceptance()
+        phase = "audit"
+        record_admin_audit(
+            session["admin_id"],
+            "private_storage_acceptance_passed" if result["passed"] else "private_storage_acceptance_failed",
+            "staging_storage", "synthetic_acceptance",
+            {"passed": result["passed"], "results": result["results"]},
+        )
+        return jsonify(result), 200 if result["passed"] else 503
+    except Exception as exc:
+        app.logger.warning(
+            "Private storage diagnostic failed; phase=%s exception_type=%s",
+            phase, type(exc).__name__,
+        )
+        try:
+            record_admin_audit(
+                session["admin_id"], "private_storage_acceptance_failed",
+                "staging_storage", "synthetic_acceptance",
+                {"passed": False, "phase": phase, "exception_type": type(exc).__name__[:80]},
+            )
+        except Exception:
+            app.logger.error("Private storage diagnostic failure could not be audited")
+        return jsonify({"error": "storage_diagnostic_unavailable"}), 503
+
+
 @app.get("/api/v1/admin/auth/me")
 def admin_me():
     session = _current_admin()

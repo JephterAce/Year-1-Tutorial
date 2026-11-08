@@ -734,3 +734,13 @@ Production/student onboarding remains blocked until all applicable release gates
 ### Render staging deployment — 8 November 2026
 - Manually triggered staging deployment `dep-dboa3995efls73d9hd70` for exact CI-tested commit `c691d6026588ab36d2c5cd7de73fd9567a792b00`. Render build completed successfully; deployment rollout was still in progress at the time of this checkpoint. Auto-deploy remains disabled.
 - No production deployment, PR merge, main-branch change, live student registration or live payment was performed.
+
+
+
+### Post-deployment live acceptance — 8 November 2026
+- Render deployment `dep-dboa3995efls73d9hd70` completed with status `live` at 2026-11-08T16:23:40Z on exact commit `c691d6026588ab36d2c5cd7de73fd9567a792b00`. Build succeeded; service remains Free and auto-deploy remains disabled.
+- After rollout completion, live read-only browser workflow [42499695470](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499695470) passed **9/9** against the deployed staging service: health readiness, student page delivery, account controls, keyboard/mobile accessibility, anonymous student/private API denial, anonymous assessment/audio denial, anonymous admin denial and admin redirect/login separation. No real form submission or learner data write occurred.
+- The same browser run's health test passed after deployment. Earlier health job run 42499619472 occurred while rollout was still finishing and is not used as post-deploy evidence.
+- Authenticated live student acceptance remains outstanding. The synthetic QA flow is implemented and its disposable PostgreSQL + browser tests pass, but no staging QA identity was provisioned because SMTP/Brevo delivery has not been verified and the dedicated QA mailbox/feature flag are not enabled.
+- R2 control-plane object upload/retrieval/checksum/delete acceptance passed as recorded above; direct anonymous URL request remained DNS-blocked. Render application's S3 credentials remain untested.
+- Neon private audio upload/playback remains transport-blocked by execution-host DNS; no QA object exists in the private audio bucket.

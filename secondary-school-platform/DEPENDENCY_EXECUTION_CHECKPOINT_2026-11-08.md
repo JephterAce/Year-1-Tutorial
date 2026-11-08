@@ -573,3 +573,19 @@ The GitHub connector did not expose a workflow-dispatch operation. To complete t
 - Artifact: `think-tank-staging-browser-acceptance` (14-day retention), run artifact ID `13624340958`.
 
 The workflow's push trigger is limited to updates of this workflow file on the development branch. Render auto-deploy is disabled; this GitHub workflow change did not deploy application code. `main` and PR merge state were not changed.
+
+
+## Fresh staging database and managed-recovery recheck — 8 November 2026
+
+A read-only query against Neon staging branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`, returned:
+- Students: **0**.
+- Active administrators: **1**.
+- Topics: **0**.
+- Curriculum source records with `verification_status='approved'`: **0**.
+- Migration history rows: **20**.
+
+The branch remains `ready`. Neon project snapshot listing returned an empty list, and the staging branch automatic snapshot schedule is empty. The branch inventory still includes the previously created staging backup copy, but that copy is not a managed snapshot and has not been restored/tested. Managed recovery remains outstanding. No database rows, branches, snapshots or schedules were changed in this recheck.
+
+The absence of approved source records and topics confirms that no curriculum content is currently approved for publication. Teacher appointments, source licensing and curriculum review must be completed before populating/publishing lessons.
+
+The account lifecycle review also confirmed the current email-verification handler activates a pending student after email verification, while the schema records guardian-consent state separately. A safe synthetic QA flow must explicitly distinguish test identities from real students and must not represent test policy acceptance as guardian consent. No such account was created and public registration remains disabled.

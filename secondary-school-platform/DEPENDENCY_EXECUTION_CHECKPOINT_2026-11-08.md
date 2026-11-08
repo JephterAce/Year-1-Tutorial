@@ -664,3 +664,32 @@ This is CI evidence only. It does not clear real provider storage, SMTP, Paystac
 - Read-only browser workflow [42499890634](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499890634) passed the R2 anonymous-denial step and all 9 live staging browser tests.
 - The temporary object was deleted through the Cloudflare API. A final list of the `qa-acceptance/` prefix returned zero objects.
 - The earlier local-container DNS failure is superseded for the R2 public-access check by this successful GitHub-runner HTTP 401. Neon private-audio DNS remains unresolved.
+
+
+## Follow-up execution — synthetic QA lifecycle, staging promotion and CI — 8 November 2026, 16:35 UTC
+
+### Synthetic QA identity lifecycle
+
+The initial synthetic QA lifecycle implementation is committed on `secondary-school-platform-foundation` and promoted to the staging service:
+
+- Branch commit: `9367331b2ad3f0640427a9c4119779acbbc70462`.
+- Migration: `021_synthetic_qa_identity.sql`; source blob SHA `f7a08dc396534ee7bb8be25d656bf49415ba862e`.
+- Neon staging branch `think-tank-staging` records migration 021 applied at `2026-11-08T16:21:46Z`.
+- Render staging deployment `dep-dboa96nig07c73a2dlf0` is live on the same branch commit.
+- GitHub Actions push run `42500044511` and PR run `42500050705` both passed all three jobs. API job included unit/security, syntax, migration replay, disposable restore, PostgreSQL schema, synthetic QA lifecycle, payment/assessment E2E, student journey and authenticated/anonymous Playwright browser acceptance.
+
+The implementation uses an explicit synthetic marker and 24-hour expiry; hashed 30-minute verification token; owner-only, CSRF-protected, settings.manage-gated issuance/revoke/expiry; fixed configured QA mailbox; no fabricated consent rows; rollback on invitation/audit failure; default-deny synthetic sessions except `/auth/me` and logout; and exclusion from learner profile, assessment, payment, data-rights and export paths. Revocation/expiry invalidates sessions and tokens and clears the email address.
+
+**Not yet live-accepted:** no synthetic student account has been created. `STAGING_QA_IDENTITY_ENABLED` is disabled by default and `STAGING_QA_EMAIL` is not configured. Brevo delivery is still unverified. Configure a dedicated QA mailbox and verify actual delivery before enabling the feature. The live public registration flag remains disabled.
+
+### Deployment and verification distinction
+
+The Render deployment is confirmed live, but the green GitHub staging-health check was part of the CI run that preceded this manually triggered deploy. A fresh post-deploy health check and live browser acceptance still need to be recorded against deployment `dep-dboa96nig07c73a2dlf0`. Do not conflate disposable CI browser fixtures with live authenticated staging acceptance.
+
+### Outstanding storage and release dependencies
+
+- R2 bucket-level credentials are present in Render according to the prior owner report, but object-level PUT/GET/checksum/unsigned-denial/DELETE has not been executed from the Render network. Keep export worker disabled.
+- Neon private audio upload/retrieval is not yet proven from the Render runtime; previous direct transfer failed DNS resolution before reaching the object service. Real protected playback still needs an approved lesson asset and eligible entitlement.
+- Paystack sandbox, teacher-reviewed/licensed curriculum, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review remain outstanding.
+
+No production deployment, live payment, public student registration, PR merge, main-branch change, paid infrastructure upgrade, or destructive database action was performed.

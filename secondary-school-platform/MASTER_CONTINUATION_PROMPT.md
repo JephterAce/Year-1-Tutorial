@@ -1154,3 +1154,13 @@ Safeguards remain: student public registration explicitly disabled; synthetic QA
 - Added synthetic QA invitation/revoke/expiry controls to the same page. The staging-only QA flag is enabled and a QA recipient is configured to the confirmed owner mailbox. Public student registration remains disabled. No QA account exists yet; owner must click the invitation control, verify the emailed link and sign in. SMTP failure rolls back the pending identity.
 - Deployment dep-dboaenuc6qcc73d3lc00 is live on a9b7bacd4c3069651319df79ce95ec932a7797fc. Push CI 42501474162 and PR CI 42501478189 passed all jobs. Read-only live browser run 42501474212 passed 9/9 before environment-flag update; this docs push triggers a fresh health/browser check.
 - The storage test verifies unsigned access denial, not cross-bucket denial; a second bucket-scoped credential/known alternate R2 bucket is still needed for that separate control.
+
+
+### Latest verified checkpoint — 8 November 2026, 16:51 UTC
+- Branch head d66cca79bb12221de7228ffc8b49e4b5167f6f66; PR #1 open/draft/unmerged; main untouched.
+- Push CI 42501847900 and PR CI 42501852204 passed all jobs. Live read-only staging browser run 42501847936 passed 10/10, including owner-gated QA/storage routes returning 401 to anonymous callers and student registration remaining disabled.
+- Render app deployment dep-dboaenuc6qcc73d3lc00 is live on application commit a9b7bacd4c3069651319df79ce95ec932a7797fc. Auto-deploy remains disabled.
+- Staging-only owner controls are enabled at /admin/operations: “Run private storage acceptance” and “Send synthetic QA invitation”. Neither has been clicked yet. The first runs synthetic audio/R2 upload, retrieval, checksum, unsigned-denial and deletion from Render. The second sends a short-lived synthetic QA invitation to the configured owner mailbox; email failure revokes the pending account. Public registration remains disabled.
+- No student rows or synthetic QA accounts exist. Neon staging counts: 0 students, 0 synthetic, 1 active admin, 0 approved curriculum sources, 0 topics. Migration 021 is applied.
+- Cloudflare inventory has one R2 bucket only; r2.dev is disabled. Neon audio and export buckets are private. Cross-bucket denial is still untested because there is no second R2 bucket/credential.
+- Remaining human/operational gates: actual SMTP delivery and account recovery, owner-triggered storage probe, verified synthetic QA invitation and live authenticated browser acceptance, Paystack sandbox, approved curriculum/teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed restore, alert delivery, second admin and independent security review.

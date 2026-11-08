@@ -185,11 +185,11 @@ def retry_export(export_id):
 
 
 @admin_exports.get("/api/v1/admin/data-exports/<export_id>/download")
-def download_export():
+def download_export(export_id):
     session, error = _admin("export.download")
     if error:
         return error
-    export_id = _uuid(request.view_args.get("export_id"))
+    export_id = _uuid(export_id)
     if not export_id:
         return jsonify({"error": "invalid_export_id"}), 400
     try:

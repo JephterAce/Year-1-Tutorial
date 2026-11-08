@@ -54,6 +54,19 @@ def request_export():
     target_id = spec.student_id
     try:
         with connection() as conn:
+            limits = conn.execute(
+                """SELECT
+                     count(*) FILTER (WHERE requested_at >= now()-interval '24 hours') AS daily_total,
+                     count(*) FILTER (WHERE export_scope='bulk'
+                       AND requested_at >= now()-interval '24 hours') AS daily_bulk,
+                     count(*) FILTER (WHERE status IN ('queued','processing')) AS active_jobs
+                   FROM student_data_exports WHERE requested_by_admin_id=%s""",
+                (session["admin_id"],),
+            ).fetchone()
+            if limits["daily_total"] >= 5 or limits["active_jobs"] >= 2:
+                return jsonify({"error": "export_request_rate_limited"}), 429
+            if spec.scope == "bulk" and limits["daily_bulk"] >= 1:
+                return jsonify({"error": "bulk_export_daily_limit_reached"}), 429
             if target_id:
                 exists = conn.execute("SELECT 1 FROM students WHERE id=%s", (target_id,)).fetchone()
                 if not exists:

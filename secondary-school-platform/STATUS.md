@@ -583,3 +583,19 @@ Managed Neon staging still has only 13 migration records; migrations 014–018 h
 
 ### Final handover pointer — 7 November 2026
 The current development branch and open draft PR head is fc77dbc714af2103b50f58c02bff844556a776ad. Exact-head push workflow 42417089283 and PR workflow 42417094553 both passed. This head contains documentation/PR-status updates only; latest tested application code remains a057289c4930b86b6bdd5176bd71e61a9536f044. Public health is HTTP 200/status=ok/mode=database/service=secondary-school-api. No deployment or managed migration was performed.
+
+
+### Latest verified continuation — 8 November 2026
+
+- Render workspace Emmanuel's workspace was explicitly confirmed. The service learnwise-staging-api (srv-dbkqcmt9fdbs73c2kdpg) is live, free plan, Frankfurt, auto-deploy disabled, and still deployed at c5805a6fc463fd040e64e8223d58ed3dbf37d143. The 8 November deploy dep-dbo22jp5efls73cm1sb0 completed successfully; no further deploy was made.
+- GitHub Actions staging-health verified the public endpoint at HTTP 200 with status=ok, mode=database, service=secondary-school-api. The latest Render logs show Gunicorn listening on port 8000 and Render reporting the service live.
+- Managed Neon staging branch think-tank-staging contains migrations 001–019. All 19 recorded source_blob_sha values were compared with GitHub blob SHAs and match. Read-only counts: 6 subjects, 0 topics, 0 students, 1 active administrator, 0 data-rights requests.
+- A backup branch think-tank-staging-backup-2026-11-08 and an isolated migration rehearsal branch think-tank-migration-rehearsal-2026-11-08 are ready. Migration 020_private_student_export_approval.sql was applied only to the rehearsal branch; all added columns, four check constraints, approver FK and queue index were verified. Its migration-history SHA matches the repository blob SHA. Managed staging remains at 019.
+- Development-branch implementation now includes admin export request/approval/download routes, a restricted export UI, streaming repeatable-read worker, dedicated private-storage configuration, checksum manifest, short-lived signed URLs, expiry cleanup, request caps and two-person approval. Worker disabled; no export bucket, credentials or schedule provisioned. Subject-filtered bulk export is rejected safely. A second active owner approver is required; only one active admin exists.
+- CI run 42459497431 included 258 tests. The health and container-build jobs passed; API tests failed on two test fixtures missing export_scope. Those fixtures were corrected in subsequent commits. No fresh exact-head CI result has yet been observed, so the new code is not certified as passing.
+- The new application branch has not been deployed. PR #1 remains open/draft/unmerged; main and production remain untouched.
+
+#### Remaining release blockers
+SMTP/password recovery verification; Paystack sandbox E2E; private audio storage/playback acceptance; authorised NERDC materials and teacher review (zero topics in staging); child safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restore/PITR and RPO/RTO; monitoring/incident-alert verification; independent security review; export bucket provisioning, second approver, scheduled worker and subject-scoped exports.
+
+Production release remains blocked. Migration 020 and its matching code deployment require a fresh passing exact-head CI run, isolated upgrade evidence and explicit owner approval before staging promotion.

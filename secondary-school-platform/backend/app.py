@@ -740,7 +740,7 @@ def provision_staging_qa_identity():
                 {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
             )
         except Exception as exc:
-            # Fail closed even if SMTP or the audit trail fails after provisioning.
+            # Fail closed even if Brevo API delivery or the audit trail fails after provisioning.
             try:
                 revoke_synthetic_qa_student(student["id"])
             except Exception:

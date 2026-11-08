@@ -549,3 +549,13 @@ The strict private-audio object-key and HTTP byte-range validation changes are n
 - This deployment does **not** constitute live R2/audio object upload, retrieval, checksum, playback, access-denial or deletion acceptance. Those provider-level tests remain outstanding.
 
 No production deployment, `main` change, PR merge, public registration, live payment or learner-data operation was performed. Render auto-deploy remains disabled.
+
+
+## Post-audio-deployment health and CI verification — 8 November 2026
+
+After Render deployment `dep-dbo9jk0u01pc73ekc330` reached `live`, GitHub Actions run [42478184387](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42478184387) completed all three jobs successfully on the deployed commit:
+- `api-tests`: passed, including unit/security tests, PostgreSQL migration and schema integration, assessment/payment tests, student-journey tests, and anonymous/authenticated browser acceptance on disposable CI fixtures.
+- `staging-health`: passed against the live Render endpoint after the deployment. The job log records HTTP **200**, JSON `status=ok`, `mode=database`, `service=secondary-school-api`.
+- `container-build`: passed; image was built but not published.
+
+This closes the post-deployment public health check for this deployment. It does not close authenticated browser acceptance against the live staging database or provider-level SMTP, R2, audio and Paystack acceptance. The browser tests in this CI run used disposable fixtures, not real staging learner accounts.

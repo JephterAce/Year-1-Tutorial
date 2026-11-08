@@ -749,3 +749,13 @@ Added owner-only create/revoke/expiry controls on /admin/operations. Staging QA 
 - Exact-head push/PR CI and live browser evidence at d803ece32de57bbffd3ede3ad48b52e951ab7e64 are green; current documentation-only head d77ab84e0c1e044795f26b8311160496edb1da63 has fresh CI/browser checks running.
 - Owner actions still required at /admin/operations: run private storage acceptance, then send and verify the synthetic QA invitation. No synthetic account or storage test object has been created. Public student registration remains disabled.
 
+
+
+## Final verification — 8 November 2026, 16:58 UTC
+
+- Development branch before this note: 01ee3dfbbb9445c5207b190b7ad9a77c56b76e4e. Latest exact-head push CI 42502439706 and PR CI 42502443706 both passed all three jobs.
+- Live read-only staging browser run 42502439746 passed 10/10, including owner-gated QA/storage endpoints returning 401 to anonymous callers and the disabled public-registration response.
+- Application deployment remains dep-dboaenuc6qcc73d3lc00 on a9b7bacd4c3069651319df79ce95ec932a7797fc. The newer commits are documentation/test-only; no further app deploy was needed.
+- Main remains at its original pre-checkpoint head 5d6d93ceec31ff3eb6851d567e4d61f7477bc492. PR #1 remains open/draft/unmerged.
+- Owner-only controls are ready at /admin/operations. Storage probe and synthetic QA invitation have not been executed; no synthetic identity or storage test object exists. The owner session is required to run them.
+

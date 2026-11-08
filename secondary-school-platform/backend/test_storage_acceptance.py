@@ -123,5 +123,42 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertTrue(result["passed"] if "passed" in result else result["checksum_match"])
         delete.assert_called_once_with("qa-acceptance/audio.wav")
 
+
+    def test_safe_failure_includes_provider_code_and_status_but_not_message(self):
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _safe_failure
+
+        exc = ClientError(
+            {"Error": {"Code": "AccessDenied", "Message": "SECRET_VALUE_DO_NOT_EXPOSE"},
+             "ResponseMetadata": {"HTTPStatusCode": 403}},
+            "PutObject",
+        )
+        result = _safe_failure(exc, "r2_storage_transfer")
+        self.assertEqual(result["provider_code"], "AccessDenied")
+        self.assertEqual(result["http_status"], 403)
+        self.assertFalse(result["retryable"])
+        self.assertNotIn("SECRET_VALUE_DO_NOT_EXPOSE", str(result))
+
+    def test_r2_config_accepts_documented_r2_aliases(self):
+        from storage_acceptance import run_private_storage_acceptance
+        env = {
+            "APP_ENV": "staging",
+            "R2_ACCESS_KEY_ID": "access-id",
+            "R2_SECRET_ACCESS_KEY": "secret-value",
+            "R2_ENDPOINT_URL": "https://account.r2.cloudflarestorage.com",
+            "R2_BUCKET_NAME": "private-export-bucket",
+            "R2_REGION": "auto",
+        }
+        with patch.dict(os.environ, env, clear=True), \
+             patch("audio_storage.storage_config", side_effect=RuntimeError("audio not configured")), \
+             patch("storage_acceptance._probe_s3", return_value={
+                 "configured": True, "upload": True, "retrieval": True,
+                 "checksum_match": True, "unsigned_access_denied": True,
+                 "deletion": True, "sha256": "a" * 64,
+             }) as probe:
+            result = run_private_storage_acceptance()
+        self.assertTrue(result["results"]["r2_exports"]["passed"])
+        probe.assert_called_once()
+
 if __name__ == "__main__":
     unittest.main()

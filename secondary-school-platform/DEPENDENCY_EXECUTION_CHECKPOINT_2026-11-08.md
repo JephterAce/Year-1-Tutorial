@@ -609,7 +609,7 @@ The same external execution environment has previously failed DNS resolution to 
 
 The current registration service is unsuitable for QA provisioning: it writes privacy-notice and terms acceptance rows, and those must not be repurposed as guardian consent. Public registration remains disabled. The current authentication session also has no synthetic identity boundary.
 
-A new implementation contract was added at `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md`. It requires staging-only activation, owner-authenticated + CSRF-protected provisioning, a fixed configured QA mailbox, hashed one-time verification, an explicit immutable synthetic marker, default-deny access to learner-data routes, expiry/revocation, audit and cleanup. The document is a design checkpoint only; no schema, route, account, or deployment has been changed. Authenticated live browser acceptance remains blocked until implementation, CI and explicit staging promotion.
+A new implementation contract was added at `STAGING_SYNTHETIC_QA_IDENTITY_SPEC.md`. It requires staging-only activation, owner-authenticated + CSRF-protected provisioning, a fixed configured QA mailbox, hashed one-time verification, an explicit immutable synthetic marker, default-deny access to learner-data routes, expiry/revocation, audit and cleanup. This was the initial design checkpoint. The schema, service, owner-only routes, synthetic-session isolation and tests were subsequently implemented and deployed to staging. No live synthetic account has been created. Authenticated live browser acceptance remains blocked until implementation, CI and explicit staging promotion.
 
 ## Latest PR CI result — 8 November 2026
 

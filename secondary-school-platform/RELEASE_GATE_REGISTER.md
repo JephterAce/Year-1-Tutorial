@@ -177,3 +177,9 @@ Production remains blocked. Do not merge PR #1, deploy the new branch, apply mig
 ### Full CI pass and latest export browser test — 8 November 2026
 - Run 42460191786 (run 1180, commit 7de9dd1d0da160e634673fc813a16befb147e383) completed fully green: API tests, staging health and container build. It verified 260 unit/security tests, syntax, 20 numbered migration replays/idempotency, backup/restore, PostgreSQL schema integration, assessment/payment E2E, student journey and existing browser acceptance.
 - Run 42460225765 (run 1184, commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) includes new export-workspace browser coverage and anonymous /admin/exports access checks. All steps through student journey passed; Playwright installation/browser acceptance remained in progress at the latest inspection. Keep the export UI acceptance gate open until that run completes.
+
+
+### Green full CI and export workflow acceptance — 8 November 2026
+- Run 42460225765 (run 1184, code commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) is fully green across API tests, staging-health and non-publishing container-build.
+- Passed 260 unit/security tests, syntax checks, all 20 numbered migration replays/idempotency, backup/restore, PostgreSQL schema integration, assessment/payment E2E, student journey and anonymous/authenticated browser acceptance. The added private-export browser scenario passed: an owner can queue a filtered bulk request, cancel it, and cannot approve their own request; anonymous access redirects to admin login.
+- This does not verify live SMTP, Paystack, private audio, NERDC content rights, child-safeguarding/legal controls, managed backup/PITR, alert delivery, independent security review or a real private export bucket/worker. It also does not deploy the code or apply migration 020 to managed staging.

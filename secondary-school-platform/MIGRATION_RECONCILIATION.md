@@ -104,3 +104,15 @@ This establishes that the 13 applied migration source blobs match the repository
 - Recorded the rehearsal migration history entry with source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`; this exactly matches the current development-branch migration file.
 - Managed staging remains at migrations 001–019. Migration 020 has **not** been applied there. No Render deployment was triggered.
 - This rehearsal verifies the additive DDL on a copy of the staging schema; full application CI and authenticated browser acceptance for the new export endpoints are still pending. Do not promote migration 020 until those checks pass and the owner approves the paired staging migration/deployment.
+
+
+## Migration 021 — synthetic QA identity isolation — 8 November 2026
+
+- Canonical file: `secondary-school-platform/backend/migrations/021_synthetic_qa_identity.sql`.
+- Canonical Git blob SHA: `f7a08dc396534ee7bb8be25d656bf49415ba862e`.
+- Rehearsed transactionally on `think-tank-migration-rehearsal-2026-11-08` (`br-divine-bread-bah58gvn`), then applied transactionally to `think-tank-staging` (`br-still-cherry-baz7g5hk`).
+- Both branches now have 21 migration-history rows and the new marker/expiry columns, constraints and indexes.
+- Staging verification after application: 0 students, 0 synthetic QA students, 1 active administrator, 0 consent records, and all three expected new constraints present.
+- No student or consent rows were inserted or changed. No synthetic account was created.
+- Full push and PR CI passed on the tested branch head, including migration replay and the PostgreSQL synthetic QA lifecycle test.
+- Migration 021 is an additive schema extension with replaced token-purpose/identity-pair checks. It is not a data backfill or learner migration.

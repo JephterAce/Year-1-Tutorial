@@ -623,3 +623,10 @@ Production release remains blocked. Migration 020 and its matching code deployme
 - All 260 unit/security tests passed; Python, admin/frontend JavaScript and shell syntax passed; all 20 numbered migrations replayed and replayed idempotently; backup/restore rehearsal passed; PostgreSQL schema integration passed; assessment/payment E2E passed; registration-to-results passed; anonymous and authenticated Playwright acceptance passed, including the new admin export request/cancel flow and requester self-approval prohibition.
 - The workflow also verified staging health HTTP 200, status=ok, mode=database, service=secondary-school-api. The container was built but not published.
 - The tested code commit is an ancestor of the current branch; subsequent commits only update project records. The new code is still not deployed to Render. Migration 020 remains only on the isolated rehearsal branch.
+
+
+### Final repository reconciliation — 8 November 2026
+- Latest tested application-code commit: `5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3`, fully green in workflow 42460225765 (run 1184).
+- Current branch head before this final status/handover update: `3a5cace1db3b9de2803b18f22c4974e69c4b963d`; it is 8 documentation-only commits ahead of the tested application-code commit. No application code changed after the green run.
+- Render remains live on `c5805a6fc463fd040e64e8223d58ed3dbf37d143`, auto-deploy off. Managed Neon remains at 19 migration records. Migration 020 remains only on isolated rehearsal branch `br-divine-bread-bah58gvn`.
+- PR #1 remains open, draft and unmerged. Production remains blocked.

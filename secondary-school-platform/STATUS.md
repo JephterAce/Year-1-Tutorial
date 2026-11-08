@@ -605,3 +605,9 @@ Production release remains blocked. Migration 020 and its matching code deployme
 - Latest verified development-branch head before the final handover update: `c421b4e305731c8850b6b3bd93e856578fbbd27c`.
 - The branch is 30 commits ahead of the deployed Render SHA `c5805a6fc463fd040e64e8223d58ed3dbf37d143`; it is not deployed.
 - PR #1 remains open as a draft and unmerged. The current GitHub connection returned no fresh exact-head workflow run/status for this head. The last relevant run `42459497431` had passing health and container-build jobs but a failing API test job; the two missing test-fixture fields were corrected afterward, and a fresh run is still required.
+
+
+### CI correction checkpoint — 8 November 2026
+- Workflow run 42460006986 at branch commit 1316c1d2fa789c2f67eb389ac10605f0489ac374 passed all 260 unit/security tests, the public staging-health job (HTTP 200/status=ok/database/secondary-school-api) and the non-publishing container build.
+- The Python/JavaScript/shell syntax step then failed because the new exports admin page contained a literal escaped newline in its inline script. This was corrected in commit 81d33094f0506a71c9f72984133075fa75c84252; a read-back confirms the page now contains a real newline. No fresh exact-head workflow result is yet available, so migration replay, backup restore, PostgreSQL integration and browser acceptance remain unverified for this corrected head.
+- Current branch head at this checkpoint: 81d33094f0506a71c9f72984133075fa75c84252; 54 commits ahead of deployed Render SHA c5805a6fc463fd040e64e8223d58ed3dbf37d143. PR #1 remains open/draft/unmerged; no deployment was triggered.

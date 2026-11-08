@@ -283,7 +283,7 @@ def process_one_export():
                 (safe_code[:80], job["id"]),
             )
             _audit(conn, job, "failed", {"actor": "worker", "failure_code": safe_code[:80]})
-        return False
+        return None
 
 
 def create_export_download_url(export_id, ttl_seconds=300):
@@ -355,7 +355,14 @@ if __name__ == "__main__":
     if action == "expire":
         print(f"Expired exports cleaned: {expire_completed_exports()}")
     elif action == "once":
-        print("Export job processed." if process_one_export() else "No approved export processed.")
+        result = process_one_export()
+        if result is True:
+            print("Export job completed.")
+        elif result is False:
+            print("No approved export was available.")
+        else:
+            print("Export job failed; an audited failure code was recorded.", file=sys.stderr)
+            raise SystemExit(1)
     else:
         print("Usage: python student_bulk_export.py [once|expire]", file=sys.stderr)
         raise SystemExit(2)

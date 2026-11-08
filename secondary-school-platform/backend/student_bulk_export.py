@@ -69,14 +69,14 @@ def _claim_job():
                  SELECT id FROM student_data_exports
                  WHERE approved_at IS NOT NULL AND attempt_count < 3
                    AND (status='queued' OR
-                        (status='processing' AND started_at < now()-interval '30 minutes'))
+                        (status='processing' AND started_at < now()-interval '2 hours'))
                  ORDER BY requested_at
                  FOR UPDATE SKIP LOCKED LIMIT 1
                )
                RETURNING *"""
         ).fetchone()
         if row:
-            _audit(conn, row, "started", {"attempt": row["attempt_count"]})
+            _audit(conn, row, "started", {"actor": "worker", "attempt": row["attempt_count"]})
         return dict(row) if row else None
 
 
@@ -107,7 +107,14 @@ def _multipart_upload(client, bucket, key, chunks, content_type, export_id):
             while len(buffer) >= PART_SIZE:
                 send_part(bytes(buffer[:PART_SIZE]), len(parts) + 1)
                 del buffer[:PART_SIZE]
-        if buffer or not parts:
+        if not parts and not buffer:
+            client.abort_multipart_upload(Bucket=bucket, Key=key, UploadId=upload_id)
+            client.put_object(
+                Bucket=bucket, Key=key, Body=b"", ContentType=content_type,
+                Metadata={"export-id": str(export_id), "classification": "restricted"},
+            )
+            return digest.hexdigest(), 0
+        if buffer:
             send_part(bytes(buffer), len(parts) + 1)
         client.complete_multipart_upload(
             Bucket=bucket, Key=key, UploadId=upload_id,
@@ -243,7 +250,7 @@ def process_one_export():
                 (data_key, manifest_key, checksum, manifest["record_count"], expires_at, job["id"]),
             )
             _audit(conn, job, "completed", {
-                "record_count": manifest["record_count"], "byte_count": byte_count,
+                "actor": "worker", "record_count": manifest["record_count"], "byte_count": byte_count,
                 "sha256": checksum, "expires_at": expires_at.isoformat(),
             })
         return True
@@ -256,7 +263,7 @@ def process_one_export():
                    WHERE id=%s AND status='processing'""",
                 (safe_code[:80], job["id"]),
             )
-            _audit(conn, job, "failed", {"failure_code": safe_code[:80]})
+            _audit(conn, job, "failed", {"actor": "worker", "failure_code": safe_code[:80]})
         return False
 
 
@@ -274,7 +281,10 @@ def create_export_download_url(export_id, ttl_seconds=300):
         ).fetchone()
     if not row or row["status"] != "completed" or not row["expires_at"] or row["expires_at"] <= datetime.now(timezone.utc):
         raise ExportWorkerError("export_not_available")
-    ttl = min(max(int(ttl_seconds), 60), 300)
+    remaining = int((row["expires_at"] - datetime.now(timezone.utc)).total_seconds())
+    if remaining <= 0:
+        raise ExportWorkerError("export_not_available")
+    ttl = min(max(int(ttl_seconds), 1), 300, remaining)
     data_url = client.generate_presigned_url(
         "get_object", Params={"Bucket": bucket, "Key": row["storage_key"]},
         ExpiresIn=ttl,

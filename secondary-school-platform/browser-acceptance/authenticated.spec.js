@@ -49,6 +49,25 @@ test("authenticated administrator creates, reviews and publishes a draft assessm
   await expect(page.locator("#publish")).toBeDisabled();
 });
 
+test("owner can queue and cancel a scoped export but cannot self-approve it", async ({ page }) => {
+  await signInAdmin(page);
+  await page.goto("/admin/exports");
+  await expect(page.getByRole("heading", { name: "Private student-data exports" })).toBeVisible();
+
+  await page.getByLabel("Scope").selectOption("bulk");
+  await page.getByLabel("SS1").check();
+  await page.getByLabel("I confirm this is an authorised bulk export request.").check();
+  await page.getByRole("button", { name: "Queue export request" }).click();
+
+  await expect(page.locator("#requestMsg")).toContainText("Request queued:");
+  await expect(page.locator("#jobs")).toContainText("bulk · json");
+  await expect(page.locator("#jobs").getByRole("button", { name: "Cancel" })).toBeVisible();
+  await expect(page.locator("#jobs").getByRole("button", { name: /Approve/ })).toHaveCount(0);
+
+  await page.locator("#jobs").getByRole("button", { name: "Cancel" }).click();
+  await expect(page.locator("#jobs")).toContainText("cancelled");
+});
+
 test("assessment authoring is mobile-usable and exposes labelled controls", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await signInAdmin(page);

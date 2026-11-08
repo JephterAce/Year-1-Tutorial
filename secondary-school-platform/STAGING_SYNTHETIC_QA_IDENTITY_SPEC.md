@@ -60,7 +60,7 @@ The existing student registration path is not suitable for creating a QA identit
 - Synthetic identity can authenticate only after verification; session and CSRF cookies retain existing security properties.
 - Synthetic session is denied by default on every learner-data and write endpoint; allow-listed QA shell and identity checks work.
 - Real learner identity and normal authentication behavior are unchanged.
-- Expiry, revocation, cleanup, audit trail, rate limits, duplicate-email and concurrent issuance require PostgreSQL integration tests. Unit route and export-isolation tests have been added; full CI remains pending.
+- PostgreSQL lifecycle, unit route, export-isolation and disposable authenticated browser tests passed in CI run [42499289104](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499289104). Live staging authenticated acceptance remains a separate gate.
 - Browser acceptance runs against disposable synthetic fixtures in CI first. Live staging acceptance is a separate later gate and must not create real learner records.
 
 ## Deployment sequence

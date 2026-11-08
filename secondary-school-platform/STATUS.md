@@ -699,3 +699,9 @@ Production/student onboarding remains blocked until all applicable release gates
 - Snapshot listing is empty; automatic snapshot schedule for the staging branch is empty. Existing copied backup branch is not a managed snapshot or a verified restore. Managed recovery remains outstanding.
 - No database data or backup settings were changed.
 - The identity review confirms a QA provisioning design must keep synthetic records distinct and must never represent terms/privacy acceptance as guardian consent. Public registration remains disabled; no synthetic account was created.
+
+
+### Private audio data-plane test attempt — 8 November 2026
+- Neon confirms the staging audio bucket exists and is private. A synthetic 76-byte test payload and short-lived presigned upload were prepared.
+- Upload could not be attempted successfully because the execution host could not resolve the Neon storage hostname (HTTP 000 / DNS failure). A subsequent bucket-prefix listing confirmed no test object was created.
+- This is a transport-blocked attempt, not a passed storage test. Real upload, retrieval/checksum, access denial, playback/range and deletion remain outstanding pending a runtime/network that can resolve the storage endpoint.

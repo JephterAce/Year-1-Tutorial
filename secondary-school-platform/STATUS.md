@@ -868,3 +868,10 @@ No storage object test, live audio playback, Paystack sandbox transaction, produ
 - Synthetic QA feature remains disabled. The next authenticated live-staging test requires a dedicated mailbox and verified SMTP delivery, then an owner-triggered synthetic invitation. No learner account or consent has been fabricated.
 
 All other human/provider/recovery release gates remain open: Paystack sandbox; approved/licensed curriculum and teacher sign-off; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restore; monitoring alert delivery; second administrator; independent security review.
+
+
+## Configuration correction — synthetic QA gate state — 8 November 2026, 17:14 UTC
+
+The latest post-deployment live browser run `42503828381` returned HTTP 401 from the synthetic QA issuance endpoint to an anonymous caller. The route returns 404 before authentication when its staging feature gate is disabled. Therefore `STAGING_QA_IDENTITY_ENABLED` is **enabled** on staging, and the independent `STUDENT_REGISTRATION_ENABLED=false` guard is also in effect. The prior 17:10 addendum incorrectly said the synthetic QA feature flag remained disabled; this correction supersedes that sentence.
+
+This does **not** mean an identity was created or invitation delivery verified. Neon staging still has 0 students and 0 synthetic QA identities. No invitation was sent by this run. The configured QA recipient value cannot be inspected through the available read-only Render service metadata, and SMTP/Brevo delivery remains unverified. The owner-only invitation control is available on `/admin/operations`; it must be used only with a dedicated QA mailbox and verified delivery. If invitation delivery fails, the route revokes the pending synthetic identity. Do not treat HTTP 401 as proof of authenticated access or email delivery.

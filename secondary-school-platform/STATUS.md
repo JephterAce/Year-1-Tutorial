@@ -814,3 +814,14 @@ Production/student onboarding remains blocked until all applicable release gates
 - The synthetic QA invitation control is live on the same page and targets the configured owner mailbox. No synthetic account has been issued. Owner must click “Send synthetic QA invitation”, verify the emailed link and sign in. SMTP delivery is not yet verified; a failed send automatically revokes the pending identity.
 - Authenticated live-staging acceptance remains outstanding until the owner completes the invitation/verification and tests the signed-in synthetic account. CI authenticated tests use disposable local fixtures only.
 
+
+
+
+### Staging diagnostics ready for owner execution — 8 November 2026, 16:55 UTC
+- Explicit staging environment settings are now in place: `APP_ENV=staging`, `STUDENT_REGISTRATION_ENABLED=false`, `STAGING_STORAGE_DIAGNOSTICS_ENABLED=true`, `STAGING_QA_IDENTITY_ENABLED=true`; the synthetic QA recipient is the confirmed owner mailbox. No student account was created by configuration.
+- Render deployment `dep-dboaidjrjlhs73asffug` is **live** on commit `d803ece32de57bbffd3ede3ad48b52e951ab7e64`. Service remains Free; Render auto-deploy remains disabled.
+- The live read-only browser suite [42501984433](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42501984433) passed after the environment flags were enabled. It verifies the synthetic QA and storage diagnostic endpoints reject anonymous callers with HTTP 401, alongside the existing public-page, accessibility and anonymous-denial checks.
+- Push and PR CI [42502089029](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42502089029) and [42502095096](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42502095096) passed all jobs: unit/security, migration replay, local backup/restore rehearsal, PostgreSQL schema and lifecycle tests, assessment/payment tests, disposable authenticated browser acceptance, staging health and container build.
+- Neon staging independently rechecked: migration history 21 rows (latest 021), 0 students, 0 synthetic students, 1 active owner administrator, 0 consent rows. Both `qa-acceptance/` prefixes remain empty in Neon audio and export buckets.
+- The owner-only controls are ready at `/admin/operations`: send the synthetic QA invitation, run private storage acceptance, or retry the SMTP diagnostic. **Neither the storage diagnostic nor synthetic QA invitation has been executed yet.** The storage probe runs from the Render runtime and is the next required technical acceptance. SMTP/Brevo delivery remains unverified; a failed invitation automatically revokes the pending synthetic identity.
+- Authenticated live browser acceptance remains outstanding until the owner receives and verifies the QA invitation. The synthetic account is isolated and cannot access learner records, assessments, payments, exports or private learning content.

@@ -130,3 +130,12 @@ Required next action: owner names the alert recipient/on-call contact and config
 ## Release restriction
 
 Do not enable exports, schedule an export worker, process real learner data, publish curriculum, activate live payments, deploy to production or merge PR #1 until the relevant technical tests, external evidence and owner approvals are recorded.
+
+
+## Follow-up verification — 8 November 2026, 09:39 WAT
+
+The Render environment update completed successfully. Deployment `dep-dbo3ahrm8hqs73fenfhg` reached status `live` on the staging service, using the existing docs checkpoint commit `77a7589ee76336b339a66c687526221b48d56eec`. The deployment was triggered by the environment-variable update. This confirms Render accepted the non-secret export configuration; it does not prove S3 authentication or object operations.
+
+A direct external health check could not be completed through the available connected tools in this run. Do not mark post-deploy health as re-verified based solely on the deployment status. The prior owner-reported health response remains historical evidence only.
+
+The checkpoint file itself was then updated on `secondary-school-platform-foundation` with commit `c241717a2aff80c417a483ef0111d3f5554b2884`. Render auto-deploy is disabled, so this documentation-only commit was not deployed. No changes were made to `main`, and PR #1 remains open/unmerged.

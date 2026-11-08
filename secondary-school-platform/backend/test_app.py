@@ -163,5 +163,69 @@ class DatabaseConfigTests(unittest.TestCase):
             self.assertEqual(client.post("/api/v1/topics/00000000-0000-0000-0000-000000000001/checkout", json={}).status_code, 503)
 
 
+class AdminSmtpDiagnosticRouteTests(unittest.TestCase):
+    def setUp(self):
+        self.client = app.test_client()
+        self.owner = {
+            "admin_id": "00000000-0000-0000-0000-000000000001",
+            "email": "admin@example.test",
+            "role": "owner",
+            "principal": __import__("admin_policy").AdminPrincipal(
+                "00000000-0000-0000-0000-000000000001", "owner", True
+            ),
+        }
+
+    def test_smtp_diagnostic_is_disabled_unless_explicitly_enabled_in_staging(self):
+        with patch.dict(os.environ, {"APP_ENV": "staging"}, clear=True):
+            response = self.client.post("/api/v1/admin/diagnostics/smtp")
+        self.assertEqual(response.status_code, 404)
+
+    def test_smtp_diagnostic_rejects_anonymous_request(self):
+        with patch.dict(os.environ, {
+            "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True), patch("app._current_admin", return_value=None):
+            response = self.client.post("/api/v1/admin/diagnostics/smtp")
+        self.assertEqual(response.status_code, 401)
+
+    def test_smtp_diagnostic_rejects_non_owner(self):
+        reviewer = dict(self.owner)
+        reviewer["role"] = "reviewer"
+        reviewer["principal"] = __import__("admin_policy").AdminPrincipal(
+            reviewer["admin_id"], "reviewer", True
+        )
+        with patch.dict(os.environ, {
+            "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True), patch("app._current_admin", return_value=reviewer):
+            response = self.client.post(
+                "/api/v1/admin/diagnostics/smtp",
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+        self.assertEqual(response.status_code, 403)
+
+    def test_owner_diagnostic_sends_only_to_signed_in_admin_and_audits(self):
+        with patch.dict(os.environ, {
+            "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True), patch("app._current_admin", return_value=self.owner), \\
+             patch("admin_auth.reserve_admin_smtp_diagnostic") as throttle, \\
+             patch("admin_auth.record_admin_audit") as audit, \\
+             patch("identity_email.send_admin_diagnostic") as send:
+            response = self.client.post(
+                "/api/v1/admin/diagnostics/smtp",
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+        self.assertEqual(response.status_code, 202)
+        send.assert_called_once_with("admin@example.test")
+        throttle.assert_called_once_with("admin@example.test")
+        audit.assert_called_once()
+        self.assertEqual(audit.call_args.args[1], "smtp_diagnostic_sent")
+
+    def test_smtp_diagnostic_is_never_available_outside_staging(self):
+        with patch.dict(os.environ, {
+            "APP_ENV": "production", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True):
+            response = self.client.post("/api/v1/admin/diagnostics/smtp")
+        self.assertEqual(response.status_code, 404)
+
+
 if __name__ == "__main__":
     unittest.main()

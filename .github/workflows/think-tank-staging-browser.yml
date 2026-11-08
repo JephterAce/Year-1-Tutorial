@@ -1,4 +1,4 @@
-name: Think Tank staging browser acceptance
+name: Think Tank staging read-only browser acceptance
 
 on:
   workflow_dispatch:
@@ -27,11 +27,14 @@ jobs:
       - name: Install Chromium
         working-directory: secondary-school-platform/browser-acceptance
         run: npx playwright install --with-deps chromium
-      - name: Run staging browser acceptance
+      # Keep this live-service workflow read-only. The authenticated.spec.js suite
+      # creates/publishes an assessment and writes export/privacy-request records;
+      # run that suite only against isolated disposable fixtures, never live staging.
+      - name: Run read-only staging browser acceptance
         working-directory: secondary-school-platform/browser-acceptance
         env:
           STAGING_BASE_URL: ${{ inputs.staging_base_url }}
-        run: npm test
+        run: npx playwright test staging.spec.js
       - name: Upload browser report and traces
         if: always()
         uses: actions/upload-artifact@v4

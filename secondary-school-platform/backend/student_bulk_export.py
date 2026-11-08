@@ -71,7 +71,7 @@ def _claim_job():
                    AND (status='queued' OR
                         (status='processing' AND started_at < now()-interval '2 hours'))
                  ORDER BY requested_at
-                 FOR UPDATE SKIP LOCKED LIMIT 1
+                 LIMIT 1 FOR UPDATE SKIP LOCKED
                )
                RETURNING *"""
         ).fetchone()
@@ -313,7 +313,7 @@ def expire_completed_exports(limit=50):
             """SELECT id,requested_by_admin_id,storage_key,manifest_storage_key
                FROM student_data_exports
                WHERE status='completed' AND expires_at<=now()
-               ORDER BY expires_at FOR UPDATE SKIP LOCKED LIMIT %s""",
+               ORDER BY expires_at LIMIT %s FOR UPDATE SKIP LOCKED""",
             (max(1, min(int(limit), 100)),),
         ).fetchall()
         expired = 0

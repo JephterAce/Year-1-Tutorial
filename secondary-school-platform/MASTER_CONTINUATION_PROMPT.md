@@ -975,3 +975,30 @@ For each continuation, report Completed / Verified / Passed / Failed / Outstandi
 - Current development branch head immediately before this final handover update: `3a5cace1db3b9de2803b18f22c4974e69c4b963d`. It is eight documentation-only commits ahead of the tested application-code commit; no application code changed after the green run.
 - Render still serves commit `c5805a6fc463fd040e64e8223d58ed3dbf37d143` with auto-deploy disabled. Managed staging has 19 migration records. Migration 020 remains on isolated rehearsal branch `br-divine-bread-bah58gvn` only.
 - PR #1 remains open/draft/unmerged. The current code is CI-verified but not yet deployed. Staging migration 020 and matching code deployment require separate explicit owner approval.
+
+
+## Latest continuation checkpoint — 8 November 2026 (staging migration and deployment)
+
+Owner approval was received to apply migration 020 and deploy the tested code to the existing Render staging service only. This does not authorise merging PR #1, changing `main`, deploying production, enabling live payments, provisioning paid services, or changing secrets.
+
+### Completed and verified
+- Applied `020_private_student_export_approval.sql` to managed Neon staging branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), project `spring-cloud-84267029`, database `learnwise`.
+- Read-only verification: migration history count 20; latest version `020_private_student_export_approval`; source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`; six expected columns present; four expected constraints present.
+- Manually deployed Render staging service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) in workspace `tea-da2svh0ae00c73cs4qq0`. Deployment `dep-dbo2l1h5efls73cnf8j0` reached `live`; build succeeded; Gunicorn started and workers booted. Branch `secondary-school-platform-foundation`, deployed head `c03b7e98aee4a046d300185eb5089b42f747a75c`.
+- Application source remains the fully green CI-tested commit `5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3`; later commits through the deployed head are documentation-only.
+- Updated `STATUS.md` with this evidence.
+
+### Not yet verified from this execution environment
+- Public Render `/health` response after deployment: the web fetch could not access the endpoint, and container outbound DNS resolution failed. Deployment-live status and Gunicorn startup do not prove HTTP 200. Recheck `https://learnwise-staging-api.onrender.com/health` from a normal browser or authenticated external runner; expected JSON is `status=ok`, `mode=database`, `service=secondary-school-api`.
+- Authenticated browser acceptance against the newly deployed service: no browser/Playwright control is available in this execution environment. CI's authenticated/anonymous Playwright suite passed on the exact tested application commit, but it ran against synthetic disposable fixtures, not the live staging service.
+
+### Safety and release state
+- Keep PR #1 open/draft/unmerged and leave `main` untouched. Do not rerun `bootstrap_admin.py` or create another admin automatically.
+- Export worker remains disabled. No private export bucket, dedicated credentials, worker schedule, or second owner approver has been configured. Bulk export remains unavailable until these controls are completed.
+- Remaining gates: SMTP delivery and recovery; Paystack sandbox E2E; private audio real-provider acceptance; authorised NERDC source rights and teacher review; child safeguarding, guardian consent, NDPA/DPIA; Nigerian legal review; managed backup restoration and RPO/RTO; monitoring/alert delivery; independent security review; second owner administrator; private export bucket and worker scheduling.
+- Staging deployment is not production readiness. No production launch or student onboarding is approved.
+
+### Next operator actions
+1. Verify public `/health` HTTP 200 and expected JSON from a network-enabled browser/runner.
+2. Run authenticated browser acceptance against the deployed Render URL using an authorised existing staging admin session; do not request or expose passwords in chat.
+3. Record exact outcomes and continue with provider/safeguarding/legal gates only when owner credentials, reviewers and approvals are available.

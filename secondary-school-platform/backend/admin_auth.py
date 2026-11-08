@@ -134,4 +134,4 @@ def reserve_admin_storage_diagnostic(email):
     email = email.strip().lower() if isinstance(email, str) else ""
     if not email:
         raise AdminAuthError("Administrator email is unavailable.")
-    _rate_limit(email, limit=1, action="admin_storage_diagnostic", window_minutes=60)
+    _rate_limit(email, limit=1, action="admin_storage_diagnostic", window_minutes=15)

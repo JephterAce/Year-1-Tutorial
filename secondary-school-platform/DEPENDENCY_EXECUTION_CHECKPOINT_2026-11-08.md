@@ -739,3 +739,13 @@ Added owner-only create/revoke/expiry controls on /admin/operations. Staging QA 
 - The owner-run synthetic QA invitation control is also available at /admin/operations. The owner must trigger it, verify the email link and sign in. SMTP delivery remains unverified; the route fails closed and revokes the pending identity if mail submission fails.
 - Authenticated live-staging browser acceptance remains outstanding until that account is issued, verified and used. Do not equate disposable authenticated CI fixtures with live authenticated acceptance.
 
+
+
+## Final branch/reference check — 8 November 2026, 16:55 UTC
+
+- Development branch latest commit before this note: d77ab84e0c1e044795f26b8311160496edb1da63. PR #1 remains draft/open/unmerged.
+- Main is restored to 5d6d93ceec31ff3eb6851d567e4d61f7477bc492, its pre-checkpoint head; the temporary documentation-only commits were rolled back. No lasting main-branch changes remain.
+- Application remains deployed to staging only at dep-dboaenuc6qcc73d3lc00 / a9b7bacd4c3069651319df79ce95ec932a7797fc.
+- Exact-head push/PR CI and live browser evidence at d803ece32de57bbffd3ede3ad48b52e951ab7e64 are green; current documentation-only head d77ab84e0c1e044795f26b8311160496edb1da63 has fresh CI/browser checks running.
+- Owner actions still required at /admin/operations: run private storage acceptance, then send and verify the synthetic QA invitation. No synthetic account or storage test object has been created. Public student registration remains disabled.
+

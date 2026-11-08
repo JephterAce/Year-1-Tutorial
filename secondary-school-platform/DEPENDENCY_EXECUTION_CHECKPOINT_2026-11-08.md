@@ -312,3 +312,10 @@ The revised workflow `.github/workflows/think-tank-staging-browser.yml` is read-
 ### Release posture unchanged
 
 PR #1 remains open, draft and unmerged; base branch `main` remains unchanged. No production deploy, live payment, export worker activation, learner-data processing or public student onboarding occurred. Provider tests, private audio acceptance, curriculum licensing/teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator, managed restore drill, monitoring alert delivery, independent security review, and R2 object-level tests remain open. Do not enable exports or launch publicly until the corresponding evidence and approvals exist.
+
+
+## Owner-reported live-staging browser workflow result — 8 November 2026
+
+The owner reports that the manually dispatched workflow `.github/workflows/think-tank-staging-browser.yml` completed with a green success indicator in GitHub Actions. On that basis, the live-staging browser workflow is recorded as **owner-reported passed**. The workflow is configured to run the read-only `staging.spec.js` suite only (public health, student-facing page, registration/recovery form presence, mobile layout and anonymous access denial); it does not perform authenticated write operations.
+
+The connected GitHub interface available for this checkpoint does not expose the workflow-dispatch run identifier or its job logs, so the green result has not been independently matched to a run ID or individual test output. Retain this distinction in audit records. This result does not close the separate SMTP/recovery, Paystack sandbox, private audio, R2 object, managed recovery, monitoring, curriculum, safeguarding, legal, second-administrator or independent-security gates.

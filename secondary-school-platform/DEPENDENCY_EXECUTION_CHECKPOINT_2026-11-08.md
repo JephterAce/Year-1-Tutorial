@@ -199,3 +199,25 @@ A post-deployment HTTP health check also remains to be repeated after this deplo
 - **Still release-blocking:** SMTP delivery/recovery, Paystack sandbox E2E, private audio acceptance, authorised curriculum and teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration, monitoring alert delivery, second administrator and independent security review.
 
 No learner data or live payment was used. No production launch or PR merge is authorised by this checkpoint.
+
+
+## Post-deployment acceptance confirmation — 8 November 2026, 09:09 WAT
+
+The post-deployment public health check was subsequently completed by GitHub Actions run `42465816566` on branch head `a19214d647478b37702fb52e336fc8a3638f05bb`, after Render deployment `dep-dbo3n5hsrm7s73at12j0` had reached `live`.
+
+Observed from the health job log:
+- HTTP status: `200`
+- JSON `status`: `ok`
+- JSON `mode`: `database`
+- JSON `service`: `secondary-school-api`
+
+All three jobs in run `42465816566` completed successfully:
+- `staging-health`
+- `container-build`
+- `api-tests`, including unit/security tests, migration rehearsal, disposable local backup/restore rehearsal, PostgreSQL integration/E2E/student journey and anonymous/authenticated Playwright acceptance on disposable fixtures.
+
+This confirms the deployed staging endpoint is healthy after the deployment. The browser tests in this workflow ran against disposable CI fixtures, not the live Render service. The separate manually dispatched staging browser workflow remains outstanding.
+
+A read-only Neon query on staging branch `think-tank-staging` confirmed 20 migration-history rows, 1 admin user, 0 students, 6 subjects, 0 topics and 6 audit events. The staging branch and the pre-migration backup branch both report Neon state `ready`; this metadata does not constitute a managed restore drill.
+
+No other release restrictions are lifted. R2 object tests remain deferred/not run; export worker remains disabled; provider, curriculum, legal, safeguarding, managed-recovery, monitoring, second-admin and independent-security gates remain open.

@@ -205,6 +205,10 @@ def _current_student(require_csrf=False):
     session = authenticate_session(request.cookies.get("learnwise_session"))
     if not session:
         return None
+    # Synthetic QA sessions are default-deny: only identity confirmation and
+    # logout are permitted. They cannot reach learner data or mutation routes.
+    if session.get("is_synthetic_qa") is True and request.endpoint not in {"current_student", "logout"}:
+        return None
     if require_csrf and not validate_csrf(session, request.headers.get("X-CSRF-Token", "")):
         return None
     return session
@@ -690,6 +694,129 @@ def _current_admin(require_csrf=False):
     if require_csrf and not validate_admin_csrf(session, request.headers.get("X-CSRF-Token", "")):
         return None
     return session
+
+
+def _qa_identity_gate():
+    return (
+        os.environ.get("APP_ENV", "").strip().lower() == "staging"
+        and _feature_enabled("STAGING_QA_IDENTITY_ENABLED")
+        and not _feature_enabled("STUDENT_REGISTRATION_ENABLED")
+    )
+
+
+@app.post("/api/v1/admin/qa-identities")
+def provision_staging_qa_identity():
+    if not _qa_identity_gate():
+        return jsonify({"error": "not_found"}), 404
+    if request.data:
+        return jsonify({"error": "request_body_not_allowed"}), 400
+    session = _current_admin(require_csrf=True)
+    if not session:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    from admin_policy import require
+    try:
+        require(session.get("principal"), "settings.manage")
+    except PermissionError:
+        return jsonify({"error": "forbidden"}), 403
+    from identity_service import provision_synthetic_qa_student, revoke_synthetic_qa_student, IdentityError
+    from identity_email import send_synthetic_qa_invite
+    from admin_auth import record_admin_audit
+    try:
+        result = provision_synthetic_qa_student()
+        student = result["student"]
+        record_admin_audit(
+            session["admin_id"], "synthetic_qa_invitation_requested",
+            "synthetic_qa_student", str(student["id"]),
+            {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
+        )
+        try:
+            send_synthetic_qa_invite(
+                student["email"], result["verification_token"], result["temporary_password"]
+            )
+        except Exception as exc:
+            revoke_synthetic_qa_student(student["id"])
+            record_admin_audit(
+                session["admin_id"], "synthetic_qa_invitation_failed",
+                "synthetic_qa_student", str(student["id"]),
+                {"failure_class": type(exc).__name__[:80]},
+            )
+            app.logger.error("Synthetic QA invitation delivery failed (%s)", type(exc).__name__)
+            return jsonify({"error": "qa_invitation_delivery_failed"}), 503
+        record_admin_audit(
+            session["admin_id"], "synthetic_qa_invitation_sent",
+            "synthetic_qa_student", str(student["id"]),
+            {"expires_at": student["synthetic_qa_expires_at"].isoformat()},
+        )
+        return jsonify({
+            "created": True,
+            "synthetic_qa": True,
+            "student_id": str(student["id"]),
+            "expires_at": student["synthetic_qa_expires_at"].isoformat(),
+            "message": "A short-lived synthetic QA invitation was sent to the configured staging mailbox.",
+        }), 201
+    except IdentityError:
+        return jsonify({"error": "qa_identity_unavailable"}), 409
+    except Exception:
+        app.logger.exception("Synthetic QA provisioning failed")
+        return jsonify({"error": "qa_identity_unavailable"}), 503
+
+
+@app.post("/api/v1/admin/qa-identities/<student_id>/revoke")
+def revoke_staging_qa_identity(student_id):
+    if not _qa_identity_gate():
+        return jsonify({"error": "not_found"}), 404
+    session = _current_admin(require_csrf=True)
+    if not session:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    from admin_policy import require
+    try:
+        require(session.get("principal"), "settings.manage")
+    except PermissionError:
+        return jsonify({"error": "forbidden"}), 403
+    try:
+        parsed_id = str(UUID(student_id))
+    except (ValueError, TypeError):
+        return jsonify({"error": "invalid_identity"}), 400
+    from identity_service import revoke_synthetic_qa_student, IdentityError
+    from admin_auth import record_admin_audit
+    try:
+        revoke_synthetic_qa_student(parsed_id)
+        record_admin_audit(
+            session["admin_id"], "synthetic_qa_identity_revoked",
+            "synthetic_qa_student", parsed_id, {},
+        )
+        return jsonify({"revoked": True}), 200
+    except IdentityError:
+        return jsonify({"error": "qa_identity_not_found"}), 404
+    except Exception:
+        app.logger.exception("Synthetic QA revocation failed")
+        return jsonify({"error": "qa_identity_revoke_unavailable"}), 503
+
+
+@app.post("/api/v1/admin/qa-identities/expire")
+def expire_staging_qa_identities():
+    if not _qa_identity_gate():
+        return jsonify({"error": "not_found"}), 404
+    session = _current_admin(require_csrf=True)
+    if not session:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    from admin_policy import require
+    try:
+        require(session.get("principal"), "settings.manage")
+    except PermissionError:
+        return jsonify({"error": "forbidden"}), 403
+    from identity_service import expire_synthetic_qa_students
+    from admin_auth import record_admin_audit
+    try:
+        count = expire_synthetic_qa_students()
+        record_admin_audit(
+            session["admin_id"], "synthetic_qa_expiry_cleanup",
+            "synthetic_qa_student", "expired_batch", {"closed_count": count},
+        )
+        return jsonify({"closed_count": count}), 200
+    except Exception:
+        app.logger.exception("Synthetic QA expiry cleanup failed")
+        return jsonify({"error": "qa_identity_cleanup_unavailable"}), 503
 
 
 @app.post("/api/v1/admin/diagnostics/smtp")

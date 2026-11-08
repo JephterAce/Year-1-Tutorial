@@ -439,3 +439,37 @@ Automated tests were added for token-free message content, route default-off beh
 2. If checks pass, request explicit owner approval before enabling the staging-only diagnostic flag and deploying the new code to the existing staging service.
 3. After deployment and health verification, the signed-in owner can initiate one diagnostic email from `/admin/operations`. Confirm receipt in the actual mailbox; SMTP acceptance by the provider alone is not inbox-delivery proof.
 4. Keep public registration disabled. Continue to design a separately guarded synthetic student invitation path only after the email diagnostic is verified.
+
+
+## Password-reset feedback and staging deployment — 8 November 2026, 11:55 WAT
+
+### Code and CI
+
+The account page now provides explicit progress and result feedback for password-reset submission and password-reset completion, disables the submit control while a request is in flight, and restores it after completion/failure. An anonymous browser acceptance test covers the generic response for an unknown student email.
+
+GitHub Actions run [42473078634](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42473078634), on commit `1768e43fb1e52cbd1673cf5a5f308d7cfa997cd7`, completed successfully:
+- API unit/security tests: passed.
+- Python, frontend/admin JavaScript and operations-script syntax: passed.
+- Disposable PostgreSQL migration, schema, assessment/payment, registration-to-results, and local backup/restore rehearsals: passed.
+- Anonymous and authenticated Playwright browser acceptance against disposable fixtures: passed.
+- Non-publishing container build: passed.
+- Staging health workflow job: passed (this workflow check ran before the deployment below).
+
+### Render staging deployment
+
+The existing Render service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) was manually deployed from its configured development branch `secondary-school-platform-foundation`.
+
+- Deployment: `dep-dbo59ijl550s738opag0`
+- Commit: `1768e43fb1e52cbd1673cf5a5f308d7cfa997cd7`
+- Build: succeeded.
+- Deployment: reached Render status `live` at 10:54:33Z; Render emitted `Your service is live`.
+- Auto-deploy remains disabled.
+- No production service, `main` branch, or PR merge was touched.
+
+A fresh post-deploy HTTP `/health` response was not independently captured in this run. The CI staging-health job passed before this deployment; do not misrepresent it as post-deployment verification.
+
+### SMTP and remaining release gates
+
+The owner-only SMTP diagnostic code is included in this deployed commit, but `ADMIN_SMTP_DIAGNOSTIC_ENABLED` remains off by default and was not enabled in Render. No SMTP message was sent; Brevo delivery and password-reset email delivery remain unverified. No student account was created and public registration remains disabled.
+
+R2 object-level acceptance, Paystack sandbox provider E2E, private audio storage/playback, managed recovery restoration, monitoring alert delivery, curriculum rights/teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator and independent security review remain outstanding. Do not activate exports, live payments, public onboarding or production release until the relevant evidence and approvals exist.

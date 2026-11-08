@@ -916,3 +916,13 @@ No secrets were read or changed, no data was created, and no production/PR/main 
 - Storage data-plane acceptance is still outstanding. The owner-only control is available at `/admin/operations`; an authenticated owner must run it to test synthetic object PUT/GET/checksum/unsigned denial/delete for private audio and R2. No storage pass is claimed.
 
 The staging-health CI check passed after the 17:25 environment deployment. Public registration, export worker and live payments remain disabled. No production deployment, PR merge, main-branch change, paid upgrade or real student data operation occurred.
+
+
+### Follow-on provider diagnostic investigation — 8 November 2026
+
+- Latest documentation/handover branch head is now `abf294789c46b6a06aff5e6e7e19f17e22a50b8a`; application runtime files are unchanged from the currently deployed Render commit.
+- Render logs show three failed SMTP diagnostic attempts and no successful delivery evidence. The code requires `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD`, optional port 587/465, valid `SMTP_FROM`, and HTTPS `PUBLIC_APP_URL` for identity links. No secret values were inspected or changed.
+- The storage acceptance code is confirmed to test private audio and R2 synthetic WAV PUT/GET/SHA-256/unsigned denial/DELETE. No storage-probe logs were found; no object test is recorded as passed.
+- Both owner-only controls require the authenticated admin browser session and CSRF. The connected infrastructure tools cannot access that session or execute an in-container command; neither diagnostic was invoked from this run. No synthetic QA invitation/account was created.
+- **Still blocked:** actual SMTP delivery/account recovery; private storage object acceptance; owner-issued and verified synthetic QA identity plus authenticated live browser acceptance; Paystack sandbox; licensed curriculum/teacher review; safeguarding/guardian consent/NDPA/DPIA/Nigerian legal sign-off; managed restore/RPO/RTO; monitoring alert delivery; second administrator; independent security review.
+- No secrets, environment variables, application deployment, migration, database records, storage objects, payment, PR state or main-branch state were changed during this follow-on.

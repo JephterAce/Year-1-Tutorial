@@ -77,12 +77,12 @@ test("anonymous assessment and private-audio actions fail closed", async ({ requ
 
 test("synthetic QA and storage diagnostics require an authenticated owner", async ({ request }) => {
   const qa = await request.post("/api/v1/admin/qa-identities");
-  expect([401, 404]).toContain(qa.status());
+  expect(qa.status()).toBe(401);
   const qaBody = await qa.json().catch(() => ({}));
   expect(qaBody.created).not.toBe(true);
 
   const storage = await request.post("/api/v1/admin/diagnostics/storage");
-  expect([401, 404]).toContain(storage.status());
+  expect(storage.status()).toBe(401);
 
 });
 

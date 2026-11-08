@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import io
 import os
+import re
 import uuid
 import wave
 
@@ -14,6 +15,33 @@ from botocore.exceptions import ClientError
 class StorageAcceptanceError(RuntimeError):
     pass
 
+
+
+def _safe_failure(exc, phase):
+    """Return bounded diagnostic metadata only; never expose provider messages or credentials."""
+    cause = exc
+    while getattr(cause, "__cause__", None) is not None and cause.__cause__ is not cause:
+        cause = cause.__cause__
+    error = {
+        "configured": True,
+        "passed": False,
+        "failure_phase": phase,
+        "failure_class": type(cause).__name__[:80],
+    }
+    response = getattr(cause, "response", None)
+    if isinstance(response, dict):
+        details = response.get("Error", {})
+        metadata = response.get("ResponseMetadata", {})
+        code = details.get("Code") if isinstance(details, dict) else None
+        status = metadata.get("HTTPStatusCode") if isinstance(metadata, dict) else None
+        if isinstance(code, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,48}", code):
+            error["provider_code"] = code
+        if isinstance(status, int) and 100 <= status <= 599:
+            error["http_status"] = status
+            error["retryable"] = status == 429 or status >= 500
+    if type(cause).__name__ in {"EndpointConnectionError", "ConnectTimeoutError", "ReadTimeoutError", "TimeoutError"}:
+        error["retryable"] = True
+    return error
 
 def _synthetic_wav():
     output = io.BytesIO()
@@ -149,21 +177,14 @@ def run_private_storage_acceptance():
         from audio_storage import storage_config, _s3_client
         cfg = storage_config()
     except Exception as exc:
-        results["audio"] = {
-            "configured": False, "passed": False,
-            "failure_phase": "audio_storage_configuration",
-            "failure_class": type(exc).__name__[:80],
-        }
+        results["audio"] = _safe_failure(exc, "audio_storage_configuration")
+        results["audio"]["configured"] = False
     else:
         try:
             key = f"qa-acceptance/audio-{key_suffix}.wav"
             results["audio"] = _probe_audio(cfg, _s3_client(cfg), key, payload)
         except Exception as exc:
-            results["audio"] = {
-                "configured": True, "passed": False,
-                "failure_phase": "audio_storage_transfer",
-                "failure_class": type(exc).__name__[:80],
-            }
+            results["audio"] = _safe_failure(exc, "audio_storage_transfer")
 
     required = {
         "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),

@@ -847,29 +847,29 @@ def admin_smtp_diagnostic():
     phase = "rate_limit_reservation"
     try:
         reserve_admin_smtp_diagnostic(session["email"])
-        phase = "smtp_submission"
+        phase = "brevo_api_submission"
         send_admin_diagnostic(session["email"])
         phase = "success_audit"
         record_admin_audit(
             session["admin_id"], "smtp_diagnostic_sent", "admin", session["admin_id"],
-            {"channel": "smtp", "result": "accepted_by_smtp"},
+            {"channel": "brevo_api", "result": "accepted_by_brevo_api"},
         )
-        return jsonify({"sent": True, "message": "A diagnostic email was submitted to your administrator address."}), 202
+        return jsonify({"sent": True, "message": "Brevo accepted the diagnostic email. Check your inbox to confirm delivery."}), 202
     except Exception as exc:
         # Record only a bounded phase and exception class. Never log provider
         # response text, hostnames, addresses, credentials or message content.
         app.logger.warning(
-            "Administrator SMTP diagnostic failed; phase=%s exception_type=%s",
+            "Administrator Brevo API diagnostic failed; phase=%s exception_type=%s",
             phase, type(exc).__name__,
         )
         try:
             record_admin_audit(
                 session["admin_id"], "smtp_diagnostic_failed", "admin", session["admin_id"],
-                {"channel": "smtp", "result": "failed", "phase": phase,
+                {"channel": "brevo_api", "result": "failed", "phase": phase,
                  "exception_type": type(exc).__name__[:80]},
             )
         except Exception:
-            app.logger.error("SMTP diagnostic failure could not be audited")
+            app.logger.error("Brevo API diagnostic failure could not be audited")
         return jsonify({"error": "smtp_diagnostic_unavailable", "message": "The diagnostic could not be sent. Check the staging email configuration."}), 503
 
 

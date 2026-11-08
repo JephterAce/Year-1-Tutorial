@@ -401,3 +401,41 @@ After review and staging deployment, use that controlled account to test Brevo v
 ### Current result
 
 Provisioning route/script: **not present**. Test account: **not created**. No database writes or environment changes were made. The existing live staging app remains on the previously recorded deployment; no deploy was triggered. This review does not close SMTP delivery or password-recovery acceptance.
+
+
+## Owner-only staging SMTP diagnostic implementation — 8 November 2026
+
+### Implemented on the development branch
+
+A narrowly scoped application SMTP diagnostic has been added to the Flask backend and administrator operations page. It is intended to establish whether the staging application can submit a token-free email through its configured SMTP provider, without requiring a student account or changing public registration.
+
+Changes on `secondary-school-platform-foundation`:
+- `backend/identity_email.py`: added `send_admin_diagnostic(email)`, which sends a fixed message with no identity token, password-reset link or other bearer secret.
+- `backend/admin_auth.py`: added a separate database-backed rate-limit key for SMTP diagnostics, limited to one attempt per administrator per hour. The rate-limit subject is HMAC-hashed with the existing `AUTH_RATE_LIMIT_PEPPER`.
+- `backend/app.py`: added `POST /api/v1/admin/diagnostics/smtp`. It is available only when `APP_ENV=staging` and `ADMIN_SMTP_DIAGNOSTIC_ENABLED` is explicitly enabled; it requires an authenticated owner session and CSRF validation; it sends only to the session's administrator email; and it records success/failure audit events without provider details or secrets.
+- `admin/operations.html`: added an owner-visible control to request the test message from the protected operations page.
+- `backend/.env.example`: documents `ADMIN_SMTP_DIAGNOSTIC_ENABLED=false` as the default.
+
+Automated tests were added for token-free message content, route default-off behaviour, staging-only restriction, anonymous denial, non-owner denial, owner-only recipient selection, audit invocation and the separate one-per-hour rate limit.
+
+### Safety boundaries and current verification status
+
+- The diagnostic flag remains **off by default**. No Render environment variable was changed.
+- No SMTP message has been sent by this implementation yet.
+- No SMTP credentials or values were read, copied, or exposed.
+- The endpoint is not deployed to Render staging; Render auto-deploy remains disabled.
+- Automated tests have been authored but their CI result is pending. Do not treat mocked SMTP tests as proof of Brevo delivery.
+- Student registration remains disabled. No student account or database row was created.
+- No production deployment, PR merge or change to `main` was made.
+
+### Commits
+
+- Rate-limit and diagnostic backend work, tests, UI and configuration were committed in sequential commits on `secondary-school-platform-foundation`; latest implementation commit before this checkpoint: `fed03a858bd1309c9b5471cc4c2604c4e0181989`.
+- This checkpoint update is documentation-only and does not trigger Render deployment.
+
+### Next actions
+
+1. Verify the exact branch-head CI run and correct any failures before deployment.
+2. If checks pass, request explicit owner approval before enabling the staging-only diagnostic flag and deploying the new code to the existing staging service.
+3. After deployment and health verification, the signed-in owner can initiate one diagnostic email from `/admin/operations`. Confirm receipt in the actual mailbox; SMTP acceptance by the provider alone is not inbox-delivery proof.
+4. Keep public registration disabled. Continue to design a separately guarded synthetic student invitation path only after the email diagnostic is verified.

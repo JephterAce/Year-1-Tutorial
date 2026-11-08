@@ -165,38 +165,54 @@ def run_private_storage_acceptance():
                 "failure_class": type(exc).__name__[:80],
             }
 
-    try:
-        required = {
-            "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),
-            "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", ""),
-            "endpoint": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3", ""),
-            "region": os.environ.get("DATA_EXPORT_AWS_REGION", ""),
-            "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET", ""),
-        }
-        if not all(isinstance(value, str) and value.strip() for value in required.values()):
-            raise StorageAcceptanceError("R2 export storage is not configured.")
-        if not required["endpoint"].startswith("https://"):
-            raise StorageAcceptanceError("R2 endpoint must use HTTPS.")
-        import boto3
-        client = boto3.client(
-            "s3",
-            endpoint_url=required["endpoint"],
-            region_name=required["region"],
-            aws_access_key_id=required["access_key_id"],
-            aws_secret_access_key=required["secret_access_key"],
-            config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
-        )
-        key = f"qa-acceptance/export-{key_suffix}.wav"
-        results["r2_exports"] = _probe_s3(
-            client, required["endpoint"], required["region"], required["bucket"], key, payload
-        )
-    except Exception as exc:
+    required = {
+        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),
+        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", ""),
+        "endpoint": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3", ""),
+        "region": os.environ.get("DATA_EXPORT_AWS_REGION", ""),
+        "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET", ""),
+    }
+    if not all(isinstance(value, str) and value.strip() for value in required.values()):
         results["r2_exports"] = {
-            "configured": False,
-            "passed": False,
-            "failure_phase": "r2_storage_probe",
-            "failure_class": type(exc).__name__[:80],
+            "configured": False, "passed": False,
+            "failure_phase": "r2_storage_configuration",
+            "failure_class": "StorageAcceptanceError",
         }
+    elif not required["endpoint"].startswith("https://"):
+        results["r2_exports"] = {
+            "configured": False, "passed": False,
+            "failure_phase": "r2_storage_configuration",
+            "failure_class": "StorageAcceptanceError",
+        }
+    else:
+        try:
+            import boto3
+            client = boto3.client(
+                "s3",
+                endpoint_url=required["endpoint"],
+                region_name=required["region"],
+                aws_access_key_id=required["access_key_id"],
+                aws_secret_access_key=required["secret_access_key"],
+                config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
+            )
+        except Exception as exc:
+            results["r2_exports"] = {
+                "configured": True, "passed": False,
+                "failure_phase": "r2_client_initialization",
+                "failure_class": type(exc).__name__[:80],
+            }
+        else:
+            try:
+                key = f"qa-acceptance/export-{key_suffix}.wav"
+                results["r2_exports"] = _probe_s3(
+                    client, required["endpoint"], required["region"], required["bucket"], key, payload
+                )
+            except Exception as exc:
+                results["r2_exports"] = {
+                    "configured": True, "passed": False,
+                    "failure_phase": "r2_storage_transfer",
+                    "failure_class": type(exc).__name__[:80],
+                }
 
     for value in results.values():
         value["passed"] = all(

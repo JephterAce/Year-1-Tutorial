@@ -48,3 +48,14 @@ def send_identity_link(email, token, purpose):
         raise ValueError("Unsupported identity email purpose")
     url = f"{base}/account.html?{urlencode({'action': action, 'token': token})}"
     _send(email, subject, f"{intro} using this one-time link:\n\n{url}\n\nIf you did not request this, ignore this email. Do not share this link.")
+
+
+def send_admin_diagnostic(email):
+    """Send a fixed, token-free SMTP connectivity diagnostic to the admin."""
+    _send(
+        email,
+        "Think Tank staging email-delivery test",
+        "This is a diagnostic message initiated by an authenticated Think Tank administrator. "
+        "It confirms that the staging application can submit email through its configured SMTP provider. "
+        "No action is required. If you did not initiate this test, notify the system owner.",
+    )

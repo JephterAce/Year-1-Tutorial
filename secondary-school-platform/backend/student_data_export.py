@@ -26,7 +26,7 @@ def build_student_export(student_id, conn=None):
             """SELECT id,email,display_name,username,class_level,bio,profile_visibility,
                       privacy_notice_version,guardian_consent_status,marketing_opt_in,
                       created_at,updated_at
-               FROM students WHERE id=%s""",
+               FROM students WHERE id=%s AND is_synthetic_qa=false""",
             (student_id,),
         ).fetchone()
         if not student:

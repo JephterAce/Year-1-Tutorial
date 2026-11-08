@@ -783,3 +783,11 @@ Production/student onboarding remains blocked until all applicable release gates
 - Read-only browser workflow [42499890634](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42499890634) passed the R2 anonymous-denial step and all 9 live staging browser tests.
 - The temporary object was deleted through the Cloudflare API. A final list of the `qa-acceptance/` prefix returned zero objects.
 - The earlier local-container DNS failure is superseded for the R2 public-access check by this successful GitHub-runner HTTP 401. Neon private-audio DNS remains unresolved.
+
+## Post-deployment acceptance update — 8 November 2026, 16:37 UTC
+
+- Fresh post-deploy staging-health workflow on branch commit `51e4efb152c762f9e350e4446d19dd86da8db0c5` passed after Render deploy `dep-dboa96nig07c73a2dlf0` became live. The public `/health` probe returned the expected healthy database-mode service response.
+- Fresh read-only live staging Playwright run `42500709060` passed **9/9** tests after the new deployment. Verified health, student-facing page delivery, account controls without submitting real data, mobile/keyboard accessibility, anonymous learner/assessment/audio denial, anonymous admin denial, admin redirect and separate admin login page.
+- The authenticated browser suite passed on disposable PostgreSQL fixtures in CI; authenticated live staging remains blocked because no synthetic QA identity has been issued. No student rows exist: Neon staging counts show total students 0, synthetic QA students 0, real students 0; active admins 1; approved curriculum sources 0; topics 0.
+- A second direct presigned Neon Storage upload attempt was made from the available execution network using a fresh five-minute URL and synthetic text payload. DNS resolution again failed before connection (HTTP 000, curl exit 6); the object was not uploaded and the bucket listing remains clean. This confirms an execution-network limitation, not a Neon storage outage. Repeat from Render runtime is still required.
+

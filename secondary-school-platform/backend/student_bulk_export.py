@@ -22,7 +22,7 @@ from export_serialization import _csv_safe, _json_value
 from student_data_export import build_student_export
 
 PART_SIZE = 8 * 1024 * 1024
-MAX_BULK_ROWS = 100_000
+MAX_BULK_ROWS = 1_000
 EXPORT_TTL_HOURS = 24
 
 

@@ -96,6 +96,46 @@ def _probe_s3(client, endpoint, region, bucket, key, payload):
     return result
 
 
+def _probe_audio(cfg, client, key, payload):
+    from audio_storage import put_private_audio_object, get_private_audio_object, delete_private_audio_object
+    digest = hashlib.sha256(payload).hexdigest()
+    result = {
+        "configured": True, "upload": False, "retrieval": False,
+        "checksum_match": False, "unsigned_access_denied": False,
+        "deletion": False, "sha256": digest,
+    }
+    uploaded = False
+    try:
+        put_private_audio_object(key, io.BytesIO(payload), "audio/wav", len(payload))
+        uploaded = True
+        result["upload"] = True
+        stored = get_private_audio_object(key)
+        body = stored["Body"].read()
+        try:
+            stored["Body"].close()
+        except Exception:
+            pass
+        result["retrieval"] = True
+        result["checksum_match"] = hashlib.sha256(body).hexdigest() == digest
+        if not result["checksum_match"]:
+            raise StorageAcceptanceError("Retrieved audio checksum did not match.")
+        _unsigned_denied(cfg["endpoint_url"], cfg["region"], cfg["bucket"], key)
+        result["unsigned_access_denied"] = True
+    finally:
+        if uploaded:
+            delete_private_audio_object(key)
+            try:
+                client.head_object(Bucket=cfg["bucket"], Key=key)
+            except ClientError as exc:
+                if _status_code(exc) == 404 or exc.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
+                    result["deletion"] = True
+                else:
+                    raise StorageAcceptanceError("Deleted audio object could not be verified absent.") from None
+            else:
+                raise StorageAcceptanceError("Synthetic audio object still exists after deletion.")
+    return result
+
+
 def run_private_storage_acceptance():
     """Probe the configured private audio bucket and R2 export bucket independently."""
     if os.environ.get("APP_ENV", "").strip().lower() != "staging":
@@ -108,17 +148,22 @@ def run_private_storage_acceptance():
     try:
         from audio_storage import storage_config, _s3_client
         cfg = storage_config()
-        key = f"qa-acceptance/audio-{key_suffix}.wav"
-        results["audio"] = _probe_s3(
-            _s3_client(cfg), cfg["endpoint_url"], cfg["region"], cfg["bucket"], key, payload
-        )
     except Exception as exc:
         results["audio"] = {
-            "configured": False,
-            "passed": False,
-            "failure_phase": "audio_storage_probe",
+            "configured": False, "passed": False,
+            "failure_phase": "audio_storage_configuration",
             "failure_class": type(exc).__name__[:80],
         }
+    else:
+        try:
+            key = f"qa-acceptance/audio-{key_suffix}.wav"
+            results["audio"] = _probe_audio(cfg, _s3_client(cfg), key, payload)
+        except Exception as exc:
+            results["audio"] = {
+                "configured": True, "passed": False,
+                "failure_phase": "audio_storage_transfer",
+                "failure_class": type(exc).__name__[:80],
+            }
 
     try:
         required = {

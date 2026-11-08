@@ -42,6 +42,9 @@ def _storage():
         raise ExportWorkerError("private_export_storage_not_configured")
     if not cfg["endpoint_url"].startswith("https://"):
         raise ExportWorkerError("private_export_storage_requires_https")
+    audio_bucket = os.environ.get("AUDIO_STORAGE_BUCKET", "").strip()
+    if audio_bucket and cfg["bucket"] == audio_bucket:
+        raise ExportWorkerError("export_bucket_must_be_separate_from_audio")
     client = boto3.client(
         "s3", endpoint_url=cfg["endpoint_url"], region_name=cfg["region"],
         aws_access_key_id=cfg["access_key_id"],

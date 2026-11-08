@@ -125,6 +125,16 @@ test("authenticated student can submit, review and withdraw a data-rights reques
   await expect(page.locator("#rightsRequests")).toContainText("withdrawn");
 });
 
+test("student password-reset form gives visible feedback for an unknown account without enumeration", async ({ page }) => {
+  await page.goto("/account");
+  await page.getByLabel("Password reset email address").fill("no-student-reset@thinktank.invalid");
+  await page.getByRole("button", { name: "Send reset link" }).click();
+  await expect(page.locator("#resetMsg")).toContainText(
+    "If an eligible account exists, reset instructions will be sent."
+  );
+  await expect(page.getByRole("button", { name: "Send reset link" })).toBeEnabled();
+});
+
 test("assessment authoring page redirects anonymous visitors", async ({ page }) => {
   await page.goto("/admin/assessments");
   await expect(page).toHaveURL(/\/admin\/login$/);

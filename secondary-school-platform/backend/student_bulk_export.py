@@ -51,6 +51,12 @@ def _storage():
         aws_secret_access_key=cfg["secret_access_key"],
         config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
     )
+    try:
+        versioning = client.get_bucket_versioning(Bucket=cfg["bucket"])
+    except Exception as exc:
+        raise ExportWorkerError("export_bucket_configuration_unverified") from exc
+    if versioning.get("Status") == "Enabled":
+        raise ExportWorkerError("export_bucket_versioning_must_be_disabled")
     return client, cfg["bucket"]
 
 

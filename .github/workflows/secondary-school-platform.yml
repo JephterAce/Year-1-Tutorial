@@ -111,6 +111,11 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python -m unittest -v test_postgres_schema_integration
+      - name: Run PostgreSQL synthetic QA identity lifecycle tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
+          AUTH_RATE_LIMIT_PEPPER: ci-only-synthetic-qa-pepper-not-a-real-secret-000000000000
+        run: python -m unittest -v test_postgres_synthetic_qa_identity
       - name: Run PostgreSQL assessment and payment end-to-end tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal

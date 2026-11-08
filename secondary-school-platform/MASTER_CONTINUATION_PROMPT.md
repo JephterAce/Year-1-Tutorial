@@ -896,3 +896,51 @@ Latest repository/PR head is 2098d7ad37b830a84a1120654afc56b5152ae4ef (documenta
 
 ### Handover pointer — 7 November 2026
 Current branch/PR head: fc77dbc714af2103b50f58c02bff844556a776ad. Exact-head push 42417089283 and PR 42417094553 passed. This branch head contains documentation/PR-status changes only; latest tested application code remains a057289c4930b86b6bdd5176bd71e61a9536f044. Latest public staging health is HTTP 200, status=ok, mode=database, service=secondary-school-api. Render remains on its prior live deployment; no managed migration or deployment was performed.
+
+
+## Authoritative continuation checkpoint — 8 November 2026
+
+### Project identity and safety
+- This remains the Think Tank SS1–SS3 secondary-school tutorials platform in `JephterAce/Year-1-Tutorial`, branch `secondary-school-platform-foundation`. Do not confuse it with the legacy university Telegram subscription bot.
+- PR #1 remains open, draft and unmerged. Do not modify `main`, force-push, merge the PR, expose secrets, deploy production, purchase/upgrade services, or perform destructive operations without separate owner approval.
+- Render workspace `Emmanuel's workspace` (`tea-da2svh0ae00c73cs4qq0`) is confirmed for read-only inspection and approved staging-only verification.
+
+### Render status
+- Service `learnwise-staging-api`, ID `srv-dbkqcmt9fdbs73c2kdpg`, URL `https://learnwise-staging-api.onrender.com`, branch `secondary-school-platform-foundation`, Frankfurt, free plan, auto-deploy disabled.
+- Latest Render deployment is `dep-dbo22jp5efls73cm1sb0`, live at commit `c5805a6fc463fd040e64e8223d58ed3dbf37d143`, completed 2026-11-08T07:14:47Z. The later development commits have not been deployed.
+- Public health was verified by the GitHub Actions staging-health job: HTTP 200, JSON status `ok`, mode `database`, service `secondary-school-api`. Render logs show Gunicorn listening on port 8000 and Render reporting the service live. Render's own `healthCheckPath` remains empty; do not change it without a separate review.
+
+### Managed Neon status
+- Project `learnwise` (`spring-cloud-84267029`), staging branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`.
+- Read-only inspection verified migration history 001–019. Every one of the 19 recorded `source_blob_sha` values exactly matches the corresponding canonical backend migration GitHub blob SHA.
+- Read-only counts on managed staging: 6 subjects, 0 topics, 0 students, 1 active admin, 0 student data-rights requests.
+- Backup branch `think-tank-staging-backup-2026-11-08` (`br-super-haze-bazf13ia`) is ready. Existing older rehearsal branch `think-tank-migration-rehearsal-20261106` remains separate.
+- New isolated rehearsal branch `think-tank-migration-rehearsal-2026-11-08` (`br-divine-bread-bah58gvn`) was created from staging at migrations 001–019. Migration `020_private_student_export_approval.sql` was applied only there. Read-only schema inspection confirmed its six columns, four check constraints, approver foreign key and approved-queue index. A rehearsal migration-history row records blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`, matching the development migration file. Managed staging remains at 019; do not apply 020 without explicit owner approval.
+
+### New development-branch implementation
+- Added `backend/migrations/020_private_student_export_approval.sql` for a separate export approver, approval timestamp, manifest key, worker attempt metadata and safety constraints.
+- Added `backend/admin_data_exports.py` and registered it in the Flask app. It supports queued individual/filtered bulk export requests, listing, separate-administrator approval, retry, cancellation and signed-download URL issuance. Export request caps are five per admin per 24 hours, one bulk per day and two active jobs.
+- Added restricted admin page `/admin/exports` and links from the data-rights and operations pages.
+- Added `backend/student_bulk_export.py`: one repeatable-read/read-only snapshot, server-side student cursor, NDJSON or CSV output, multipart upload, SHA-256 manifest, 100,000-student cap, five-minute maximum signed URLs, 24-hour default expiry and expiry cleanup. It uses separate `DATA_EXPORT_AWS_*` credentials and `DATA_EXPORT_STORAGE_BUCKET`, never the audio bucket.
+- Worker is fail-closed and disabled unless `DATA_EXPORT_WORKER_ENABLED=true`. No export bucket, credentials or scheduled worker have been provisioned. No real export job has been run. Subject-scoped bulk exports are explicitly rejected until every exported record type can be filtered correctly.
+- Two-person approval is mandatory: requester and approver must be different active administrators. Export capabilities are owner-only; managed staging currently has one active owner, so no admin export can be approved until a second owner is provisioned through the controlled offline process. Never bypass this control.
+- Student self-service export remains separate and scoped to the authenticated learner. Data-rights deletion requests remain intake-only and never automatically erase accounts or records.
+
+### CI status for this increment
+- The first run that included the new export tests was workflow run `42459497431` at commit `e7f4d41deeed17549afb9fb76c4e0ef1eae08eca`. `staging-health` and `container-build` passed. `api-tests` failed on two new test fixtures that omitted `export_scope`.
+- The fixtures were corrected in subsequent development-branch commits. The available GitHub connection has not returned a fresh exact-head workflow run/status for the corrected head. Do not claim the new export code is CI-passed until a fresh exact-head run completes successfully.
+- The new code has not been deployed to Render. Auto-deploy remains off.
+
+### Remaining build and release gates
+1. Obtain a fresh exact-head CI run and fix every failure before staging deployment.
+2. Rehearse migration 020 from the current 001–019 staging state (the isolated rehearsal branch already has the additive DDL applied and inspected); then obtain explicit owner approval before applying it to managed staging.
+3. Configure a dedicated private export bucket, encryption-at-rest, least-privilege bucket-scoped credentials, retention/lifecycle policy and worker scheduling. Provision a second owner approver offline. Keep the worker disabled until all of these are verified.
+4. Complete SMTP delivery and password/account recovery E2E; Paystack sandbox checkout/webhook/entitlement/reconciliation; private audio storage/playback acceptance.
+5. Obtain authorised NERDC materials/licensing, curriculum mapping and teacher review. Staging currently has zero topics; do not publish unlicensed or unreviewed content.
+6. Complete child safeguarding, guardian consent/age verification, NDPA assessment/DPIA, retention schedule and Nigerian legal review.
+7. Complete managed backup/PITR restoration drill with measured RPO/RTO, monitoring/incident-alert verification and independent security review.
+8. Run authenticated browser acceptance against the newly deployed staging commit after migration 020 and all environment prerequisites are approved.
+9. Update this file, `STATUS.md`, `EXECUTION_AUDIT.md` and `RELEASE_GATE_REGISTER.md` after each verified milestone.
+
+### Required reporting format
+For each continuation, report Completed / Verified / Passed / Failed / Outstanding / Blocked / GitHub / Render / Neon / Approval required. Distinguish source-code implementation, disposable CI evidence, isolated Neon rehearsal, managed staging state and production state. Never call the platform launch-ready while any external/legal/safeguarding/security gate remains open.

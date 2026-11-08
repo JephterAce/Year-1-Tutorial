@@ -73,5 +73,55 @@ class StagingStorageDiagnosticRouteTests(unittest.TestCase):
         self.assertFalse(response.get_json()["passed"])
 
 
+
+class StorageProbeUnitTests(unittest.TestCase):
+    def test_generic_s3_probe_uploads_checksums_denies_unsigned_and_deletes(self):
+        import io
+        from unittest.mock import Mock
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _probe_s3
+
+        payload = b"synthetic-storage-payload"
+        client = Mock()
+        client.get_object.return_value = {"Body": io.BytesIO(payload)}
+        client.head_object.side_effect = ClientError(
+            {"Error": {"Code": "404"}, "ResponseMetadata": {"HTTPStatusCode": 404}},
+            "HeadObject",
+        )
+        with patch("storage_acceptance._unsigned_denied", return_value=True):
+            result = _probe_s3(client, "https://storage.example.test", "auto",
+                               "private-bucket", "qa-acceptance/test.wav", payload)
+        self.assertTrue(result["upload"])
+        self.assertTrue(result["retrieval"])
+        self.assertTrue(result["checksum_match"])
+        self.assertTrue(result["unsigned_access_denied"])
+        self.assertTrue(result["deletion"])
+        client.delete_object.assert_called_once()
+
+    def test_audio_probe_uses_application_storage_adapter(self):
+        import io
+        from unittest.mock import Mock
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _probe_audio
+
+        payload = b"synthetic-audio"
+        cfg = {
+            "endpoint_url": "https://storage.example.test",
+            "region": "eu-central-1",
+            "bucket": "private-audio",
+        }
+        client = Mock()
+        client.head_object.side_effect = ClientError(
+            {"Error": {"Code": "404"}, "ResponseMetadata": {"HTTPStatusCode": 404}},
+            "HeadObject",
+        )
+        with patch("audio_storage.put_private_audio_object"), \
+             patch("audio_storage.get_private_audio_object", return_value={"Body": io.BytesIO(payload)}), \
+             patch("audio_storage.delete_private_audio_object") as delete, \
+             patch("storage_acceptance._unsigned_denied", return_value=True):
+            result = _probe_audio(cfg, client, "qa-acceptance/audio.wav", payload)
+        self.assertTrue(result["passed"] if "passed" in result else result["checksum_match"])
+        delete.assert_called_once_with("qa-acceptance/audio.wav")
+
 if __name__ == "__main__":
     unittest.main()

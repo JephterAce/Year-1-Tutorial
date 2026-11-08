@@ -76,7 +76,7 @@ test("anonymous assessment and private-audio actions fail closed", async ({ requ
 });
 
 test("synthetic QA provisioning and public registration remain closed to anonymous callers", async ({ request }) => {
-  const qa = await request.post("/api/v1/admin/qa-identities", { data: {} });
+  const qa = await request.post("/api/v1/admin/qa-identities");
   expect([401, 404]).toContain(qa.status());
   const qaBody = await qa.json().catch(() => ({}));
   expect(qaBody.created).not.toBe(true);

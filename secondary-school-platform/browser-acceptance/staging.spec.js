@@ -81,6 +81,9 @@ test("synthetic QA provisioning and public registration remain closed to anonymo
   const qaBody = await qa.json().catch(() => ({}));
   expect(qaBody.created).not.toBe(true);
 
+  const storage = await request.post("/api/v1/admin/diagnostics/storage");
+  expect([401, 404]).toContain(storage.status());
+
   const registration = await request.post("/api/v1/auth/register", { data: {} });
   expect(registration.status()).toBe(503);
 });

@@ -2,7 +2,7 @@
 
 ## Scope and safety
 
-This checkpoint records an attempted execution of the remaining provider, people/approval and operational dependencies for Think Tank staging. Work remained on `secondary-school-platform-foundation`. No production deployment, PR merge, main-branch change, live payment, paid-service activation, credential disclosure, or student onboarding was performed.
+This checkpoint records an attempted execution of the remaining provider, people/approval and operational dependencies for Think Tank staging. Work remained on `secondary-school-platform-foundation`. No production deployment, PR merge, main-branch change, live payment, credential disclosure, or student onboarding was performed.
 
 ## Provider credentials and integrations
 
@@ -43,13 +43,45 @@ The export worker uses a separate namespace:
 - `DATA_EXPORT_AWS_REGION`
 - `DATA_EXPORT_AWS_ACCESS_KEY_ID`
 - `DATA_EXPORT_AWS_SECRET_ACCESS_KEY`
-- `DATA_EXPORT_WORKER_ENABLED` (currently configured to remain false until approvals and storage controls are verified)
+- `DATA_EXPORT_WORKER_ENABLED` (must remain false until approvals and storage controls are verified)
 
-### Cloudflare R2 attempt
+### Cloudflare R2 — partial completion, 8 November 2026
 
-The connected Cloudflare account returned HTTP 403 / error 10042: R2 must first be enabled through the Cloudflare Dashboard. Cloudflare's R2 token documentation also states R2 must be purchased/activated before API token creation. No R2 bucket or token was created, and no billing or paid-service activation was initiated.
+The owner confirmed R2 activation in the Cloudflare Dashboard. The connected Cloudflare account is `b8d5a16d7a33f342f0b790bdf8717e07`.
 
-**Decision required:** either (a) owner activates R2 and creates a token scoped to the exact private bucket with only the required object read/write permissions, or (b) owner explicitly accepts the Neon branch-wide storage capability after security review. Keep export worker disabled until a second authorised administrator and retention controls are in place.
+Created bucket:
+- Name: `think-tank-private-exports`
+- Bucket ID: `09ee0a4e92a445889e76a1ca94db79a3`
+- Location: `WEUR` (Western Europe)
+- Storage class: `Standard`
+- Jurisdiction: `default`
+
+Read-after-create verification succeeded. The bucket's managed `r2.dev` public domain is explicitly disabled (`enabled=false`). A CORS policy does not exist; this is intentional for the current server-to-server design and should not be opened to browser origins without a reviewed requirement. No public custom domain was attached.
+
+Render service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) was updated with non-secret configuration only:
+- `DATA_EXPORT_STORAGE_BUCKET=think-tank-private-exports`
+- `DATA_EXPORT_AWS_ENDPOINT_URL_S3=https://b8d5a16d7a33f342f0b790bdf8717e07.r2.cloudflarestorage.com`
+- `DATA_EXPORT_AWS_REGION=auto`
+- `DATA_EXPORT_WORKER_ENABLED=false`
+
+The Render environment update triggered staging deployment `dep-dbo3ahrm8hqs73fenfhg` from commit `77a7589ee76336b339a66c687526221b48d56eec`; its latest observed state at checkpoint preparation was `update_in_progress`. Verify final deployment status and staging health before treating configuration as active.
+
+### Credential and object-test blockers
+
+The Cloudflare connector is authenticated through OAuth and its API connection does not have the `API Tokens Read/Write` scopes required to create an R2 S3 API token programmatically. The token permission-groups API returned 403 / error 9109. No S3 access key or secret was created, exposed, or stored.
+
+Owner action required in Cloudflare Dashboard:
+1. Open R2 Object Storage → Overview → Manage R2 API Tokens.
+2. Create an R2 API token with **Object Read & Write** permissions, scoped only to `think-tank-private-exports`. Do not grant Admin Read/Write or all-bucket access.
+3. Copy the Access Key ID and Secret Access Key once; never paste them into chat or GitHub.
+4. In Render → `learnwise-staging-api` → Environment, set:
+   - `DATA_EXPORT_AWS_ACCESS_KEY_ID`
+   - `DATA_EXPORT_AWS_SECRET_ACCESS_KEY`
+   Enter the values directly into Render's secret environment fields.
+
+After the owner has added the two secrets, perform an isolated synthetic-object test using the exact application credentials: upload a random test object, retrieve and compare its bytes/checksum, verify an unauthenticated request is denied, verify a credential scoped to another bucket cannot read/write this bucket if a separate test credential is available, then delete the test object. Do not use learner records or personal data. Do not enable the export worker during this test.
+
+**Current disposition:** bucket created and public access disabled; non-secret Render configuration submitted; dedicated bucket-scoped S3 credentials and object-level acceptance tests remain outstanding. Keep `DATA_EXPORT_WORKER_ENABLED=false`.
 
 ## People and formal approvals
 
@@ -86,7 +118,7 @@ Required next action: owner names the alert recipient/on-call contact and config
 |---|---|
 | Brevo SMTP | Application variable names identified; provider credentials/sender/mailbox test still required |
 | Paystack sandbox | Secret variable identified; provider sandbox test still required |
-| Export storage | Existing Neon credential confirmed branch-wide; bucket-level decision unresolved; R2 activation unavailable pending owner action |
+| Export storage | R2 bucket created; public domain disabled; non-secret Render config submitted; bucket-scoped S3 token and object tests outstanding |
 | Second administrator | Not appointed; one active admin |
 | Subject teachers | Not appointed; 18 mappings remain unapproved |
 | Nigerian counsel | Not appointed; legal review outstanding |

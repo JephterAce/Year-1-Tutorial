@@ -42,12 +42,23 @@ class PrivateAudioStorageTests(unittest.TestCase):
         self.assertEqual(result["ContentRange"], "bytes 0-3/10")
         self.assertEqual(client.get_object.call_args.kwargs["Range"], "bytes=0-3")
 
-    def test_download_rejects_multiple_ranges_and_path_traversal(self):
+    def test_download_rejects_malformed_ranges_and_path_traversal(self):
         with patch.dict("os.environ", self.env, clear=True):
-            with self.assertRaises(AudioStorageError):
-                audio_storage.get_private_audio_object("../secret.mp3")
-            with self.assertRaises(AudioStorageError):
-                audio_storage.get_private_audio_object("audio.mp3", "bytes=0-1,4-5")
+            for key in ("../secret.mp3", "/absolute.mp3", "topics//audio.mp3", "topics/./audio.mp3"):
+                with self.subTest(key=key), self.assertRaises(AudioStorageError):
+                    audio_storage.get_private_audio_object(key)
+            for value in ("bytes=0-1,4-5", "bytes=abc-def", "bytes=-", "bytes=8-2", "bytes=-0"):
+                with self.subTest(value=value), self.assertRaises(AudioStorageError):
+                    audio_storage.get_private_audio_object("audio.mp3", value)
+
+    def test_download_accepts_open_ended_and_suffix_ranges(self):
+        client = Mock()
+        client.get_object.return_value = {"Body": object()}
+        with patch.dict("os.environ", self.env, clear=True), patch.object(audio_storage, "_s3_client", return_value=client):
+            audio_storage.get_private_audio_object("audio.mp3", "bytes=10-")
+            self.assertEqual(client.get_object.call_args.kwargs["Range"], "bytes=10-")
+            audio_storage.get_private_audio_object("audio.mp3", "bytes=-500")
+            self.assertEqual(client.get_object.call_args.kwargs["Range"], "bytes=-500")
 
     def test_private_object_can_be_removed_after_database_failure(self):
         client = Mock()

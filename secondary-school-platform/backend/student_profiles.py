@@ -14,7 +14,7 @@ def get_profile(student_id):
         row = conn.execute(
             """SELECT id,email,display_name,username,class_level,bio,
                       profile_visibility,profile_photo_key,created_at
-               FROM students WHERE id=%s""", (student_id,)
+               FROM students WHERE id=%s AND is_synthetic_qa=false""", (student_id,)
         ).fetchone()
     if not row:
         raise ProfileError("not_found", "Student profile not found.", 404)
@@ -58,7 +58,7 @@ def update_profile(student_id, changes):
         params = list(values.values()) + [student_id]
         row = conn.execute(
             f"""UPDATE students SET {assignments},updated_at=now()
-                WHERE id=%s RETURNING id,email,display_name,username,class_level,bio,
+                WHERE id=%s AND is_synthetic_qa=false RETURNING id,email,display_name,username,class_level,bio,
                 profile_visibility,profile_photo_key,created_at""", params
         ).fetchone()
         if not row:

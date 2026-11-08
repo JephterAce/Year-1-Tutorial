@@ -968,3 +968,10 @@ For each continuation, report Completed / Verified / Passed / Failed / Outstandi
 - It passed 260 unit/security tests; Python/JS/shell syntax; all 20 numbered migration replays and idempotency; local backup/restore; PostgreSQL schema integration; assessment/payment E2E; registration-to-results; and all anonymous/authenticated Playwright browser checks, including the new private export page, bulk request/cancel, no self-approval and anonymous redirect tests.
 - Staging health returned HTTP 200/status=ok/mode=database/service=secondary-school-api. The container build was non-publishing. The tested code commit is included in the current development branch; later commits update documentation only.
 - This is disposable CI evidence, not a deployment or real-provider acceptance. Render remains on c5805a6; managed Neon remains at migrations 001–019; migration 020 exists only on the isolated rehearsal branch. Do not promote without explicit owner approval.
+
+
+### Final repository reconciliation — 8 November 2026
+- Latest tested application-code commit: `5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3`, workflow 42460225765 fully green.
+- Current development branch head immediately before this final handover update: `3a5cace1db3b9de2803b18f22c4974e69c4b963d`. It is eight documentation-only commits ahead of the tested application-code commit; no application code changed after the green run.
+- Render still serves commit `c5805a6fc463fd040e64e8223d58ed3dbf37d143` with auto-deploy disabled. Managed staging has 19 migration records. Migration 020 remains on isolated rehearsal branch `br-divine-bread-bah58gvn` only.
+- PR #1 remains open/draft/unmerged. The current code is CI-verified but not yet deployed. Staging migration 020 and matching code deployment require separate explicit owner approval.

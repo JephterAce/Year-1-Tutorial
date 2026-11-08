@@ -191,6 +191,7 @@ def process_one_export():
     job = _claim_job()
     if not job:
         return False
+    client = bucket = data_key = manifest_key = None
     try:
         client, bucket = _storage()
         export_id = str(UUID(str(job["id"])))
@@ -256,6 +257,14 @@ def process_one_export():
             })
         return True
     except Exception as exc:
+        # Remove partially written private objects if the job cannot be committed.
+        if client is not None and bucket is not None:
+            for key in (manifest_key, data_key):
+                if key:
+                    try:
+                        client.delete_object(Bucket=bucket, Key=key)
+                    except Exception:
+                        pass
         code = exc.args[0] if isinstance(exc, ExportWorkerError) and exc.args else "export_processing_failed"
         safe_code = code if isinstance(code, str) and code.replace("_", "").isalnum() else "export_processing_failed"
         with connection() as conn:
@@ -319,8 +328,8 @@ def expire_completed_exports(limit=50):
                 )
                 conn.execute(
                     """INSERT INTO student_data_export_audit(export_id,actor_admin_id,event_type,details)
-                       VALUES (%s,%s,'expired','{}'::jsonb)""",
-                    (row["id"], row["requested_by_admin_id"]),
+                       VALUES (%s,%s,'expired',%s)""",
+                    (row["id"], row["requested_by_admin_id"], Jsonb({"actor": "worker"})),
                 )
                 expired += 1
             except Exception:

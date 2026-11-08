@@ -1249,3 +1249,22 @@ No secrets were read or changed, no data was created, and no production/PR/main 
 - Storage data-plane acceptance is still outstanding. The owner-only control is available at `/admin/operations`; an authenticated owner must run it to test synthetic object PUT/GET/checksum/unsigned denial/delete for private audio and R2. No storage pass is claimed.
 
 The staging-health CI check passed after the 17:25 environment deployment. Public registration, export worker and live payments remain disabled. No production deployment, PR merge, main-branch change, paid upgrade or real student data operation occurred.
+
+
+---
+
+## Execution continuation — 8 November 2026, 18:50 WAT
+
+Read-only verification was repeated against the current development branch and staging infrastructure before this addendum.
+
+- Branch head at verification: `112f15f764299639763471f7813aea776a334358`; exact-head workflow `42505261079` passed API/security + PostgreSQL lifecycle/restore tests, non-publishing container build, and staging health. The health job explicitly recorded HTTP 200, JSON status `ok`, mode `database`, service `secondary-school-api`.
+- Live read-only staging browser run `42505118340` passed 10/10 after the latest staging safety deployment. This remains anonymous/read-only acceptance; it is not authenticated live-student acceptance.
+- Render `learnwise-staging-api` is live at deployment `dep-dbob0qh5efls73dc3tg0` on commit `97f243d3a1daea2ad910f59c405066ab75484955`. The branch is seven commits ahead; the compare contains documentation and browser-test-spec changes only, with no application runtime files. Auto-deploy remains disabled.
+- Neon `think-tank-staging` is ready with 21 migration records through 021; the 021 source blob hash matches the current branch migration file. Read-only counts: zero students, one active administrator, six subjects, zero topics, zero curriculum source records.
+- Both private Neon buckets are empty. The existing Neon storage credential is branch-scoped, not bucket-scoped. No managed snapshots are listed; the backup branch exists but no managed restore drill has passed.
+- R2 control-plane object acceptance and anonymous HTTP 401 denial have previously passed. Render-runtime S3 acceptance and Neon audio data-plane acceptance remain outstanding.
+- SMTP diagnostic previously returned `smtp_diagnostic_unavailable` (503); provider details are redacted in logs. No verified delivery or account recovery is established. Synthetic QA issuance remains disabled and no synthetic account exists.
+- Remaining human/provider gates are Paystack sandbox E2E, licensed curriculum and teacher approvals, safeguarding/guardian consent/NDPA/DPIA/legal review, managed recovery, monitoring alert delivery, second administrator and independent security review.
+
+No secrets were read or changed. No database writes, student creation, storage object creation, payment, PR merge, main-branch change, production deployment, paid upgrade or destructive action was performed during this verification.
+

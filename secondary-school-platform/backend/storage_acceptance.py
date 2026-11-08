@@ -195,7 +195,18 @@ def run_private_storage_acceptance():
         "region": os.environ.get("DATA_EXPORT_AWS_REGION") or os.environ.get("R2_REGION", "auto"),
         "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET") or os.environ.get("R2_BUCKET_NAME", ""),
     }
-    missing = [name for name, value in required.items() if name != "region" and (not isinstance(value, str) or not value.strip())]
+    if ".r2.cloudflarestorage.com" in required["endpoint"]:
+        required["region"] = "auto"
+    missing = [
+        f"{canonical} or {alias}"
+        for key, canonical, alias in (
+            ("access_key_id", "DATA_EXPORT_AWS_ACCESS_KEY_ID", "R2_ACCESS_KEY_ID"),
+            ("secret_access_key", "DATA_EXPORT_AWS_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY"),
+            ("endpoint", "DATA_EXPORT_AWS_ENDPOINT_URL_S3", "R2_ENDPOINT_URL"),
+            ("bucket", "DATA_EXPORT_STORAGE_BUCKET", "R2_BUCKET_NAME"),
+        )
+        if not required[key].strip()
+    ]
     if missing:
         results["r2_exports"] = {
             "configured": False, "passed": False,

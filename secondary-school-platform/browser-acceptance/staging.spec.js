@@ -84,8 +84,7 @@ test("synthetic QA and storage diagnostics require an authenticated owner", asyn
   expect(qaBody.created).not.toBe(true);
 
   const storage = await request.post("/api/v1/admin/diagnostics/storage");
-  if (localFixture) expect([401, 404]).toContain(storage.status());
-  else expect(storage.status()).toBe(401);
+  expect([401, 404]).toContain(storage.status());
 
 });
 

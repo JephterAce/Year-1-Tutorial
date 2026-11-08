@@ -166,3 +166,9 @@ Current branch/PR head fc77dbc714af2103b50f58c02bff844556a776ad passed exact-hea
 - Dedicated private data-export bucket, second active export approver, scheduled worker/expiry cleanup and subject-scoped export support.
 
 Production remains blocked. Do not merge PR #1, deploy the new branch, apply migration 020 to managed staging, provision billable services, or claim launch readiness until the relevant tests, external evidence and explicit owner approvals are recorded.
+
+
+### Corrected admin export page syntax — 8 November 2026
+- Exact-head workflow 42460006986 at commit 1316c1d2fa789c2f67eb389ac10605f0489ac374: 260 unit/security tests passed; staging-health passed HTTP 200/status=ok/database/secondary-school-api; non-publishing container build passed.
+- Syntax check failed on a literal escaped newline in admin/exports.html. Fixed in commit 81d33094f0506a71c9f72984133075fa75c84252 and confirmed by reading back the updated source.
+- A fresh exact-head workflow run has not yet been returned for the corrected commit. Migration replay, backup/restore, PostgreSQL schema/E2E and authenticated browser steps remain unverified for this increment. Keep migration 020 and the matching code deployment blocked pending a full green run.

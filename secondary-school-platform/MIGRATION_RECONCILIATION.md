@@ -1,6 +1,6 @@
 # Migration and main-branch reconciliation
 
-Checked 2026-11-07.
+Checked 2026-11-08.
 
 ## Main-branch changes preserved
 
@@ -14,12 +14,12 @@ Both files are retained verbatim on this development branch. Do not apply the ro
 
 ## Canonical backend migration sequence
 
-The canonical backend sequence is now `backend/migrations/001` through `backend/migrations/019`, applied after `DATABASE_SCHEMA.sql` as the baseline. The baseline plus 19 numbered migrations gives 20 migration-history entries in the disposable CI rehearsal.
+The canonical backend sequence is now `backend/migrations/001` through `backend/migrations/020`, applied after `DATABASE_SCHEMA.sql` as the baseline. The baseline plus 20 numbered migrations gives 21 migration-history entries in the disposable CI rehearsal.
 
-- Migrations 001–013 are present in managed Neon staging.
-- Migrations 014–019 are verified only by disposable PostgreSQL CI replay and have **not** been applied to managed staging.
+- Migrations 001–019 are present in managed Neon staging (read-only count verified 2026-11-08).
+- Migration 020 is committed to the development branch and is pending isolated upgrade rehearsal and explicit staging-migration approval.
 - The managed Neon project is `learnwise` (`spring-cloud-84267029`); the staging branch is `think-tank-staging` (`br-still-cherry-baz7g5hk`).
-- Read-only inspection of `learnwise_migration_history` on that branch returned exactly 001–013.
+- Read-only inspection of `learnwise_migration_history` on that branch returned 19 migration records on 2026-11-08.
 - The branch `think-tank-migration-rehearsal-20261106` (`br-plain-band-ba3mrbzi`) also contains only 001–013. It is not evidence that 014 onward has been rehearsed on that Neon branch.
 - Disposable CI now replays all 19 numbered migrations on an isolated PostgreSQL 16 database, then runs schema integration and end-to-end tests.
 
@@ -31,6 +31,7 @@ The canonical backend sequence is now `backend/migrations/001` through `backend/
 - `017_ai_tutor_platform_budget.sql`
 - `018_student_saved_topics.sql`
 - `019_student_data_rights_requests.sql`
+- `020_private_student_export_approval.sql` (new; not applied to managed staging)
 
 Before staging migration, compare every unapplied file against the managed database's actual schema and migration checksums, inspect constraints/indexes/data dependencies, and rehearse an upgrade from a copy of the current 001–013 state. A clean-database replay alone does not prove an upgrade is safe.
 
@@ -40,10 +41,11 @@ Before staging migration, compare every unapplied file against the managed datab
 2. Create an isolated Neon branch from the current staging branch.
 3. Compare migration source checksums with `learnwise_migration_history` and inspect actual table/index/constraint state.
 4. Apply 014–019 only on the isolated branch, in order, with the reviewed migration runner.
-5. Run schema integration, synthetic registration-to-results, saved lesson, assessment authoring/history, data-rights, payment-ledger and private-audio acceptance.
-6. Compare pre/post row counts and audit continuity; verify rollback/recovery procedure.
-7. Obtain explicit owner approval for managed staging migration and the matching code deployment.
-8. Apply the reviewed migrations to managed staging in the approved window, verify exact migration history and application health, and stop on any unexpected schema drift.
+5. For the current increment, rehearse migration 020 only on an isolated copy of the current 001–019 state; do not replay already-applied migrations.
+6. Run schema integration, synthetic registration-to-results, saved lesson, assessment authoring/history, data-rights and export-approval tests.
+7. Compare pre/post row counts and audit continuity; verify rollback/recovery procedure.
+8. Obtain explicit owner approval for managed staging migration and the matching code deployment.
+9. Apply migration 020 to managed staging only in the approved window, verify exact migration history and application health, and stop on any unexpected schema drift.
 
 No managed staging migration has been run as part of this work.
 
@@ -79,3 +81,11 @@ Queried the managed staging table `learnwise_migration_history` and compared eac
 | 013_admin_sessions_and_audit_guard | 548e463479b322b4197e8a605f63d03b6993fdf8 | 548e463479b322b4197e8a605f63d03b6993fdf8 | Match |
 
 This establishes that the 13 applied migration source blobs match the repository files. It does not establish that the pending migrations 014–019 are safe to apply to live staging; they remain unapplied and require upgrade rehearsal from the current 001–013 state plus explicit approval.
+
+
+## Read-only managed staging check — 8 November 2026
+
+- A read-only query against project `spring-cloud-84267029`, branch `br-still-cherry-baz7g5hk`, database `learnwise`, role `learnwise_app`, returned 19 migration-history records, 6 subjects, 0 topics, 0 students, 1 active administrator and 0 data-rights requests.
+- The result confirms migrations through 019 are recorded, but this count alone does not validate every migration checksum or schema object. The existing 13/13 source checksum comparison above remains the separately recorded checksum evidence for migrations 001–013.
+- Migration 020 is not applied. The development branch must not be deployed against staging until 020 is rehearsed from the current 001–019 state and the owner approves the paired staging migration/deployment.
+- No staging data was changed by this check.

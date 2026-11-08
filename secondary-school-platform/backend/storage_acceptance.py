@@ -186,24 +186,29 @@ def run_private_storage_acceptance():
         except Exception as exc:
             results["audio"] = _safe_failure(exc, "audio_storage_transfer")
 
+    # Canonical DATA_EXPORT_* settings are preferred. R2_* aliases support
+    # existing Render deployments without ever reusing the separate audio bucket.
     required = {
-        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),
-        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", ""),
-        "endpoint": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3", ""),
-        "region": os.environ.get("DATA_EXPORT_AWS_REGION", ""),
-        "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET", ""),
+        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID") or os.environ.get("R2_ACCESS_KEY_ID", ""),
+        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY") or os.environ.get("R2_SECRET_ACCESS_KEY", ""),
+        "endpoint": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3") or os.environ.get("R2_ENDPOINT_URL", ""),
+        "region": os.environ.get("DATA_EXPORT_AWS_REGION") or os.environ.get("R2_REGION", "auto"),
+        "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET") or os.environ.get("R2_BUCKET_NAME", ""),
     }
-    if not all(isinstance(value, str) and value.strip() for value in required.values()):
+    missing = [name for name, value in required.items() if name != "region" and not isinstance(value, str) or name != "region" and not value.strip()]
+    if missing:
         results["r2_exports"] = {
             "configured": False, "passed": False,
             "failure_phase": "r2_storage_configuration",
             "failure_class": "StorageAcceptanceError",
+            "missing_settings": missing,
         }
     elif not required["endpoint"].startswith("https://"):
         results["r2_exports"] = {
             "configured": False, "passed": False,
             "failure_phase": "r2_storage_configuration",
             "failure_class": "StorageAcceptanceError",
+            "configuration_issue": "endpoint_must_use_https",
         }
     else:
         try:
@@ -217,11 +222,7 @@ def run_private_storage_acceptance():
                 config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
             )
         except Exception as exc:
-            results["r2_exports"] = {
-                "configured": True, "passed": False,
-                "failure_phase": "r2_client_initialization",
-                "failure_class": type(exc).__name__[:80],
-            }
+            results["r2_exports"] = _safe_failure(exc, "r2_client_initialization")
         else:
             try:
                 key = f"qa-acceptance/export-{key_suffix}.wav"
@@ -229,11 +230,7 @@ def run_private_storage_acceptance():
                     client, required["endpoint"], required["region"], required["bucket"], key, payload
                 )
             except Exception as exc:
-                results["r2_exports"] = {
-                    "configured": True, "passed": False,
-                    "failure_phase": "r2_storage_transfer",
-                    "failure_class": type(exc).__name__[:80],
-                }
+                results["r2_exports"] = _safe_failure(exc, "r2_storage_transfer")
 
     for value in results.values():
         value["passed"] = all(

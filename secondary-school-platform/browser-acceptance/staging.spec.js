@@ -75,6 +75,16 @@ test("anonymous assessment and private-audio actions fail closed", async ({ requ
   expect(audioStream.status()).toBe(401);
 });
 
+test("synthetic QA provisioning and public registration remain closed to anonymous callers", async ({ request }) => {
+  const qa = await request.post("/api/v1/admin/qa-identities", { data: {} });
+  expect([401, 404]).toContain(qa.status());
+  const qaBody = await qa.json().catch(() => ({}));
+  expect(qaBody.created).not.toBe(true);
+
+  const registration = await request.post("/api/v1/auth/register", { data: {} });
+  expect(registration.status()).toBe(503);
+});
+
 test("administrator identity endpoint rejects anonymous sessions", async ({ request }) => {
   const response = await request.get("/api/v1/admin/auth/me");
   expect(response.status()).toBe(401);

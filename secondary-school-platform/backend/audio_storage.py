@@ -1,5 +1,6 @@
 """Private S3-compatible object retrieval for branch-scoped Neon storage."""
 import os
+import re
 
 class AudioStorageError(RuntimeError):
     pass
@@ -46,9 +47,10 @@ def put_private_audio_object(object_key, fileobj, content_type, content_length):
     if isinstance(content_length, bool) or not isinstance(content_length, int) or not 1 <= content_length <= 100 * 1024 * 1024:
         raise AudioStorageError("Audio file must be between 1 byte and 100 MB.")
     try:
-        client = _s3_client(storage_config())
+        cfg = storage_config()
+        client = _s3_client(cfg)
         result = client.put_object(
-            Bucket=storage_config()["bucket"], Key=key, Body=fileobj,
+            Bucket=cfg["bucket"], Key=key, Body=fileobj,
             ContentType=content_type, ContentLength=content_length,
             Metadata={"learnwise-review-status": "pending"},
         )
@@ -74,9 +76,13 @@ def get_private_audio_object(object_key, range_header=None):
     try:
         params = {"Bucket": cfg["bucket"], "Key": key}
         if range_header:
-            if not range_header.startswith("bytes=") or "," in range_header:
+            match = re.fullmatch(r"bytes=(\d*)-(\d*)", range_header.strip())
+            if not match or (not match.group(1) and not match.group(2)):
                 raise AudioStorageError("Invalid audio byte range.")
-            params["Range"] = range_header
+            start, end = match.groups()
+            if (start and end and int(start) > int(end)) or (not start and end == "0"):
+                raise AudioStorageError("Invalid audio byte range.")
+            params["Range"] = range_header.strip()
         return _s3_client(cfg).get_object(**params)
     except AudioStorageError:
         raise

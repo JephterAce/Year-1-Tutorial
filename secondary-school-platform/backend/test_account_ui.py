@@ -34,6 +34,17 @@ class StudentAccountUiTests(unittest.TestCase):
         self.assertIn("autocomplete=\"current-password\"", html)
         self.assertIn("autocomplete=\"new-password\"", html)
 
+    def test_password_reset_shows_pending_and_completion_feedback(self):
+        page = Path(__file__).resolve().parents[1] / "frontend" / "account.html"
+        html = page.read_text(encoding="utf-8")
+        self.assertIn("Submitting your request…", html)
+        self.assertIn("We could not complete the request right now. Check your connection and try again.", html)
+        self.assertIn("button.disabled=true", html)
+        self.assertIn("button.disabled=false", html)
+        self.assertIn("Updating your password…", html)
+        self.assertIn("Password updated. Sign in with your new password.", html)
+        self.assertIn("If an eligible account exists, reset instructions will be sent.", html)
+
     def test_dashboard_links_to_account_page(self):
         page = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
         html = page.read_text(encoding="utf-8")

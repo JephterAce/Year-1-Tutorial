@@ -155,3 +155,9 @@ The repository contains a substantial implementation foundation. It is **not app
 - Staging has zero curriculum topics and zero students. Authorised NERDC material/licensing and teacher review are prerequisites to content population.
 - SMTP delivery/password recovery, Paystack sandbox E2E, private audio storage/playback, child safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration/RPO/RTO, monitoring/incident alerting and independent security review remain outstanding.
 - PR #1 remains open/draft/unmerged; `main` and production remain untouched. No new Render deployment or managed staging migration was performed.
+
+
+### CI correction — 8 November 2026
+- Workflow 42460006986 (commit 1316c1d2fa789c2f67eb389ac10605f0489ac374) ran 260 unit/security tests successfully; staging-health passed; non-publishing container build passed.
+- The syntax step found one inline JavaScript parse error in admin/exports.html: a literal escaped newline between the DOM helper and currentAdminId declaration. Fixed in commit 81d33094f0506a71c9f72984133075fa75c84252. Read-back verifies the literal sequence is gone and a real newline is present.
+- No new exact-head CI run is yet available after the fix. PostgreSQL migration replay, backup restore, schema integration, payment/student E2E and authenticated browser tests were skipped in run 42460006986 because syntax checking failed. Do not mark the new feature release-ready until a fresh exact-head run completes all steps.

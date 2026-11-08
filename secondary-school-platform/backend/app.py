@@ -722,6 +722,8 @@ from admin_assessments import admin_assessments
 app.register_blueprint(admin_assessments)
 from student_data_rights import data_rights
 app.register_blueprint(data_rights)
+from admin_data_exports import admin_exports
+app.register_blueprint(admin_exports)
 
 
 # Private lesson audio: signed access is scoped to an approved asset and active entitlement.
@@ -1066,6 +1068,16 @@ def admin_data_rights_page():
     if not _current_admin():
         return redirect("/admin/login")
     response = send_from_directory(_ADMIN_DIR, "data-rights.html")
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.get("/admin/exports")
+def admin_exports_page():
+    if not _current_admin():
+        return redirect("/admin/login")
+    response = send_from_directory(_ADMIN_DIR, "exports.html")
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     response.headers["Cache-Control"] = "no-store"
     return response

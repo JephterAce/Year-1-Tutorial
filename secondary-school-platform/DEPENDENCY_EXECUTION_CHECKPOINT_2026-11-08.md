@@ -361,3 +361,43 @@ Inspected `secondary-school-platform/backend/test_identity_routes.py`. It contai
 Use an isolated staging-only test account created through an approved administrative/test-fixture procedure, not public registration and not a real learner identity. Then submit a reset request through the actual account page, verify the generic on-page response, confirm Brevo receives the message, open the one-time link, complete password reset and sign in with the new password. Record timestamps and pass/fail outcomes without recording passwords, tokens, signed links or SMTP secrets. The available Render integration does not provide shell/exec access, and no safe administrative test-account creation action was available in this run; therefore this live test was **not performed**.
 
 No application code, feature flags, environment variables, database rows, live accounts or production settings were changed by this investigation. PR #1 remains unmerged; `main` remains untouched.
+
+
+## Controlled staging student-account provisioning review — 8 November 2026
+
+### Existing provisioning paths
+
+A source review of the complete Flask route table and identity modules found:
+- Student creation is exposed only through `POST /api/v1/auth/register`, which is disabled in staging unless `STUDENT_REGISTRATION_ENABLED` is explicitly enabled.
+- The admin API provides administrator authentication and protected review/operations functions, but no administrator-controlled student invitation or test-account provisioning endpoint was found.
+- `bootstrap_admin.py` is a one-time first-owner bootstrap, requires an explicit confirmation environment variable, and refuses to run if any admin already exists. It is not a student-account tool and must not be reused.
+- `identity_service.register_student` creates a pending student, stores a hashed email-verification token and consent records, and returns a one-time token for email delivery. Bypassing this flow with direct SQL would bypass the intended identity/verification path and is not an acceptable test-account method.
+- No supported safe staging-only account-provisioning script or admin UI flow was located in the inspected backend routes and modules.
+
+### Fresh read-only staging database check
+
+On Neon project `spring-cloud-84267029`, branch `think-tank-staging` (`br-still-cherry-baz7g5hk`), database `learnwise`, using the read-only application role, a fresh query returned:
+- student rows: **0**
+- active administrators: **1**
+- unconsumed, unexpired identity tokens: **0**
+
+This confirms there is currently no student account against which a password-reset email could be sent, and no pending verification token.
+
+### Decision and next implementation requirement
+
+Do not switch on public student registration, insert a synthetic student directly with SQL, reuse the one-time admin bootstrap, or create an unaudited account.
+
+The safe path is to implement a narrowly scoped, staging-only, admin-authenticated test-account invitation/provisioning workflow that:
+1. is disabled by default and rejects non-staging environments;
+2. requires an authenticated owner/admin session and CSRF protection;
+3. accepts only a reserved synthetic test identity/domain and enforces a short expiry;
+4. uses the existing student creation, token hashing, consent/version recording and email-delivery services rather than bypassing them;
+5. creates an auditable event and supports explicit expiry/revocation/cleanup;
+6. never exposes raw tokens or credentials in API responses or logs;
+7. has automated tests proving the route is inaccessible in production, inaccessible anonymously, and cannot provision arbitrary real learner identities.
+
+After review and staging deployment, use that controlled account to test Brevo verification email, account activation, login, password-reset delivery, reset completion, and subsequent login. Public registration must remain disabled throughout.
+
+### Current result
+
+Provisioning route/script: **not present**. Test account: **not created**. No database writes or environment changes were made. The existing live staging app remains on the previously recorded deployment; no deploy was triggered. This review does not close SMTP delivery or password-recovery acceptance.

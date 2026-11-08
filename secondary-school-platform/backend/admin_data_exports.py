@@ -89,7 +89,7 @@ def request_export():
                     params.append(spec.date_to)
                 scope_sql = "SELECT count(*) AS total FROM students WHERE is_synthetic_qa=false"
                 if clauses:
-                    scope_sql += " WHERE " + " AND ".join(clauses)
+                    scope_sql += " AND " + " AND ".join(clauses)
                 total = int(conn.execute(scope_sql, params).fetchone()["total"])
                 if total == 0:
                     return jsonify({"error": "no_students_match_export_scope"}), 400

@@ -59,3 +59,25 @@ def send_admin_diagnostic(email):
         "It confirms that the staging application can submit email through its configured SMTP provider. "
         "No action is required. If you did not initiate this test, notify the system owner.",
     )
+
+
+
+def send_synthetic_qa_invite(email, token, temporary_password):
+    """Send a short-lived staging-only QA invitation; never log its credentials."""
+    if os.environ.get("APP_ENV", "").strip().lower() != "staging":
+        raise RuntimeError("Synthetic QA invitations are staging-only")
+    base = _required("PUBLIC_APP_URL").rstrip("/")
+    if not base.startswith("https://"):
+        raise RuntimeError("PUBLIC_APP_URL must use HTTPS")
+    url = f"{base}/account.html?{urlencode({'action': 'verify', 'token': token})}"
+    _send(
+        email,
+        "Think Tank staging synthetic QA invitation",
+        "A short-lived synthetic QA identity was created for controlled staging acceptance. "
+        "It is not a real learner account and must not be used with real learner information.\n\n"
+        f"Verify the mailbox using this one-time link (expires in 30 minutes):\n{url}\n\n"
+        f"Temporary staging password (account expires within 24 hours):\n{temporary_password}\n\n"
+        "Do not reuse this password or share the verification link. "
+        "This synthetic account has no guardian-consent status and is blocked from learner records, "
+        "assessments, payments, exports and private learning content."
+    )

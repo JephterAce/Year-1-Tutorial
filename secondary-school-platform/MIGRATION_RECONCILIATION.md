@@ -62,7 +62,7 @@ No managed staging migration has been run as part of this work.
 
 Queried the managed staging table `learnwise_migration_history` and compared each recorded `source_blob_sha` with the GitHub blob SHA for the same canonical backend migration file on the development branch.
 
-**13/13 applied migrations match.**
+**19/19 applied migrations match.**
 
 | Migration | Managed recorded SHA | Development GitHub blob SHA | Result |
 |---|---|---|---|
@@ -79,6 +79,12 @@ Queried the managed staging table `learnwise_migration_history` and compared eac
 | 011_curriculum_source_immutability | 15ff126155bfcc8c157183e9b4a6911076fc6307 | 15ff126155bfcc8c157183e9b4a6911076fc6307 | Match |
 | 012_assessment_issue_reporting | 1bb1c8dffe53e7feb73fbba14ef7b84c48226d6a | 1bb1c8dffe53e7feb73fbba14ef7b84c48226d6a | Match |
 | 013_admin_sessions_and_audit_guard | 548e463479b322b4197e8a605f63d03b6993fdf8 | 548e463479b322b4197e8a605f63d03b6993fdf8 | Match |
+| 014_ai_tutor_usage_limits | 8dddaa8e768d2c69f9fbd82faab1619517c1512c | 8dddaa8e768d2c69f9fbd82faab1619517c1512c | Match |
+| 015_reviewed_lesson_content_and_progress | 787a29faee3d1445aea147963050711894780d68 | 787a29faee3d1445aea147963050711894780d68 | Match |
+| 016_podcast_script_workflow | bd73014c852ee50ab010af4d23420f15a93253bc | bd73014c852ee50ab010af4d23420f15a93253 | Match |
+| 017_ai_tutor_platform_budget | 6211dc9254f5c982ced1246955f77b665a229df5 | 6211dc9254f5c982ced1246955f77b665a229df5 | Match |
+| 018_student_saved_topics | f246ac45f4f11e43a8c948fb3d67ed80397f3f5b | f246ac45f4f11e43a8c948fb3d67ed80397f3f5b | Match |
+| 019_student_data_rights_requests | 7a18e4dcab85edd2e70d0675185e1af48614752d | 7a18e4dcab85edd2e70d0675185e1af48614752d | Match |
 
 This establishes that the 13 applied migration source blobs match the repository files. It does not establish that the pending migrations 014–019 are safe to apply to live staging; they remain unapplied and require upgrade rehearsal from the current 001–013 state plus explicit approval.
 
@@ -89,3 +95,12 @@ This establishes that the 13 applied migration source blobs match the repository
 - The result confirms migrations through 019 are recorded, but this count alone does not validate every migration checksum or schema object. The existing 13/13 source checksum comparison above remains the separately recorded checksum evidence for migrations 001–013.
 - Migration 020 is not applied. The development branch must not be deployed against staging until 020 is rehearsed from the current 001–019 state and the owner approves the paired staging migration/deployment.
 - No staging data was changed by this check.
+
+
+## Isolated migration 020 rehearsal — 8 November 2026
+
+- Rehearsal branch: `think-tank-migration-rehearsal-2026-11-08` (`br-divine-bread-bah58gvn`), created from the managed staging branch at the 001–019 state.
+- Applied migration `020_private_student_export_approval.sql` only on that isolated rehearsal branch. Read-only inspection confirmed all six new columns, four new check constraints, the approver foreign key and the approved-queue index.
+- Recorded the rehearsal migration history entry with source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`; this exactly matches the current development-branch migration file.
+- Managed staging remains at migrations 001–019. Migration 020 has **not** been applied there. No Render deployment was triggered.
+- This rehearsal verifies the additive DDL on a copy of the staging schema; full application CI and authenticated browser acceptance for the new export endpoints are still pending. Do not promote migration 020 until those checks pass and the owner approves the paired staging migration/deployment.

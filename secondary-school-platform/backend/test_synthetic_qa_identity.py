@@ -55,7 +55,7 @@ class SyntheticQAIdentityRouteTests(unittest.TestCase):
              patch("identity_service.provision_synthetic_qa_student", return_value=provisioned), \
              patch("identity_email.send_synthetic_qa_invite") as send, \
              patch("admin_auth.record_admin_audit"):
-            response = self.client.post("/api/v1/admin/qa-identities")
+            response = self.client.post("/api/v1/admin/qa-identities", json={})
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.get_json()["synthetic_qa"])
         self.assertNotIn("raw-verification-token-never-return", response.get_data(as_text=True))

@@ -875,3 +875,13 @@ All other human/provider/recovery release gates remain open: Paystack sandbox; a
 The latest post-deployment live browser run `42503828381` returned HTTP 401 from the synthetic QA issuance endpoint to an anonymous caller. The route returns 404 before authentication when its staging feature gate is disabled. Therefore `STAGING_QA_IDENTITY_ENABLED` is **enabled** on staging, and the independent `STUDENT_REGISTRATION_ENABLED=false` guard is also in effect. The prior 17:10 addendum incorrectly said the synthetic QA feature flag remained disabled; this correction supersedes that sentence.
 
 This does **not** mean an identity was created or invitation delivery verified. Neon staging still has 0 students and 0 synthetic QA identities. No invitation was sent by this run. The configured QA recipient value cannot be inspected through the available read-only Render service metadata, and SMTP/Brevo delivery remains unverified. The owner-only invitation control is available on `/admin/operations`; it must be used only with a dedicated QA mailbox and verified delivery. If invitation delivery fails, the route revokes the pending synthetic identity. Do not treat HTTP 401 as proof of authenticated access or email delivery.
+
+
+## Final staging safety configuration — 8 November 2026, 17:25 UTC
+
+- Render deployment `dep-dbob0qh5efls73dc3tg0` completed successfully (Render deploy-ended event `evt-dbob11rm5ojs73fvl1hg`). The deployment picked up the explicit staging environment change `STAGING_QA_IDENTITY_ENABLED=false`.
+- Reason: anonymous browser verification had shown HTTP 401 on the QA issuance route, proving the route was exposed behind authentication, but no dedicated QA mailbox or verified Brevo delivery was available. The safe decision is to keep QA issuance disabled until mail delivery and recipient ownership are verified. This prevents an owner from accidentally issuing an invitation to an unverified address.
+- The independent owner-only storage diagnostic remains exposed by `STAGING_STORAGE_DIAGNOSTICS_ENABLED=true`. Its data-plane test is still not run; it must be triggered by the authenticated owner in the staging Operations page.
+- No student account was created. Student public registration remains disabled. The staging deployment has not been re-tested after the 17:25 environment update yet; trigger/record a fresh health and read-only browser check before claiming post-update health.
+
+No secrets were read or changed, no data was created, and no production/PR/main action occurred.

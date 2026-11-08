@@ -68,7 +68,7 @@ def request_export():
             if spec.scope == "bulk" and limits["daily_bulk"] >= 1:
                 return jsonify({"error": "bulk_export_daily_limit_reached"}), 429
             if target_id:
-                exists = conn.execute("SELECT 1 FROM students WHERE id=%s", (target_id,)).fetchone()
+                exists = conn.execute("SELECT 1 FROM students WHERE id=%s AND is_synthetic_qa=false", (target_id,)).fetchone()
                 if not exists:
                     return jsonify({"error": "student_not_found"}), 404
             filters = {
@@ -87,7 +87,7 @@ def request_export():
                     params.append(spec.date_from)
                     clauses.append("created_at < (%s::date + interval '1 day')")
                     params.append(spec.date_to)
-                scope_sql = "SELECT count(*) AS total FROM students"
+                scope_sql = "SELECT count(*) AS total FROM students WHERE is_synthetic_qa=false"
                 if clauses:
                     scope_sql += " WHERE " + " AND ".join(clauses)
                 total = int(conn.execute(scope_sql, params).fetchone()["total"])

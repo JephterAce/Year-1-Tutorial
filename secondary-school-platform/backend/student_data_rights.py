@@ -181,7 +181,7 @@ def admin_list_requests():
                           r.created_at,r.updated_at,s.id AS student_id,s.email,
                           s.display_name,s.class_level
                    FROM student_data_rights_requests r
-                   JOIN students s ON s.id=r.student_id
+                   JOIN students s ON s.id=r.student_id AND s.is_synthetic_qa=false
                    ORDER BY CASE WHEN r.status IN ('submitted','under_review','awaiting_information') THEN 0 ELSE 1 END,
                             r.created_at ASC LIMIT %s""",
                 (limit,),

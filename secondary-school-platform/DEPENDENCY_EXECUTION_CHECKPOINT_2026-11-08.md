@@ -492,3 +492,25 @@ The diagnostic is available only to an authenticated owner administrator with th
 No diagnostic email has yet been sent, so Brevo delivery is **not verified**. To perform the authorised test, the owner must sign in at `https://learnwise-staging-api.onrender.com/admin/operations`, open the **Staging email delivery test** card, and press **Send test email to my admin address** once. Confirm receipt in the same mailbox and report whether it arrived (including spam/promotions folders if absent). Never paste SMTP credentials or verification/reset links into chat.
 
 Account verification and password-reset email delivery remain unverified until an eligible controlled staging account exists and the full lifecycle is tested. Public student registration remains disabled.
+
+
+## SMTP diagnostic attempt failed — 8 November 2026, 11:02 UTC
+
+The owner initiated the staging-only SMTP diagnostic from the authenticated operations page. The endpoint returned `smtp_diagnostic_unavailable`; no delivery receipt was confirmed. Brevo delivery therefore remains **failed/unverified**.
+
+Render application logs recorded three generic SMTP diagnostic failure warnings at 11:02:12, 11:02:17 and 11:02:26 UTC. The current implementation suppresses provider exception details, so these entries do not establish whether the cause was SMTP configuration/authentication, network/TLS, database rate-limit reservation, or audit persistence. The diagnostic rate-limit reservation occurs before SMTP submission; a failed initial attempt may therefore consume the one-per-hour allowance. Do not ask the owner to retry until the cause and retry window are understood.
+
+GitHub Actions run [42473587753](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42473587753) subsequently completed all three jobs successfully:
+- API/security tests, PostgreSQL migration/schema and disposable local restore rehearsals, and browser acceptance: passed.
+- Post-deployment staging health check: passed.
+- Non-publishing container build: passed.
+
+A follow-up diagnostic observability change has now been committed on `secondary-school-platform-foundation`:
+- The failure log and audit record will include only a bounded phase (`rate_limit_reservation`, `smtp_submission`, or `success_audit`) and exception class.
+- Provider response text, credentials, addresses, hostnames and message content remain excluded.
+- A regression test confirms sensitive exception text is not logged.
+- Commit: `481442a4c2445dd66dae9d46a443bc8523e2bd1f`.
+- CI for this follow-up commit has not yet been verified; it must pass before staging deployment.
+- No SMTP credential values were read or changed. No additional email was sent.
+
+The owner-only diagnostic remains enabled on staging. Public student registration remains disabled. No production deployment, PR merge, or change to `main` was made.

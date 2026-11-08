@@ -724,3 +724,18 @@ Added owner-only create/revoke/expiry controls on /admin/operations. Staging QA 
 - Render deployment dep-dboaenuc6qcc73d3lc00 is live on that commit. Post-deploy Render application log sample contained no error/exception/traceback messages.
 - Read-only live browser run 42501474212 passed 9/9 before the environment-flag deploy. This checkpoint push triggers a fresh read-only browser/health run after the environment update.
 
+
+
+## Final CI and staging control verification — 8 November 2026, 16:51 UTC
+
+- Latest branch head d66cca79bb12221de7228ffc8b49e4b5167f6f66; PR #1 remains open/draft/unmerged.
+- Render app deployment dep-dboaenuc6qcc73d3lc00 is live on a9b7bacd4c3069651319df79ce95ec932a7797fc. Auto-deploy remains off.
+- Push CI 42501847900 and PR CI 42501852204 both fully green. Live read-only staging browser run 42501847936 passed 10/10. Public staging health check passed after deployment.
+- The 10 live tests include a direct check that the staging-only QA and storage diagnostic endpoints return 401 to anonymous callers, proving the owner-gated routes are enabled and protected. The same test confirms public student registration returns the expected disabled response. No real form was submitted and no account was created.
+- Render staging environment now enables STAGING_STORAGE_DIAGNOSTICS_ENABLED and STAGING_QA_IDENTITY_ENABLED; STAGING_QA_EMAIL is set to the previously confirmed owner mailbox. No synthetic QA identity has been issued. Public student registration, export worker and live payments remain disabled.
+- Read-only Neon counts: 0 students, 0 synthetic QA students, 1 active admin, 0 approved curriculum source records and 0 topics. Migration 021 is applied with the matching source blob hash.
+- Cloudflare R2 inventory shows only one bucket, think-tank-private-exports; its managed r2.dev domain is disabled. Neon lists learnwise-private-audio and think-tank-private-exports as private. No second R2 bucket was created, so cross-bucket denial is not yet independently tested.
+- The owner-run storage diagnostic is available at /admin/operations but has not been executed. It will perform synthetic audio and R2 upload/retrieval/checksum/unsigned-denial/deletion from Render. The model-side network still cannot resolve the Neon storage hostname.
+- The owner-run synthetic QA invitation control is also available at /admin/operations. The owner must trigger it, verify the email link and sign in. SMTP delivery remains unverified; the route fails closed and revokes the pending identity if mail submission fails.
+- Authenticated live-staging browser acceptance remains outstanding until that account is issued, verified and used. Do not equate disposable authenticated CI fixtures with live authenticated acceptance.
+

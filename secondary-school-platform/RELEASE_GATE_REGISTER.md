@@ -304,3 +304,14 @@ These templates are preparatory only. They do not constitute legal advice, guard
 - Public student registration, export worker and live payments remain disabled. Staging database has zero student rows, zero synthetic QA rows, one active admin, zero approved curriculum sources and zero topics.
 - Still release-blocking: actual SMTP delivery/account recovery; owner-run storage and synthetic QA acceptance; Paystack sandbox; licensed curriculum and qualified teacher review; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration/RPO/RTO; monitoring alert delivery; second administrator; independent security review. Production remains NOT READY.
 
+
+
+## Current verified staging checkpoint — 8 November 2026, 16:54 UTC
+
+- Latest development branch head: d77ab84e0c1e044795f26b8311160496edb1da63. PR #1 remains open/draft/unmerged. Main is restored to its pre-checkpoint commit 5d6d93ceec31ff3eb6851d567e4d61f7477bc492 and has no net changes from this work.
+- Render staging deployment dep-dboaenuc6qcc73d3lc00 is live on app commit a9b7bacd4c3069651319df79ce95ec932a7797fc. Push CI 42502089029 and PR CI 42502095096 passed; live read-only browser 42502089014 passed 10/10. A newer documentation-only branch head is undergoing its own checks.
+- Synthetic QA lifecycle is implemented, migration 021 applied and CI-tested. Owner-only create/revoke/expiry controls are enabled in staging. No synthetic account exists yet. The owner must send the invitation, verify the link and sign in before authenticated live-staging acceptance can be completed.
+- Owner-only storage acceptance endpoint/UI is enabled in staging. It performs synthetic private audio and R2 PUT/GET/SHA-256/unsigned-denial/DELETE from the Render runtime. The probe has not yet been run. Neon audio/export buckets are private; Cloudflare inventory contains one R2 bucket only and its managed r2.dev domain is disabled. Cross-bucket denial remains untested because there is no second R2 bucket/credential.
+- Public student registration, export worker and live payments remain disabled. Staging database has zero student rows, zero synthetic QA rows, one active owner admin, zero approved curriculum sources and zero topics.
+- Still release-blocking: SMTP delivery/account recovery; owner-run storage and synthetic QA acceptance; Paystack sandbox; licensed curriculum and qualified teacher review; safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration/RPO/RTO; monitoring alert delivery; second administrator; independent security review. Production remains NOT READY.
+

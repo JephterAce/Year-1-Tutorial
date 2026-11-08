@@ -172,3 +172,8 @@ Production remains blocked. Do not merge PR #1, deploy the new branch, apply mig
 - Exact-head workflow 42460006986 at commit 1316c1d2fa789c2f67eb389ac10605f0489ac374: 260 unit/security tests passed; staging-health passed HTTP 200/status=ok/database/secondary-school-api; non-publishing container build passed.
 - Syntax check failed on a literal escaped newline in admin/exports.html. Fixed in commit 81d33094f0506a71c9f72984133075fa75c84252 and confirmed by reading back the updated source.
 - A fresh exact-head workflow run has not yet been returned for the corrected commit. Migration replay, backup/restore, PostgreSQL schema/E2E and authenticated browser steps remain unverified for this increment. Keep migration 020 and the matching code deployment blocked pending a full green run.
+
+
+### Full CI pass and latest export browser test — 8 November 2026
+- Run 42460191786 (run 1180, commit 7de9dd1d0da160e634673fc813a16befb147e383) completed fully green: API tests, staging health and container build. It verified 260 unit/security tests, syntax, 20 numbered migration replays/idempotency, backup/restore, PostgreSQL schema integration, assessment/payment E2E, student journey and existing browser acceptance.
+- Run 42460225765 (run 1184, commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) includes new export-workspace browser coverage and anonymous /admin/exports access checks. All steps through student journey passed; Playwright installation/browser acceptance remained in progress at the latest inspection. Keep the export UI acceptance gate open until that run completes.

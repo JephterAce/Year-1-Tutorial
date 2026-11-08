@@ -154,6 +154,22 @@ class BulkExportWorkerTests(unittest.TestCase):
             with self.assertRaises(ExportWorkerError):
                 _storage()
 
+    def test_export_bucket_versioning_must_be_disabled(self):
+        class VersionedBucket:
+            def get_bucket_versioning(self, **kwargs):
+                return {"Status": "Enabled"}
+        values = {
+            "DATA_EXPORT_AWS_ACCESS_KEY_ID": "test-key",
+            "DATA_EXPORT_AWS_SECRET_ACCESS_KEY": "test-secret",
+            "DATA_EXPORT_AWS_ENDPOINT_URL_S3": "https://storage.example.test",
+            "DATA_EXPORT_AWS_REGION": "eu-central-1",
+            "DATA_EXPORT_STORAGE_BUCKET": "private-export-bucket",
+        }
+        with patch.dict(os.environ, values, clear=True):
+            with patch("student_bulk_export.boto3.client", return_value=VersionedBucket()):
+                with self.assertRaises(ExportWorkerError):
+                    _storage()
+
 
 if __name__ == "__main__":
     unittest.main()

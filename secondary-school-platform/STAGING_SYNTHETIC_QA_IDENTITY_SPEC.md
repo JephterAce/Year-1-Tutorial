@@ -1,6 +1,6 @@
 # Staging Synthetic QA Identity Lifecycle
 
-**Status:** Initial implementation committed to the development branch; awaiting full CI and staging-promotion verification. Not deployed to Render or applied to managed staging.  
+**Status:** Initial implementation passed full CI, migration 021 is applied to managed staging, and the staging deployment is live. The feature remains disabled; no synthetic account has been provisioned. Authenticated live acceptance remains outstanding.  
 **Scope:** Staging only. This document does not authorise public registration, production changes, real learner onboarding, or guardian-consent processing.
 
 ## Why a separate lifecycle is required
@@ -68,7 +68,7 @@ The existing student registration path is not suitable for creating a QA identit
 1. Initial implementation is committed on `secondary-school-platform-foundation`: migration 021, service, owner-only provisioning/revoke/expiry routes, default-deny session boundary, invitation email, QA account UI state, and learner-count/payment/assessment/export exclusions.
 2. Run full unit/security, migration replay/idempotency, PostgreSQL integration and browser CI.
 3. Review the migration and route diff for consent isolation and default-deny access.
-4. Obtain explicit staging-promotion approval before applying the migration or deploying the code to Render.
+4. Completed for the current staging checkpoint: migration 021 applied transactionally after rehearsal and CI; Render deployment `dep-dboa3995efls73d9hd70` is live on tested commit `c691d6026588ab36d2c5cd7de73fd9567a792b00`.
 5. Provision one synthetic identity through the owner-only flow, verify invitation delivery, perform read-only authenticated browser acceptance, then revoke and confirm cleanup.
 6. Keep public student registration disabled throughout. Production remains blocked pending all independent safeguarding, legal, curriculum, security and operational approvals.
 

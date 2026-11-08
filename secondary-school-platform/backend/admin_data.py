@@ -34,8 +34,8 @@ def overview():
     try:
         with connection() as conn:
             counts = conn.execute("""SELECT
-              (SELECT count(*) FROM students) AS students,
-              (SELECT count(*) FROM payment_transactions) AS payments,
+              (SELECT count(*) FROM students WHERE is_synthetic_qa=false) AS students,
+              (SELECT count(*) FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false) AS payments,
               (SELECT count(*) FROM topics WHERE status='published' AND curriculum_status='published') AS published_topics,
               (SELECT count(*) FROM assessment_issue_reports WHERE status IN ('submitted','under_review')) AS open_reports""").fetchone()
             _audit(conn, session, "admin.overview.viewed", "platform_metrics", 1)
@@ -51,7 +51,7 @@ def students():
         limit=max(1,min(int(request.args.get("limit","50")),100))
         with connection() as conn:
             rows=conn.execute("""SELECT id,display_name,email,class_level,account_status,created_at
-              FROM students ORDER BY created_at DESC LIMIT %s""",(limit,)).fetchall()
+              FROM students WHERE is_synthetic_qa=false ORDER BY created_at DESC LIMIT %s""",(limit,)).fetchall()
             _audit(conn,session,"admin.student_records.viewed","students",len(rows))
         return jsonify({"items":[{"id":str(r["id"]),"display_name":r["display_name"],
           "email":r["email"],"class_level":r["class_level"],"account_status":r["account_status"],
@@ -69,7 +69,7 @@ def payments():
         limit=max(1,min(int(request.args.get("limit","50")),100))
         with connection() as conn:
             rows=conn.execute("""SELECT id,provider_reference,amount_kobo,currency,status,created_at,verified_at
-              FROM payment_transactions ORDER BY created_at DESC LIMIT %s""",(limit,)).fetchall()
+              FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false ORDER BY p.created_at DESC LIMIT %s""",(limit,)).fetchall()
             _audit(conn,session,"admin.payment_records.viewed","payment_transactions",len(rows))
         return jsonify({"items":[{"id":str(r["id"]),"reference":r["provider_reference"],
           "amount_kobo":int(r["amount_kobo"]),"currency":r["currency"].strip(),
@@ -91,7 +91,7 @@ def finance_summary():
                 """SELECT status,count(*) AS transaction_count,
                           COALESCE(sum(amount_kobo),0) AS amount_kobo,
                           count(*) FILTER (WHERE verified_at IS NULL) AS unverified_count
-                   FROM payment_transactions GROUP BY status ORDER BY status"""
+                   FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false GROUP BY status ORDER BY status"""
             ).fetchall()
             exceptions = conn.execute(
                 """SELECT
@@ -99,7 +99,7 @@ def finance_summary():
                      count(*) FILTER (WHERE status IN ('initialized','pending')
                        AND created_at < now()-interval '24 hours') AS stale_pending,
                      count(*) FILTER (WHERE status IN ('refunded','reversed')) AS reversed_or_refunded
-                   FROM payment_transactions"""
+                   FROM payment_transactions p JOIN students s ON s.id=p.student_id WHERE s.is_synthetic_qa=false"""
             ).fetchone()
             _audit(conn, session, "admin.finance_summary.viewed", "payment_transactions", len(rows))
         return jsonify({

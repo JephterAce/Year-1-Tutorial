@@ -9,7 +9,7 @@ import re
 
 ALLOWED_FORMATS = frozenset({"csv", "json"})
 ALLOWED_CLASSES = frozenset({"SS1", "SS2", "SS3"})
-MAX_BULK_ROWS = 100_000
+MAX_BULK_ROWS = 1_000
 MAX_DATE_RANGE_DAYS = 366
 
 # Explicit allowlist: never export credentials, tokens, answer keys or provider secrets.

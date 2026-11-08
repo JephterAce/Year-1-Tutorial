@@ -950,3 +950,9 @@ For each continuation, report Completed / Verified / Passed / Failed / Outstandi
 - The development branch head immediately before this final handover pointer was `c421b4e305731c8850b6b3bd93e856578fbbd27c`; it was 30 commits ahead of the live Render deployment SHA `c5805a6fc463fd040e64e8223d58ed3dbf37d143`.
 - `STATUS.md` was updated at commit `280927402ffaf68c6cae46a8bcfc86e74fdb7d50` to record that pointer and the CI caveat. This master-file update itself will create a newer branch head; verify the resulting latest SHA before any subsequent action.
 - PR #1 is still open/draft/unmerged. The new export implementation has not been deployed. A fresh exact-head CI run remains mandatory before migration 020 or staging deployment.
+
+
+### CI correction checkpoint — 8 November 2026
+- Workflow 42460006986 at commit 1316c1d2fa789c2f67eb389ac10605f0489ac374 passed 260 unit/security tests, public staging health (HTTP 200/status=ok/database/secondary-school-api) and non-publishing container build. Its syntax step failed on a literal escaped newline in the new exports admin page.
+- Fixed the page in commit 81d33094f0506a71c9f72984133075fa75c84252. A subsequent GitHub read-back confirms the literal `\\n` is gone and the source has a real line break between the two declarations. No fresh exact-head CI result has been returned yet; do not assume the corrected head passes syntax or the later migration/backup/PostgreSQL/browser steps.
+- Current branch head at this checkpoint is 81d33094f0506a71c9f72984133075fa75c84252, 54 commits ahead of the live Render SHA. PR #1 remains draft/unmerged; no new deployment or managed migration occurred.

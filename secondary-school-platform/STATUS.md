@@ -643,3 +643,7 @@ Production release remains blocked. Migration 020 and its matching code deployme
 
 #### Remaining release blockers
 SMTP delivery/password recovery; Paystack sandbox E2E; private audio provider playback acceptance; licensed NERDC content and teacher sign-off; child safeguarding/guardian consent/NDPA/DPIA; Nigerian legal review; managed backup restoration/RPO/RTO; monitoring and alert delivery; independent security review; second active owner administrator; private export bucket and worker scheduling. Staging is not production-ready.
+
+
+### Owner-confirmed live staging health — 8 November 2026
+The owner opened `https://learnwise-staging-api.onrender.com/health` after deployment and returned the live JSON response `{"mode":"database","service":"secondary-school-api","status":"ok"}`. Public staging health is therefore verified after deployment. Authenticated browser acceptance against the deployed service remains outstanding.

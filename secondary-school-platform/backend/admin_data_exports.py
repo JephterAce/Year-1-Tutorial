@@ -37,7 +37,7 @@ def request_export():
     if error:
         return error
     data = request.get_json(silent=True) or {}
-    from export_policy import validate_export_request
+    from export_policy import validate_export_request, MAX_BULK_ROWS
     try:
         spec = validate_export_request(data)
     except ValueError as exc:
@@ -77,6 +77,24 @@ def request_export():
                 "date_from": spec.date_from,
                 "date_to": spec.date_to,
             }
+            if spec.scope == "bulk":
+                clauses, params = [], []
+                if spec.class_levels:
+                    clauses.append("class_level = ANY(%s)")
+                    params.append(list(spec.class_levels))
+                if spec.date_from and spec.date_to:
+                    clauses.append("created_at >= %s::date")
+                    params.append(spec.date_from)
+                    clauses.append("created_at < (%s::date + interval '1 day')")
+                    params.append(spec.date_to)
+                scope_sql = "SELECT count(*) AS total FROM students"
+                if clauses:
+                    scope_sql += " WHERE " + " AND ".join(clauses)
+                total = int(conn.execute(scope_sql, params).fetchone()["total"])
+                if total == 0:
+                    return jsonify({"error": "no_students_match_export_scope"}), 400
+                if total > MAX_BULK_ROWS:
+                    return jsonify({"error": "export_scope_exceeds_row_limit", "maximum_rows": MAX_BULK_ROWS}), 413
             row = conn.execute(
                 """INSERT INTO student_data_exports(
                      requested_by_admin_id,target_student_id,export_scope,export_format,filters

@@ -1063,3 +1063,10 @@ Continue from the latest development branch head; do not reset, rebase destructi
 Keep the existing Render service on Free, auto-deploy disabled, export worker disabled, student registration disabled, and live payments disabled. No new subscriptions, paid upgrades, billable resources, domain purchase, production deployment or PR merge without explicit owner approval. Keep the user interaction minimal; only request real credentials/decisions/approvals when unavoidable.
 
 Detailed evidence: `secondary-school-platform/DEPENDENCY_EXECUTION_CHECKPOINT_2026-11-08.md` and `secondary-school-platform/STATUS.md`.
+
+
+### Latest execution addendum — 8 November 2026
+- Live read-only staging browser acceptance passed 9/9 tests in run [42497224093](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497224093). Authenticated live-staging acceptance remains outstanding; no live accounts or write operations were used.
+- A Neon private-audio data-plane smoke test was attempted with a 76-byte synthetic payload and a short-lived presigned PUT. The execution host could not resolve the Neon storage hostname (HTTP 000); the bucket prefix was subsequently confirmed empty. No object was uploaded. This remains blocked, not passed. The test payload SHA-256 and full result are recorded in the dependency checkpoint.
+- Latest docs-only updates were recorded in `STATUS.md` and `DEPENDENCY_EXECUTION_CHECKPOINT_2026-11-08.md`. No production changes or staging application deployment were triggered.
+- Latest verified full platform CI run before the newest docs-only record: [42497412130](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497412130), all jobs passed on commit `1fd1753cf571b0c20e46286dfca2451bd9b4cdaf`. Newer documentation commits have their own checks in progress; verify those before declaring the branch head green.

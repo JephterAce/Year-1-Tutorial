@@ -205,15 +205,17 @@ class AdminSmtpDiagnosticRouteTests(unittest.TestCase):
     def test_owner_diagnostic_sends_only_to_signed_in_admin_and_audits(self):
         with patch.dict(os.environ, {
             "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
-        }, clear=True), patch("app._current_admin", return_value=self.owner), \\
-             patch("admin_auth.reserve_admin_smtp_diagnostic") as throttle, \\
-             patch("admin_auth.record_admin_audit") as audit, \\
-             patch("identity_email.send_admin_diagnostic") as send:
-            response = self.client.post(
-                "/api/v1/admin/diagnostics/smtp",
-                headers={"X-CSRF-Token": "test-csrf"},
-            )
+        }, clear=True):
+            with patch("app._current_admin", return_value=self.owner) as current_admin:
+                with patch("admin_auth.reserve_admin_smtp_diagnostic") as throttle:
+                    with patch("admin_auth.record_admin_audit") as audit:
+                        with patch("identity_email.send_admin_diagnostic") as send:
+                            response = self.client.post(
+                                "/api/v1/admin/diagnostics/smtp",
+                                headers={"X-CSRF-Token": "test-csrf"},
+                            )
         self.assertEqual(response.status_code, 202)
+        current_admin.assert_called_once_with(require_csrf=True)
         send.assert_called_once_with("admin@example.test")
         throttle.assert_called_once_with("admin@example.test")
         audit.assert_called_once()

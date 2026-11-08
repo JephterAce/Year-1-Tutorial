@@ -166,3 +166,10 @@ The repository contains a substantial implementation foundation. It is **not app
 ### Full disposable CI pass and export-browser acceptance in progress — 8 November 2026
 - Run 42460191786 (run 1180, commit 7de9dd1d0da160e634673fc813a16befb147e383) completed successfully across API tests, staging health and container build. It passed 260 unit/security tests, Python/JS/shell syntax, all 20 numbered migrations and idempotency, local backup/restore, PostgreSQL schema integration, assessment/payment E2E, registration-to-results and the existing authenticated/anonymous browser suite.
 - Run 42460225765 (run 1184, commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) adds the new export workspace Playwright test (queue/cancel and no self-approval) and anonymous exports page redirect. Unit tests, syntax, migration replay, backup/restore, PostgreSQL integration, assessment/payment E2E and student journey all passed; Playwright was still installing/running at the latest check.
+
+
+### Full exact-code CI verification — 8 November 2026
+- Run 42460225765 (run 1184) at code commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3 completed green across API tests, staging health and container build.
+- Verified 260 unit/security tests; Python/frontend-admin JavaScript/shell syntax; all 20 numbered migration replays and idempotency; guarded local backup/restore; PostgreSQL schema integration; assessment/payment E2E; registration-to-results; anonymous/authenticated Playwright suite. New export acceptance verified the restricted page, queued filtered bulk request, requester cancellation and no self-approval button. Anonymous visitors are redirected from /admin/exports.
+- Public staging health returned HTTP 200 with status=ok, mode=database, service=secondary-school-api. Container build was non-publishing.
+- The tested code commit is included in the current development branch; subsequent commits only update docs. No code was deployed. Managed staging remains at 019; migration 020 remains isolated.

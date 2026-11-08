@@ -280,3 +280,35 @@ A ready Neon branch is not a completed backup restore drill. No snapshot schedul
 ### Release posture
 
 No production deployment, PR merge, main-branch change, live payment, export worker activation or learner-data processing occurred. PR #1 remains open/draft/unmerged. Public student onboarding remains blocked by the external gates already recorded above.
+
+
+## Continuation — latest branch and staging verification, 8 November 2026
+
+### Current GitHub branch and checks
+
+The development branch head is `a21f73a97c7f29313f9bebf31b9b4af7bfe5f746`. The automatic push and pull-request CI runs on this exact commit both completed successfully:
+- Push run: `42466299588` — all three jobs passed (`api-tests`, `container-build`, `staging-health`).
+- PR run: `42466302891` — all three jobs passed.
+
+The push run's staging-health job completed successfully against the configured Render health URL. Earlier health job logs explicitly captured HTTP 200 and JSON `status=ok`, `mode=database`, `service=secondary-school-api` at 09:10:14Z. The current GitHub API confirms the latest exact-head health job passed, but its detailed response body was not separately retrieved in this verification.
+
+### Render staging deployment and configuration
+
+A fresh Render service read confirms:
+- Service: `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`)
+- URL: `https://learnwise-staging-api.onrender.com`
+- Branch: `secondary-school-platform-foundation`
+- Region: Frankfurt; plan: Free; one instance
+- Auto-deploy: disabled
+- Failure notifications: `default` (no named alert recipient/delivery evidence)
+- Latest deployment: `dep-dbo3n5hsrm7s73at12j0`, status `live`, application commit `f73f14592d9a21af803f01e6408dd06d4bb269a3`
+
+Render event history shows the latest build and deployment both succeeded. The currently live application deployment is still `f73f145`; the later GitHub commits are checkpoint/workflow changes and are not deployed. No code deployment was triggered because no application-code change was made and auto-deploy is intentionally disabled.
+
+### Live-staging browser workflow dispatch
+
+The revised workflow `.github/workflows/think-tank-staging-browser.yml` is read-only and is intended to run `staging.spec.js` only. The latest returned GitHub Actions run collection contains only the normal `secondary-school-platform.yml` push/PR workflows; it does not show a completed run of the dedicated browser workflow. The connected GitHub tool set exposes workflow-run reads and reruns, but no `workflow_dispatch` action. Therefore live-staging browser acceptance remains **not verified**. No claim of completion is made.
+
+### Release posture unchanged
+
+PR #1 remains open, draft and unmerged; base branch `main` remains unchanged. No production deploy, live payment, export worker activation, learner-data processing or public student onboarding occurred. Provider tests, private audio acceptance, curriculum licensing/teacher review, safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, second administrator, managed restore drill, monitoring alert delivery, independent security review, and R2 object-level tests remain open. Do not enable exports or launch publicly until the corresponding evidence and approvals exist.

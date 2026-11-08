@@ -32,10 +32,10 @@ class ExportWorkerError(RuntimeError):
 
 def _storage():
     cfg = {
-        "access_key_id": os.environ.get("AWS_ACCESS_KEY_ID", ""),
-        "secret_access_key": os.environ.get("AWS_SECRET_ACCESS_KEY", ""),
-        "endpoint_url": os.environ.get("AWS_ENDPOINT_URL_S3", ""),
-        "region": os.environ.get("AWS_REGION", ""),
+        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),
+        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", ""),
+        "endpoint_url": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3", ""),
+        "region": os.environ.get("DATA_EXPORT_AWS_REGION", ""),
         "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET", ""),
     }
     if not all(isinstance(v, str) and v.strip() for v in cfg.values()):

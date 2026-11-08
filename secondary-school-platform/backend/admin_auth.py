@@ -20,7 +20,7 @@ def _digest(value):
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-def _rate_limit(email, limit=6):
+def _rate_limit(email, limit=6, action="admin_login", window_minutes=15):
     pepper = os.environ.get("AUTH_RATE_LIMIT_PEPPER", "")
     if len(pepper) < 32:
         raise RuntimeError("AUTH_RATE_LIMIT_PEPPER must contain at least 32 characters")
@@ -28,7 +28,7 @@ def _rate_limit(email, limit=6):
     with connection() as conn:
         row = conn.execute(
             """INSERT INTO auth_rate_limits(action_key,subject_hash,window_started_at,attempts)
-               VALUES ('admin_login',%s,now(),1)
+               VALUES (%s,%s,now(),1)
                ON CONFLICT(action_key,subject_hash) DO UPDATE SET
                  window_started_at=CASE WHEN auth_rate_limits.window_started_at < now()-interval '15 minutes'
                    THEN now() ELSE auth_rate_limits.window_started_at END,
@@ -36,8 +36,8 @@ def _rate_limit(email, limit=6):
                    THEN 1 ELSE auth_rate_limits.attempts+1 END,
                  blocked_until=CASE WHEN auth_rate_limits.window_started_at < now()-interval '15 minutes'
                    THEN NULL WHEN auth_rate_limits.attempts >= %s
-                   THEN now()+interval '15 minutes' ELSE auth_rate_limits.blocked_until END
-               RETURNING attempts,blocked_until""", (key, limit)
+                   THEN now()+(%s * interval '1 minute') ELSE auth_rate_limits.blocked_until END
+               RETURNING attempts,blocked_until""", (action, key, window_minutes, window_minutes, window_minutes, limit, window_minutes)
         ).fetchone()
     if row["attempts"] > limit or (row["blocked_until"] and row["blocked_until"] > datetime.now(timezone.utc)):
         raise AdminAuthError("Email or password is incorrect.")
@@ -118,3 +118,11 @@ def record_admin_audit(admin_id, event_type, entity_type, entity_id, details=Non
                VALUES (%s,%s,%s,%s,%s)""",
             (admin_id, event_type[:100], entity_type[:100], entity_id[:200], Jsonb(details or {}))
         )
+
+
+def reserve_admin_smtp_diagnostic(email):
+    """Allow one staging SMTP diagnostic per admin per hour."""
+    email = email.strip().lower() if isinstance(email, str) else ""
+    if not email:
+        raise AdminAuthError("Administrator email is unavailable.")
+    _rate_limit(email, limit=1, action="admin_smtp_diagnostic", window_minutes=60)

@@ -961,3 +961,10 @@ For each continuation, report Completed / Verified / Passed / Failed / Outstandi
 ### Green CI checkpoint and export browser acceptance — 8 November 2026
 - Run 42460191786 (run 1180, commit 7de9dd1d0da160e634673fc813a16befb147e383) completed fully green: API tests, staging health and non-publishing container build all succeeded. The API job passed 260 unit/security tests, syntax, migration replay/idempotency for all 20 numbered migrations, backup/restore, PostgreSQL schema integration, assessment/payment E2E, student journey and the existing authenticated/anonymous Playwright suite.
 - Run 42460225765 (run 1184, commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3) includes the additional owner export request/cancel/self-approval browser acceptance and anonymous exports-page redirect check. At the latest inspection, every step through the student journey had passed; Playwright installation/browser tests were still in progress. Recheck the run before marking this additional UI test passed.
+
+
+### Full exact-code CI pass — 8 November 2026
+- Run 42460225765 (run 1184) completed fully green at code commit 5673a7f8660ef1dd0a7f5ca407e47f3d9ae3f0e3: api-tests, staging-health and container-build all succeeded.
+- It passed 260 unit/security tests; Python/JS/shell syntax; all 20 numbered migration replays and idempotency; local backup/restore; PostgreSQL schema integration; assessment/payment E2E; registration-to-results; and all anonymous/authenticated Playwright browser checks, including the new private export page, bulk request/cancel, no self-approval and anonymous redirect tests.
+- Staging health returned HTTP 200/status=ok/mode=database/service=secondary-school-api. The container build was non-publishing. The tested code commit is included in the current development branch; later commits update documentation only.
+- This is disposable CI evidence, not a deployment or real-provider acceptance. Render remains on c5805a6; managed Neon remains at migrations 001–019; migration 020 exists only on the isolated rehearsal branch. Do not promote without explicit owner approval.

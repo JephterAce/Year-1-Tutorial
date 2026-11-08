@@ -1175,3 +1175,13 @@ Safeguards remain: student public registration explicitly disabled; synthetic QA
 - Next unavoidable owner action: sign in at `https://learnwise-staging-api.onrender.com/admin/operations`. Click **Run private storage acceptance** to execute the R2 and Neon audio PUT/GET/SHA-256/unsigned-denial/DELETE probes from Render's runtime. Then use **Send test email to my admin address**; if it succeeds, click **Send synthetic QA invitation**, verify the email link, and sign in to complete authenticated live browser acceptance. Do not share the password or verification link in chat.
 - Storage diagnostics and QA invitation are owner-only, CSRF-protected, staging-only and audited. QA identity expires within 24 hours and is blocked from all learner data/learning routes. SMTP failure revokes the pending QA identity. The storage diagnostic can be retried after 15 minutes.
 - Still blocked on actual owner execution: storage data-plane acceptance, SMTP delivery, synthetic account verification and authenticated live browser acceptance. All other human/provider dependencies remain as listed in the release gate register.
+
+
+## Final branch/reference check — 8 November 2026, 16:55 UTC
+
+- Development branch latest commit before this note: d77ab84e0c1e044795f26b8311160496edb1da63. PR #1 remains draft/open/unmerged.
+- Main is restored to 5d6d93ceec31ff3eb6851d567e4d61f7477bc492, its pre-checkpoint head; the temporary documentation-only commits were rolled back. No lasting main-branch changes remain.
+- Application remains deployed to staging only at dep-dboaenuc6qcc73d3lc00 / a9b7bacd4c3069651319df79ce95ec932a7797fc.
+- Exact-head push/PR CI and live browser evidence at d803ece32de57bbffd3ede3ad48b52e951ab7e64 are green; current documentation-only head d77ab84e0c1e044795f26b8311160496edb1da63 has fresh CI/browser checks running.
+- Owner actions still required at /admin/operations: run private storage acceptance, then send and verify the synthetic QA invitation. No synthetic account or storage test object has been created. Public student registration remains disabled.
+

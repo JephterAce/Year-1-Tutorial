@@ -81,7 +81,7 @@ test("administrator identity endpoint rejects anonymous sessions", async ({ requ
 });
 
 test("administrator pages redirect anonymous visitors to the dedicated login page", async ({ page }) => {
-  for (const path of ["/admin", "/admin/operations", "/admin/reviews"]) {
+  for (const path of ["/admin", "/admin/operations", "/admin/reviews", "/admin/exports"]) {
     const response = await page.goto(path);
     expect(response.status(), path).toBe(200);
     await expect(page).toHaveURL(/\/admin\/login$/);

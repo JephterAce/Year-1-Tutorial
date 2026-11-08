@@ -514,3 +514,23 @@ A follow-up diagnostic observability change has now been committed on `secondary
 - No SMTP credential values were read or changed. No additional email was sent.
 
 The owner-only diagnostic remains enabled on staging. Public student registration remains disabled. No production deployment, PR merge, or change to `main` was made.
+
+
+## Diagnostic observability deployed — 8 November 2026, 12:58 WAT
+
+The diagnostic observability improvement was deployed to the existing staging service after its exact-commit workflow completed successfully.
+
+- Code commit: `fa8d3377aac13068cc17801874c85a48c504a9e4`.
+- Render deployment: `dep-dbo67aajnfac73e0kt2g`.
+- Render result: `live`, completed at 11:58:08Z.
+- GitHub Actions run: [42474098220](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42474098220), all three jobs completed successfully: API/security tests, post-deployment staging health, and non-publishing container build. Browser acceptance, PostgreSQL migrations/schema, assessment/payment tests, student journey, and disposable local backup/restore rehearsals passed within the API job.
+- Render auto-deploy remains disabled. No production service, `main`, or PR merge was touched.
+
+The improved diagnostic now records only the failure phase and exception class. It does not log provider response text or secrets. No second SMTP attempt was made; Brevo delivery remains failed/unverified until a controlled retry is authorised after the one-hour limit and the new logs are inspected.
+
+## Work that can proceed without external credentials or appointments
+
+- Draft release approval and sign-off templates are being consolidated in `RELEASE_GATE_REGISTER.md`. These are blank working templates, not approvals.
+- Safe staging test-account design remains constrained by the need to distinguish synthetic QA records from real student records and never fabricate guardian consent. Public registration remains disabled.
+- R2/audio live object tests still require provider credentials accessible to the staging runtime and safe test fixtures. Paystack provider E2E still requires sandbox credentials and an owner-controlled test.
+- No managed recovery schedule, billable service, public onboarding, or live payment was enabled.

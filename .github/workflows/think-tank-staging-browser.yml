@@ -31,6 +31,8 @@ jobs:
       - name: Install Chromium
         working-directory: secondary-school-platform/browser-acceptance
         run: npx playwright install --with-deps chromium
+      # Triggered on a workflow-file change as a post-rollout check too; the push path filter
+      # keeps this read-only suite independent of app-code deployment.
       # Keep this live-service workflow read-only. The authenticated.spec.js suite
       # creates/publishes an assessment and writes export/privacy-request records;
       # run that suite only against isolated disposable fixtures, never live staging.

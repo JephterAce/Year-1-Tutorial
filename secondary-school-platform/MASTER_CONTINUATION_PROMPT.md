@@ -944,3 +944,9 @@ Current branch/PR head: fc77dbc714af2103b50f58c02bff844556a776ad. Exact-head pus
 
 ### Required reporting format
 For each continuation, report Completed / Verified / Passed / Failed / Outstanding / Blocked / GitHub / Render / Neon / Approval required. Distinguish source-code implementation, disposable CI evidence, isolated Neon rehearsal, managed staging state and production state. Never call the platform launch-ready while any external/legal/safeguarding/security gate remains open.
+
+
+### Final repository pointer for this checkpoint — 8 November 2026
+- The development branch head immediately before this final handover pointer was `c421b4e305731c8850b6b3bd93e856578fbbd27c`; it was 30 commits ahead of the live Render deployment SHA `c5805a6fc463fd040e64e8223d58ed3dbf37d143`.
+- `STATUS.md` was updated at commit `280927402ffaf68c6cae46a8bcfc86e74fdb7d50` to record that pointer and the CI caveat. This master-file update itself will create a newer branch head; verify the resulting latest SHA before any subsequent action.
+- PR #1 is still open/draft/unmerged. The new export implementation has not been deployed. A fresh exact-head CI run remains mandatory before migration 020 or staging deployment.

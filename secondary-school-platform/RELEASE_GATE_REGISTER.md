@@ -140,3 +140,29 @@ Repository/PR head 2098d7ad37b830a84a1120654afc56b5152ae4ef passed exact-head pu
 
 ### Handover pointer — 7 November 2026
 Current branch/PR head fc77dbc714af2103b50f58c02bff844556a776ad passed exact-head push 42417089283 and PR 42417094553. Application code tested at a057289c4930b86b6bdd5176bd71e61a9536f044; later commits update workflow and documentation evidence only. Public staging health passed HTTP 200/status=ok/mode=database/service=secondary-school-api.
+
+
+### Engineering continuation and release-gate reconciliation — 8 November 2026
+
+- Current work remains on the development branch and draft PR #1. The latest Render deployment is live at commit c5805a6fc463fd040e64e8223d58ed3dbf37d143; Render auto-deploy is off. No deployment of the newer export work was triggered.
+- Public staging health was independently verified by GitHub Actions on the 7 November run: HTTP 200, JSON status=ok, mode=database, service=secondary-school-api. The 8 November Render deploy itself also completed successfully and the service booted Gunicorn workers.
+- Managed staging migration history contains exactly 001–019; all 19 source_blob_sha values match the canonical migration file blob SHAs. Staging remains unchanged by this continuation.
+- Additive migration 020_private_student_export_approval.sql was rehearsed only on isolated Neon branch br-divine-bread-bah58gvn. Column, constraint and index inspection passed; its rehearsal history row matches the development migration blob SHA. Migration 020 is not applied to managed staging.
+- New development-branch work adds admin export request/approval/download routes, a restricted admin page, a streaming worker, private bucket configuration placeholders, checksum manifest, five-minute signed links, 24-hour default expiry, retry/cancel controls, request caps and two-person approval. Subject-scoped bulk exports fail closed. The worker remains disabled; no export bucket, credentials or schedule exists.
+- Two-person export approval is not currently usable: managed staging has one active owner admin. A second authorised administrator must be provisioned offline before any admin export can be approved. No bypass is permitted.
+- The latest read-only staging counts are 6 subjects, 0 topics, 0 students, 1 active admin and 0 data-rights requests. Curriculum population cannot proceed until authorised source materials, rights and teacher review are established.
+- The first CI run that included the new export tests (run 42459497431, commit e7f4d41) passed staging-health and non-publishing container-build jobs but the API test job failed on two new test fixtures missing export_scope. The fixture was corrected in subsequent branch commits. No later exact-head CI result is currently available; do not mark the new export code as CI-passed until a fresh run completes.
+
+#### External / owner-controlled gates still open
+- SMTP delivery and password/account recovery end-to-end verification.
+- Paystack sandbox end-to-end checkout, webhook, entitlement and reconciliation.
+- Private audio bucket configuration, real approved test asset, entitlement playback and range/expiry acceptance.
+- Authorised NERDC materials/licensing, curriculum mapping, teacher review and publication; staging currently has zero topics.
+- Child safeguarding, guardian consent, age verification, NDPA assessment/DPIA and retention schedule.
+- Nigerian legal review of terms, privacy, child data, payment and retention obligations.
+- Managed backup/PITR restoration drill, measured RPO/RTO and recovery-owner sign-off.
+- Monitoring, incident-alert delivery and incident-response rehearsal.
+- Independent security review and remediation evidence.
+- Dedicated private data-export bucket, second active export approver, scheduled worker/expiry cleanup and subject-scoped export support.
+
+Production remains blocked. Do not merge PR #1, deploy the new branch, apply migration 020 to managed staging, provision billable services, or claim launch readiness until the relevant tests, external evidence and explicit owner approvals are recorded.

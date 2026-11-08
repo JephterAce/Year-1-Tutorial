@@ -139,7 +139,7 @@ def _multipart_upload(client, bucket, key, chunks, content_type, export_id):
 
 
 def _student_query(filters):
-    clauses, params = [], []
+    clauses, params = ["is_synthetic_qa=false"], []
     classes = filters.get("class_levels") or []
     if classes:
         clauses.append("class_level = ANY(%s)")
@@ -162,7 +162,7 @@ def _export_chunks(conn, job, generated_at):
     if filters.get("subject_slugs"):
         raise ExportWorkerError("subject_scoped_bulk_export_not_supported")
     if job["export_scope"] == "individual":
-        query, params = "SELECT id FROM students WHERE id=%s ORDER BY id", [job["target_student_id"]]
+        query, params = "SELECT id FROM students WHERE id=%s AND is_synthetic_qa=false ORDER BY id", [job["target_student_id"]]
     else:
         query, params = _student_query(filters)
 

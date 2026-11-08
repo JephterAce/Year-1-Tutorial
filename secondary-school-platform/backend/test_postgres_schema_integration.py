@@ -24,9 +24,9 @@ class PostgreSQLSchemaIntegrationTests(unittest.TestCase):
             rows = conn.execute(
                 "SELECT version FROM learnwise_schema_migrations ORDER BY version"
             ).fetchall()
-            self.assertEqual(len(rows), 20)
+            self.assertEqual(len(rows), 21)
             self.assertEqual(rows[0][0], "000_DATABASE_SCHEMA.sql")
-            self.assertEqual(rows[-1][0], "019_student_data_rights_requests.sql")
+            self.assertEqual(rows[-1][0], "020_private_student_export_approval.sql")
 
 
     def test_ai_quota_and_lesson_content_tables_exist(self):

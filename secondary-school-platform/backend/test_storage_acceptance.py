@@ -52,7 +52,7 @@ class StagingStorageDiagnosticRouteTests(unittest.TestCase):
              patch("admin_auth.reserve_admin_storage_diagnostic"), \
              patch("storage_acceptance.run_private_storage_acceptance", return_value=result), \
              patch("admin_auth.record_admin_audit") as audit:
-            response = self.client.post("/api/v1/admin/diagnostics/storage")
+            response = self.client.post("/api/v1/admin/diagnostics/storage", json={})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.get_json()["passed"])
         audit.assert_called_once()

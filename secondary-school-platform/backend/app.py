@@ -708,7 +708,8 @@ def _qa_identity_gate():
 def provision_staging_qa_identity():
     if not _qa_identity_gate():
         return jsonify({"error": "not_found"}), 404
-    if request.data:
+    payload = request.get_json(silent=True)
+    if request.data and payload != {}:
         return jsonify({"error": "request_body_not_allowed"}), 400
     session = _current_admin(require_csrf=True)
     if not session:

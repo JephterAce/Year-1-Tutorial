@@ -1002,3 +1002,7 @@ Owner approval was received to apply migration 020 and deploy the tested code to
 1. Verify public `/health` HTTP 200 and expected JSON from a network-enabled browser/runner.
 2. Run authenticated browser acceptance against the deployed Render URL using an authorised existing staging admin session; do not request or expose passwords in chat.
 3. Record exact outcomes and continue with provider/safeguarding/legal gates only when owner credentials, reviewers and approvals are available.
+
+
+### Owner-confirmed post-deployment health — 8 November 2026
+The owner opened `https://learnwise-staging-api.onrender.com/health` and supplied the response `{"mode":"database","service":"secondary-school-api","status":"ok"}`. Mark public staging health verified after deployment. The only immediate live acceptance item still outstanding is authenticated browser acceptance against the deployed Render service; do not request or receive passwords in chat.

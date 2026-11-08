@@ -559,3 +559,17 @@ After Render deployment `dep-dbo9jk0u01pc73ekc330` reached `live`, GitHub Action
 - `container-build`: passed; image was built but not published.
 
 This closes the post-deployment public health check for this deployment. It does not close authenticated browser acceptance against the live staging database or provider-level SMTP, R2, audio and Paystack acceptance. The browser tests in this CI run used disposable fixtures, not real staging learner accounts.
+
+
+## Live staging read-only browser acceptance — 8 November 2026
+
+The GitHub connector did not expose a workflow-dispatch operation. To complete the safe live-service check without requiring owner interaction, the existing read-only workflow `.github/workflows/think-tank-staging-browser.yml` was updated to run on a push that changes that workflow file on `secondary-school-platform-foundation`, while retaining its manual-dispatch option. It still runs only `staging.spec.js`; the write-capable authenticated suite remains excluded from live staging.
+
+- Workflow commit: `4fbd37980ef91252e1c887f4a3ddd51103999cd8`.
+- Run: [42497224093](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497224093), event `push`, branch `secondary-school-platform-foundation`.
+- Result: **passed**, 9/9 browser tests.
+- Verified in a real browser against the live staging URL: health readiness; student-facing page delivery; registration/sign-in/recovery controls present without submitting real data; keyboard/mobile accessibility; anonymous student identity/private learning API denial; anonymous assessment/private-audio action denial; anonymous admin identity denial; admin-page redirect; separate admin login page.
+- This is **live read-only browser acceptance**, not authenticated student/admin acceptance. No live account was created or used, no forms were submitted, and no learner or payment records were changed. Authenticated live-staging acceptance remains blocked until a safe synthetic account lifecycle is implemented and tested.
+- Artifact: `think-tank-staging-browser-acceptance` (14-day retention), run artifact ID `13624340958`.
+
+The workflow's push trigger is limited to updates of this workflow file on the development branch. Render auto-deploy is disabled; this GitHub workflow change did not deploy application code. `main` and PR merge state were not changed.

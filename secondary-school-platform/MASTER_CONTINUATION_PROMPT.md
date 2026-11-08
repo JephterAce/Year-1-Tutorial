@@ -1195,3 +1195,14 @@ Safeguards remain: student public registration explicitly disabled; synthetic QA
 - Main remains at its original pre-checkpoint head 5d6d93ceec31ff3eb6851d567e4d61f7477bc492. PR #1 remains open/draft/unmerged.
 - Owner-only controls are ready at /admin/operations. Storage probe and synthetic QA invitation have not been executed; no synthetic identity or storage test object exists. The owner session is required to run them.
 
+
+
+## Storage acceptance enablement and post-deploy verification — 8 November 2026, 17:10 UTC
+
+- Render staging flag `STAGING_STORAGE_DIAGNOSTICS_ENABLED=true` is enabled. Deployment `dep-dboapnh5efls73dbg5ug` completed successfully on code commit `771f5afa225a67503dd3d5d786a7cd7eb89c61ee`.
+- The Operations page has an owner-only **Run private storage acceptance** control. The route is staging-only, requires owner session + CSRF + `settings.manage`, rate-limits to one run per 15 minutes, and tests only random synthetic objects. It verifies upload, retrieval, SHA-256, unsigned-access denial and deletion/absence for private audio and R2 export buckets. It records an audit event and never uses learner data.
+- Enabling the flag only exposes the protected diagnostic; it does not execute it. No owner-triggered run has been recorded. R2 and audio object-level acceptance therefore remain **pending**, not passed. The signed-in owner must click the control at `/admin/operations` and preserve the returned result. Do not bypass authentication or use production.
+- Synthetic QA identity flag remains disabled; no test account has been created. Public registration, live payments and export worker remain disabled.
+- Previous CI/browser results predate this deployment. This documentation push triggers fresh read-only staging health and browser checks against the deployed service. These do not constitute authenticated live-staging acceptance.
+
+No storage object test, live audio playback, Paystack sandbox transaction, production deploy, PR merge or main-branch change was performed in this step.

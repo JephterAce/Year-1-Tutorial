@@ -800,3 +800,17 @@ Production/student onboarding remains blocked until all applicable release gates
 - New Render deployment dep-dboaenuc6qcc73d3lc00 is live on commit a9b7bacd4c3069651319df79ce95ec932a7797fc after the environment update. Render application logs showed no error/exception/traceback entries in the post-deploy sample.
 - Push CI 42501474162 and PR CI 42501478189 passed all jobs on the application commit, including new storage diagnostic unit/route tests, PostgreSQL migration and restore rehearsals, synthetic identity lifecycle tests, authenticated/anonymous local browser tests, container build and staging health. Read-only live browser run 42501474212 passed 9/9 before the environment-flag deploy; a fresh post-environment-update health/browser run is triggered by this checkpoint update.
 
+
+## Latest verified staging state — 8 November 2026, 16:51 UTC
+
+- Current development branch head: d66cca79bb12221de7228ffc8b49e4b5167f6f66. PR #1 remains draft/open/unmerged; main remains untouched.
+- Application deployment: Render deployment dep-dboaenuc6qcc73d3lc00 is live on application commit a9b7bacd4c3069651319df79ce95ec932a7797fc. Render auto-deploy remains disabled.
+- Staging feature flags: owner-only storage diagnostics and synthetic QA invitation are enabled. Public student registration remains disabled. Export worker and live payments remain disabled.
+- Exact-head push CI 42501847900 and PR CI 42501852204 both passed all jobs: unit/security, syntax, disposable migration replay, local backup/restore, PostgreSQL schema and lifecycle tests, assessment/payment E2E, student journey, authenticated/anonymous local Playwright and non-publishing container build. Staging health passed.
+- Fresh read-only live browser run 42501847936 passed 10/10 tests against staging after the environment update. It confirmed healthy service, student pages, registration UI, keyboard/mobile accessibility, anonymous learner/assessment/audio denial, owner-only QA/storage diagnostics (401 without admin session), anonymous admin denial, admin redirects and separate login. The test also confirms public registration remains closed.
+- Neon staging: migration 021 is applied; counts remain 0 students, 0 synthetic QA students, 1 active admin, 0 approved curriculum sources and 0 topics.
+- Cloudflare account inventory contains exactly one R2 bucket, think-tank-private-exports. Its managed r2.dev domain is disabled. Neon reports both learnwise-private-audio and think-tank-private-exports as private buckets. No second R2 bucket was created; cross-bucket denial therefore remains untested.
+- The owner-only storage diagnostic control is live at /admin/operations. It has not been run yet. Owner must click “Run private storage acceptance” to execute synthetic audio/R2 PUT, GET, SHA-256, unsigned-denial and DELETE/absence checks from the Render runtime.
+- The synthetic QA invitation control is live on the same page and targets the configured owner mailbox. No synthetic account has been issued. Owner must click “Send synthetic QA invitation”, verify the emailed link and sign in. SMTP delivery is not yet verified; a failed send automatically revokes the pending identity.
+- Authenticated live-staging acceptance remains outstanding until the owner completes the invitation/verification and tests the signed-in synthetic account. CI authenticated tests use disposable local fixtures only.
+

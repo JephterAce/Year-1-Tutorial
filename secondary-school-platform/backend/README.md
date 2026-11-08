@@ -133,3 +133,15 @@ There is deliberately no public administrator registration. To create the first 
 
 
 - When a student supplies a published lesson topic ID, the tutor now retrieves only teacher-approved lesson material for which that student has an active entitlement. The retrieved reference is bounded to 4,000 characters and included in the prompt separately from unverified learner-provided context. Without a topic ID, the tutor can answer general class-level questions but is not curriculum-grounded.
+
+
+## Administrator data exports (migration 020)
+
+- Students can continue to download their own scoped JSON export through the authenticated self-service route. The admin bulk-export workflow is separate.
+- Administrators with the export capability can queue individual or filtered bulk exports. Bulk requests require a class-level or account-created date filter and explicit confirmation. Subject-scoped bulk export is deliberately rejected until its filtering semantics are implemented.
+- A different active administrator must approve a request; the requester cannot approve their own export. Export permissions are currently owner-only. With only one active owner account, no admin export can yet be approved. Do not bypass this separation or create another admin without the owner's controlled offline provisioning decision.
+- Migration 020_private_student_export_approval.sql adds approval, manifest and retry metadata. It is in the development branch and must be rehearsed/upgraded on an isolated staging copy before applying to managed staging.
+- The worker writes newline-delimited JSON or CSV to a dedicated private object-storage bucket using separate DATA_EXPORT_AWS_* credentials. It creates a SHA-256 manifest, uses one repeatable-read/read-only PostgreSQL snapshot, caps an export at 100,000 students, and creates download URLs valid for at most five minutes. Export objects expire after 24 hours by default.
+- Required settings: DATA_EXPORT_STORAGE_BUCKET, DATA_EXPORT_AWS_ENDPOINT_URL_S3, DATA_EXPORT_AWS_REGION, DATA_EXPORT_AWS_ACCESS_KEY_ID, DATA_EXPORT_AWS_SECRET_ACCESS_KEY. These must point to a dedicated private bucket, not the audio bucket. Configure bucket encryption at rest, least-privilege access and lifecycle/retention controls in the storage provider.
+- The worker is fail-closed and disabled unless DATA_EXPORT_WORKER_ENABLED=true. A controlled one-shot run is python student_bulk_export.py once; expiry cleanup is python student_bulk_export.py expire. No Render worker/cron service has been created or scheduled, and no export bucket or credentials have been provisioned.
+- Never place export data, signed URLs, student records or secrets in Git, logs, email attachments or CI artifacts. Deletion/correction fulfilment remains subject to Nigerian legal review, approved retention rules and human review.

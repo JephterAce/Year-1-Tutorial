@@ -709,20 +709,29 @@ def admin_smtp_diagnostic():
         return jsonify({"error": "forbidden"}), 403
     from admin_auth import reserve_admin_smtp_diagnostic, record_admin_audit
     from identity_email import send_admin_diagnostic
+    phase = "rate_limit_reservation"
     try:
         reserve_admin_smtp_diagnostic(session["email"])
+        phase = "smtp_submission"
         send_admin_diagnostic(session["email"])
+        phase = "success_audit"
         record_admin_audit(
             session["admin_id"], "smtp_diagnostic_sent", "admin", session["admin_id"],
             {"channel": "smtp", "result": "accepted_by_smtp"},
         )
         return jsonify({"sent": True, "message": "A diagnostic email was submitted to your administrator address."}), 202
-    except Exception:
-        app.logger.warning("Administrator SMTP diagnostic failed; provider details suppressed")
+    except Exception as exc:
+        # Record only a bounded phase and exception class. Never log provider
+        # response text, hostnames, addresses, credentials or message content.
+        app.logger.warning(
+            "Administrator SMTP diagnostic failed; phase=%s exception_type=%s",
+            phase, type(exc).__name__,
+        )
         try:
             record_admin_audit(
                 session["admin_id"], "smtp_diagnostic_failed", "admin", session["admin_id"],
-                {"channel": "smtp", "result": "failed"},
+                {"channel": "smtp", "result": "failed", "phase": phase,
+                 "exception_type": type(exc).__name__[:80]},
             )
         except Exception:
             app.logger.error("SMTP diagnostic failure could not be audited")

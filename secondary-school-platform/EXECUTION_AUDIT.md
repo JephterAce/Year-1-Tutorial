@@ -125,3 +125,33 @@ The repository contains a substantial implementation foundation. It is **not app
 - `create_attempt` can now require an active, unrevoked entitlement on a published topic of the assessment's subject and class (HTTP 402 `entitlement_required`).
 - Controlled by `ASSESSMENT_REQUIRES_ENTITLEMENT=1`; **off by default** so existing behaviour is unchanged. Decide the product rule (paid-only vs free assessments) before enabling in staging.
 - Unit-tested: flag behaviour only. The SQL path needs the PostgreSQL E2E job (not run locally).
+
+
+## Continuation audit — 8 November 2026
+
+### Render / Neon verification
+- Confirmed Emmanuel's Render workspace (`tea-da2svh0ae00c73cs4qq0`) and inspected service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`). Latest deployment `dep-dbo22jp5efls73cm1sb0` is live at `c5805a6fc463fd040e64e8223d58ed3dbf37d143`; auto-deploy remains disabled and no new deployment was triggered.
+- GitHub Actions staging-health job verified `/health` with HTTP 200 and JSON status=ok, mode=database, service=secondary-school-api. Render logs show Gunicorn workers started and the service is live.
+- Read-only Neon queries confirmed managed staging migration history 001–019 and exact GitHub blob SHA matches for all 19 applied migrations. Counts: 6 subjects, 0 topics, 0 students, 1 active admin, 0 data-rights requests.
+- Verified backup branch `br-super-haze-bazf13ia` and isolated migration rehearsal branch `br-divine-bread-bah58gvn` are ready.
+
+### New implementation: private admin data exports
+- Added migration 020 `020_private_student_export_approval.sql` with a separate approver, approval timestamp, manifest object key, worker start/attempt metadata, distinct-approver constraint, attempt cap and approved-queue index.
+- Added `student_bulk_export.py` for a repeatable-read/read-only snapshot, server-side cursor, streamed NDJSON/CSV, multipart S3-compatible upload, SHA-256 manifest, bounded export size, five-minute signed URL cap and expiry cleanup.
+- Added `admin_data_exports.py` routes for request, list, approve, retry, cancel and download. Requests are rate-limited; bulk requests require explicit confirmation and class/date scope; subject filters fail closed. Requester cannot approve their own job.
+- Added `/admin/exports` restricted admin UI and navigation. Added separate DATA_EXPORT_AWS_* configuration placeholders; the worker remains disabled by default and requires a dedicated private bucket.
+- Updated student export builder to reuse the worker's repeatable-read connection rather than opening a separate connection per student.
+- Added worker and route tests. The first CI run containing these tests (42459497431 at e7f4d41) passed staging-health and non-publishing container-build, but API tests failed on two test fixtures missing `export_scope`. The fixtures were corrected at `df88729f54cf34353943c144de784453da46d23d`; subsequent changes further hardened worker transaction boundaries, empty uploads, expiry, locking, partial-object cleanup and request caps. A fresh exact-head CI result is not yet available; no pass is claimed.
+
+### Isolated migration 020 rehearsal
+- Applied migration 020 only to Neon rehearsal branch `br-divine-bread-bah58gvn`, not managed staging.
+- Read-only schema inspection confirmed six new columns, four new check constraints, the approver foreign key and the approved-queue index.
+- Added rehearsal history entry `020_private_student_export_approval` with source blob SHA `3ee86c0d909f429f6ca5787c47b51f86dfdf9a13`, matching the development branch migration file.
+- Managed staging remains at migration 019. Migration 020 requires explicit owner approval before staging application.
+
+### Remaining blockers / change control
+- Only one active owner admin exists on staging. Two-person export approval cannot be completed until a second owner is provisioned through the controlled offline process.
+- No dedicated data-export bucket, credentials, worker schedule or real export job exists. Worker remains disabled.
+- Staging has zero curriculum topics and zero students. Authorised NERDC material/licensing and teacher review are prerequisites to content population.
+- SMTP delivery/password recovery, Paystack sandbox E2E, private audio storage/playback, child safeguarding/guardian consent/NDPA/DPIA, Nigerian legal review, managed backup restoration/RPO/RTO, monitoring/incident alerting and independent security review remain outstanding.
+- PR #1 remains open/draft/unmerged; `main` and production remain untouched. No new Render deployment or managed staging migration was performed.

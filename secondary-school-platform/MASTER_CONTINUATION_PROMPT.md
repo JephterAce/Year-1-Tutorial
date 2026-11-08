@@ -1036,3 +1036,30 @@ This checkpoint records the latest connected-provider inspection and the owner's
 7. Name an alert recipient/on-call owner and run a controlled notification test; arrange an independent security assessment.
 
 Production/student onboarding remains blocked until all applicable release gates have documentary evidence and separate owner approval.
+
+
+## Continuation update — 8 November 2026, 16:00 UTC
+
+Continue from the latest development branch head; do not reset, rebase destructively, merge PR #1, change `main`, or deploy production.
+
+### Newly verified milestones
+- Private-audio strict object-key and byte-range validation deployed to existing Render staging service `learnwise-staging-api`: deployment `dep-dbo9jk0u01pc73ekc330`, commit `36141466a8226a6f5e4d91b1d6a08f1ebe1d2c79`, status `live`.
+- Exact-commit CI run [42478184387](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42478184387) passed all three jobs. Post-deploy health logged HTTP 200, JSON status `ok`, mode `database`, service `secondary-school-api`.
+- Read-only live staging browser workflow was adjusted to trigger on updates to its own workflow file on the development branch. Run [42497224093](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42497224093) passed 9/9 real-browser checks against live staging: page delivery, account controls, keyboard/mobile accessibility, anonymous API denial and admin access protection. This is not authenticated learner acceptance; no account was created or used.
+- Checkpoint and STATUS files now record the above results and latest Neon audit.
+- Latest fresh read-only Neon counts: 0 students, 1 active admin, 0 topics, 0 approved curriculum source records, 20 migrations. Snapshot list and staging automatic snapshot schedule are both empty. No data or recovery settings were changed.
+
+### Critical next work
+1. Do not enable public student registration. Design and implement a staging-only synthetic QA account lifecycle only after it can guarantee separate QA identity markers, owner-only auth+CSRF, reserved recipient/identity, token hashing, expiry/revocation/cleanup, audit trail, and no false guardian-consent records. Verify that synthetic QA sessions cannot access real learner data. Do not directly insert students with SQL or use the admin bootstrap.
+2. Inspect current SMTP diagnostic failure logs for phase and exception class before considering any retry. The recorded SMTP attempt failed with `smtp_diagnostic_unavailable`; no delivery receipt exists. Do not retry while rate-limited. Never expose provider details or secrets.
+3. Continue only non-destructive private audio/R2/Paystack test preparation until runtime credentials and provider acceptance paths are available. R2 owner-reported secrets are not independently verified; no object PUT/GET/checksum/unsigned denial/cross-bucket/deletion test has run. Audio code deployment does not prove real object upload/playback.
+4. Paystack sandbox E2E requires sandbox credentials in Render and a controlled sandbox transaction; no live charge.
+5. Authenticated live-staging browser acceptance remains outstanding; current live suite is intentionally read-only and anonymous. Keep write-capable browser tests confined to disposable fixtures.
+6. No approved NERDC sources/topics yet; require licensing and qualified teacher review for all 18 mappings. No curriculum publication.
+7. Safeguarding lead, guardian consent, NDPA/DPIA, Nigerian legal counsel, second admin, and independent security reviewer are human dependencies; do not fabricate sign-offs.
+8. Managed recovery remains unverified: no Neon snapshots or schedule, backup branch is not a managed restore. Do not enable a paid schedule or alter root/default branch without explicit approval.
+9. Monitoring alerts remain unverified; Render connector exposes no named alert-recipient/delivery configuration.
+
+Keep the existing Render service on Free, auto-deploy disabled, export worker disabled, student registration disabled, and live payments disabled. No new subscriptions, paid upgrades, billable resources, domain purchase, production deployment or PR merge without explicit owner approval. Keep the user interaction minimal; only request real credentials/decisions/approvals when unavoidable.
+
+Detailed evidence: `secondary-school-platform/DEPENDENCY_EXECUTION_CHECKPOINT_2026-11-08.md` and `secondary-school-platform/STATUS.md`.

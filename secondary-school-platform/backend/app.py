@@ -692,6 +692,43 @@ def _current_admin(require_csrf=False):
     return session
 
 
+@app.post("/api/v1/admin/diagnostics/smtp")
+def admin_smtp_diagnostic():
+    # This endpoint is deliberately opt-in and staging-only. It sends only to
+    # the authenticated administrator's own account address.
+    if (os.environ.get("APP_ENV", "").strip().lower() != "staging" or
+            not _feature_enabled("ADMIN_SMTP_DIAGNOSTIC_ENABLED")):
+        return jsonify({"error": "not_found"}), 404
+    session = _current_admin(require_csrf=True)
+    if not session:
+        return jsonify({"error": "unauthenticated_or_csrf_failed"}), 401
+    from admin_policy import require
+    try:
+        require(session.get("principal"), "settings.manage")
+    except PermissionError:
+        return jsonify({"error": "forbidden"}), 403
+    from admin_auth import reserve_admin_smtp_diagnostic, record_admin_audit
+    from identity_email import send_admin_diagnostic
+    try:
+        reserve_admin_smtp_diagnostic(session["email"])
+        send_admin_diagnostic(session["email"])
+        record_admin_audit(
+            session["admin_id"], "smtp_diagnostic_sent", "admin", session["admin_id"],
+            {"channel": "smtp", "result": "accepted_by_smtp"},
+        )
+        return jsonify({"sent": True, "message": "A diagnostic email was submitted to your administrator address."}), 202
+    except Exception:
+        app.logger.warning("Administrator SMTP diagnostic failed; provider details suppressed")
+        try:
+            record_admin_audit(
+                session["admin_id"], "smtp_diagnostic_failed", "admin", session["admin_id"],
+                {"channel": "smtp", "result": "failed"},
+            )
+        except Exception:
+            app.logger.error("SMTP diagnostic failure could not be audited")
+        return jsonify({"error": "smtp_diagnostic_unavailable", "message": "The diagnostic could not be sent. Check the staging email configuration."}), 503
+
+
 @app.get("/api/v1/admin/auth/me")
 def admin_me():
     session = _current_admin()

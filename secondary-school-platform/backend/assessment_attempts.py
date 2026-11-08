@@ -91,7 +91,7 @@ def create_attempt(student_id, assessment_id, question_count):
             raise AttemptError("not_open", "This assessment has not opened.", 409)
         if assessment["available_until"] and now >= assessment["available_until"]:
             raise AttemptError("closed", "This assessment has closed.", 409)
-        student = conn.execute("SELECT class_level FROM students WHERE id=%s", (student_id,)).fetchone()
+        student = conn.execute("SELECT class_level FROM students WHERE id=%s AND is_synthetic_qa=false", (student_id,)).fetchone()
         if not student or student["class_level"] != assessment["class_level"]:
             raise AttemptError("not_eligible", "You are not eligible for this assessment.", 403)
         if entitlement_required():

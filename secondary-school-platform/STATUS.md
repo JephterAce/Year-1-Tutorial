@@ -1043,3 +1043,13 @@ Do not run a second test until the first safe result has been interpreted. Do no
 8. Appoint a second authorised administrator and complete independent security review.
 
 **Release decision: NOT READY for public onboarding or production.** Keep registration, live payments and export worker disabled. Do not enable paid infrastructure, change secrets, create real student data, merge PR #1, modify `main`, or deploy production without the required owner/legal approvals. Continue all code, test, documentation and non-destructive staging work that does not cross these gates.
+
+
+## Revised NERDC curriculum source discovery — 9 November 2026
+
+- Located NERDC's official revised SSEC landing page with separate SS1, SS2 and SS3 links: https://nerdc.gov.ng/content_manager/new_senior_curriculum_home.html. The linked SSEC portal returned HTTP 403 for SS1/SS2 and 404 for SS3 in this automated access attempt; the actual curriculum files have not been acquired.
+- The official NERDC subject-offerings PDF and Federal Ministry of Education press release dated 3 September 2025 identify the revised SSS structure effective 2025/26: students select 8–9 subjects; English Language, General Mathematics, one trade subject, Citizenship and Heritage Studies and Digital Technologies are the five core/compulsory subjects; Biology, Chemistry, Physics and Further Mathematics are Science-field subjects.
+- This is important for product design: preserve the owner's six requested catalogue subjects, but do not describe all six as compulsory for every learner. Student subject/pathway selection and official SS1–SS3 mapping must be verified before curriculum import.
+- Added NERDC_REVISED_SSEC_ACCESS_FINDINGS_2026-11-09.md with official links, access results, subject-structure implications, licensing questions and follow-up evidence needed. No topic/source rows were inserted; no curriculum content or reuse rights are claimed.
+- Reconciled managed Neon migration history with the current GitHub migration directory: 21/21 source blob checksums match.
+- Current docs/CI commit chain continues to be checked; do not use an earlier passing run as evidence for a later branch head. Latest app deploy remains 7986b4a4cff506bc1d7aef4e39bb67a27e460330; new commits are documentation-only.

@@ -235,11 +235,37 @@ class AdminSmtpDiagnosticRouteTests(unittest.TestCase):
                             )
         self.assertEqual(response.status_code, 503)
         self.assertTrue(any(
-            "phase=rate_limit_reservation" in line and "exception_type=RuntimeError" in line
+            "phase=rate_limit_reservation" in line and "category=internal_error" in line
             for line in captured.output
         ))
         self.assertFalse(any("sensitive provider detail" in line for line in captured.output))
 
+
+    def test_smtp_diagnostic_returns_safe_provider_status_and_code(self):
+        from identity_email import BrevoDeliveryError
+        with patch.dict(os.environ, {
+            "APP_ENV": "staging", "ADMIN_SMTP_DIAGNOSTIC_ENABLED": "1"
+        }, clear=True):
+            with patch("app._current_admin", return_value=self.owner):
+                with patch("admin_auth.reserve_admin_smtp_diagnostic"):
+                    with patch("admin_auth.record_admin_audit") as audit:
+                        with patch("identity_email.send_admin_diagnostic",
+                                   side_effect=BrevoDeliveryError(
+                                       "provider_rejected_request", 401, "unauthorized"
+                                   )):
+                            response = self.client.post(
+                                "/api/v1/admin/diagnostics/smtp",
+                                headers={"X-CSRF-Token": "test-csrf"},
+                            )
+        self.assertEqual(response.status_code, 503)
+        payload = response.get_json()["diagnostic"]
+        self.assertEqual(payload["http_status"], 401)
+        self.assertEqual(payload["provider_error_code"], "unauthorized")
+        self.assertEqual(payload["failure_category"], "provider_rejected_request")
+        self.assertNotIn("api_key", str(response.get_json()).lower())
+        self.assertNotIn("admin@example.test", str(response.get_json()))
+        self.assertEqual(audit.call_args.args[3], "admin")
+        self.assertEqual(audit.call_args.args[5]["http_status"], 401)
 
     def test_smtp_diagnostic_is_never_available_outside_staging(self):
         with patch.dict(os.environ, {

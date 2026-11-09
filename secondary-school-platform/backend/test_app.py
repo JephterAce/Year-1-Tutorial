@@ -264,8 +264,8 @@ class AdminSmtpDiagnosticRouteTests(unittest.TestCase):
         self.assertEqual(payload["failure_category"], "provider_rejected_request")
         self.assertNotIn("api_key", str(response.get_json()).lower())
         self.assertNotIn("admin@example.test", str(response.get_json()))
-        self.assertEqual(audit.call_args.args[3], "admin")
-        self.assertEqual(audit.call_args.args[5]["http_status"], 401)
+        self.assertEqual(audit.call_args.args[2], "admin")
+        self.assertEqual(audit.call_args.args[4]["http_status"], 401)
 
     def test_smtp_diagnostic_is_never_available_outside_staging(self):
         with patch.dict(os.environ, {

@@ -24,6 +24,28 @@ test("owner operations workspace exposes guarded staging acceptance controls", a
   await expect(page.getByRole("button", { name: "Revoke issued QA identity" })).toBeDisabled();
 });
 
+test("owner email diagnostic displays status and provider code", async ({ page }) => {
+  await signInAdmin(page);
+  await page.goto("/admin/operations");
+  await expect(page.locator("#smtpDiagnosticCard")).toBeVisible();
+  await page.route("**/api/v1/admin/diagnostics/smtp", route => route.fulfill({
+    status: 503,
+    contentType: "application/json",
+    body: JSON.stringify({
+      error: "smtp_diagnostic_unavailable",
+      diagnostic: {
+        phase: "brevo_api_submission",
+        failure_category: "provider_rejected_request",
+        http_status: 401,
+        provider_error_code: "unauthorized"
+      }
+    })
+  }));
+  await page.getByRole("button", { name: "Send test email to my admin address" }).click();
+  await expect(page.locator("#smtpDiagnosticMsg")).toContainText("401");
+  await expect(page.locator("#smtpDiagnosticMsg")).toContainText("unauthorized");
+});
+
 test("authenticated administrator creates, reviews and publishes a draft assessment", async ({ page }) => {
   await signInAdmin(page);
   await page.goto("/admin/assessments");

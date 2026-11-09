@@ -858,19 +858,42 @@ def admin_smtp_diagnostic():
     except Exception as exc:
         # Record only a bounded phase and exception class. Never log provider
         # response text, hostnames, addresses, credentials or message content.
+        from identity_email import BrevoConfigurationError, BrevoDeliveryError
+        diagnostic = {
+            "phase": phase,
+            "failure_category": "internal_error",
+            "http_status": None,
+            "provider_error_code": None,
+            "missing_setting": None,
+        }
+        if isinstance(exc, BrevoDeliveryError):
+            diagnostic.update({
+                "failure_category": exc.category,
+                "http_status": exc.http_status,
+                "provider_error_code": exc.provider_error_code,
+            })
+        elif isinstance(exc, BrevoConfigurationError):
+            diagnostic.update({
+                "failure_category": exc.category,
+                "missing_setting": exc.setting,
+            })
         app.logger.warning(
-            "Administrator Brevo API diagnostic failed; phase=%s exception_type=%s",
-            phase, type(exc).__name__,
+            "Administrator Brevo API diagnostic failed; phase=%s category=%s http_status=%s provider_code=%s",
+            phase, diagnostic["failure_category"], diagnostic["http_status"],
+            diagnostic["provider_error_code"],
         )
         try:
             record_admin_audit(
                 session["admin_id"], "smtp_diagnostic_failed", "admin", session["admin_id"],
-                {"channel": "brevo_api", "result": "failed", "phase": phase,
-                 "exception_type": type(exc).__name__[:80]},
+                {"channel": "brevo_api", "result": "failed", **diagnostic},
             )
         except Exception:
             app.logger.error("Brevo API diagnostic failure could not be audited")
-        return jsonify({"error": "smtp_diagnostic_unavailable", "message": "The diagnostic could not be sent. Check the staging email configuration."}), 503
+        return jsonify({
+            "error": "smtp_diagnostic_unavailable",
+            "message": "The diagnostic failed. The safe technical details below contain no credentials or message content.",
+            "diagnostic": diagnostic,
+        }), 503
 
 
 @app.post("/api/v1/admin/diagnostics/storage")

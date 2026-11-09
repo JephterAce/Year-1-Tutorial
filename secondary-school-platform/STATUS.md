@@ -1053,3 +1053,18 @@ Do not run a second test until the first safe result has been interpreted. Do no
 - Added NERDC_REVISED_SSEC_ACCESS_FINDINGS_2026-11-09.md with official links, access results, subject-structure implications, licensing questions and follow-up evidence needed. No topic/source rows were inserted; no curriculum content or reuse rights are claimed.
 - Reconciled managed Neon migration history with the current GitHub migration directory: 21/21 source blob checksums match.
 - Current docs/CI commit chain continues to be checked; do not use an earlier passing run as evidence for a later branch head. Latest app deploy remains 7986b4a4cff506bc1d7aef4e39bb67a27e460330; new commits are documentation-only.
+
+
+## Owner-requested release gates — access and approval assessment (9 November 2026)
+
+The owner requested completion of inbox confirmation, authenticated private audio/R2 acceptance, synthetic-student journey and revocation, Paystack sandbox tests, authorised curriculum and teacher review, legal/safeguarding approval, managed backup/restore/monitoring, independent security review and a second administrator.
+
+- Gmail connector re-check returned no profile and no message results. Inbox receipt cannot be verified from this session; Brevo acceptance is not delivery evidence.
+- Neon project owner subscription is `free_v3`; project history retention is 21,600 seconds (6 hours). Staging branch is Ready and object storage is enabled. The two private buckets remain empty. Managed snapshot list and schedule were empty at the last check. Do not enable a schedule or create billable snapshots until plan eligibility/cost and retention are confirmed; do not claim this is a production backup policy.
+- Authenticated Render Operations-page interaction is not exposed through the connected service-management interface in this session. Therefore no audio/R2 diagnostic, synthetic identity issuance, student login, or revocation was performed. Do not create a student identity by direct SQL.
+- Paystack sandbox secret/webhook configuration cannot be read through Render service metadata. No sandbox payment was initiated and no secret was requested or exposed.
+- NERDC official revised SSEC links and public contact details are documented in `NERDC_REVISED_SSEC_ACCESS_FINDINGS_2026-11-09.md`; automated portal access did not deliver curriculum files. Commercial reuse rights and qualified teacher sign-off remain external approvals; no curriculum content was imported.
+- Safeguarding lead appointment, guardian-consent policy approval, NDPA/DPIA and Nigerian legal review require accountable human sign-off. No approval is implied by code or automated tests.
+- No independent external security reviewer or second authorised administrator is currently recorded. These must be appointed by the owner; automated CI is not an independent security audit.
+
+**Owner action gates:** (1) reconnect Gmail or confirm receipt manually; (2) supply/authorize authenticated staging Operations access and Paystack sandbox setup; (3) identify authorised curriculum/teacher and safeguarding/legal reviewers; (4) approve any paid backup/monitoring tier after cost confirmation; (5) nominate second admin and independent security reviewer. Continue non-destructive engineering work while these are arranged.

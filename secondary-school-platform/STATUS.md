@@ -1010,3 +1010,36 @@ The staging-health CI check passed after the 17:25 environment deployment. Publi
 4. If the request is accepted, confirm whether the message actually arrived. A Brevo `messageId` / HTTP acceptance is not proof of inbox delivery.
 
 Do not run a second test until the first safe result has been interpreted. Do not create another key unless the returned status/code shows that key replacement is warranted. Keep public registration, live payments, synthetic QA issuance and production deployment gated. PR #1 remains draft/open/unmerged; `main` is untouched. No credentials were read or changed by this work.
+
+
+## Current staging execution checkpoint — 9 November 2026
+
+### Source, CI and deployment alignment
+- Development branch: `secondary-school-platform-foundation`; current branch head at this checkpoint: `427822069ab64213527702d24492597ac003f4cf`.
+- PR #1 remains **open, draft and unmerged**. Base `main` remains untouched. Do not merge or change the legacy university Telegram bot.
+- Exact current branch-head GitHub Actions run [42663169695](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42663169695) completed successfully: API/security and PostgreSQL lifecycle/restore/browser tests, non-publishing container build, and public staging-health check all passed.
+- Render service `learnwise-staging-api` (`srv-dbkqcmt9fdbs73c2kdpg`) is **live** on deployment `dep-dbovv70u01pc73frqpag`, application commit `7986b4a4cff506bc1d7aef4e39bb67a27e460330`. Branch-head commits after the deployed application commit are documentation-only; no application redeploy is required. Render auto-deploy remains OFF, Free plan, Frankfurt.
+- Current Render error-log query returned zero error rows. Metrics returned one memory datapoint (~91 MiB); CPU and HTTP request/latency series were empty, so no traffic/performance conclusion is inferred from those metrics. Render request-log query returned no rows. The direct web fetch of `/health` was unavailable in this execution, so the successful exact-head GitHub staging-health workflow is the health evidence used here.
+
+### Read-only managed database and storage verification
+- Neon project `learnwise` (`spring-cloud-84267029`), staging branch `think-tank-staging` (`br-still-cherry-baz7g5hk`) is Ready.
+- Read-only database counts: 21 migration history entries through `021_synthetic_qa_identity`; 0 students; 1 active administrator; 6 subjects; 0 topics; 0 curriculum source records; 0 consent records.
+- Both `learnwise-private-audio` and `think-tank-private-exports` are private. Fresh object listings show both buckets empty.
+- Project snapshot listing is empty and the staging branch snapshot schedule is empty. The pre-existing backup branch is not a managed backup/restore drill. Do not claim managed recovery is complete.
+
+### Email and external acceptance
+- Owner reported that Brevo accepted the diagnostic email submission. Actual mailbox delivery has **not** been independently confirmed; the Gmail connection did not return an accessible mailbox or matching message. Do not equate provider acceptance with inbox receipt.
+- No environment-variable values or secrets were read or changed. The owner-only Operations page remains the required path for email and storage diagnostics.
+- Do not issue a synthetic QA identity until actual inbox receipt and both private storage diagnostics pass. No student or synthetic student records exist.
+
+### Remaining release gates — not cleared
+1. Confirm actual Brevo mailbox receipt and test account recovery end-to-end.
+2. Run the authenticated Render-runtime private audio and R2 storage acceptance; require upload, retrieval, SHA-256, unsigned denial, deletion and absence for each provider.
+3. Only after those pass, issue the short-lived synthetic QA identity, complete authenticated live staging journeys, then revoke it and disable issuance.
+4. Obtain Paystack sandbox credentials and complete checkout/webhook/retry/idempotency/refund/reconciliation tests.
+5. Obtain authorised NERDC curriculum source and reuse rights; independently verify all 18 SS1–SS3 × six-subject combinations with qualified teachers.
+6. Complete guardian/child consent, safeguarding lead and incident procedures, NDPA/DPIA, retention/processor/cross-border review and Nigerian legal sign-off.
+7. Approve RPO/RTO/retention and complete managed backup/PITR and isolated restore acceptance; configure monitoring, named alert recipients and incident drill.
+8. Appoint a second authorised administrator and complete independent security review.
+
+**Release decision: NOT READY for public onboarding or production.** Keep registration, live payments and export worker disabled. Do not enable paid infrastructure, change secrets, create real student data, merge PR #1, modify `main`, or deploy production without the required owner/legal approvals. Continue all code, test, documentation and non-destructive staging work that does not cross these gates.

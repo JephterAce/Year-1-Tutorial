@@ -975,3 +975,14 @@ The staging-health CI check passed after the 17:25 environment deployment. Publi
 3. Owner runs private audio + R2 storage acceptance and shares only the non-secret diagnostic result.
 4. Continue through temporary synthetic QA invitation and authenticated staging acceptance only after both gates pass; then revoke the synthetic identity and disable issuance.
 5. Continue remaining release gates; update this status and the master continuation prompt after each verified milestone.
+
+
+
+## Brevo diagnostic hardening — 9 November 2026
+
+- Updated `backend/identity_email.py` to raise typed, safe diagnostic failures. Provider HTTP failures now retain the numeric HTTP status and only a bounded machine-readable Brevo `code` token; provider `message` and response body are never exposed. Network failures report `connection_error` without a fabricated status. Missing/invalid configuration reports only the setting name and a bounded category.
+- Updated the owner-only Brevo diagnostic endpoint to return a `diagnostic` object containing phase, failure category, HTTP status, provider error code, and (only when applicable) missing setting. The same bounded metadata is audit-logged. API keys, sender/recipient addresses, provider messages, response bodies, endpoints and message content are not included.
+- Added focused tests for HTTP 401, HTTP 400, malicious provider-code rejection, missing API key, connection failure, and redaction of private provider messages. Existing successful-send and identity-link tests remain.
+- Code commits: `fba9cb98b3d4744f61e61a523b9573d765fd5e8c` (email client), `681c56a564caaf3f013303d745d974ce571b9271` (diagnostic route), `6577e205bd8c90ab0c62bbdacf0563eac4c3168f` (tests).
+- **Verification pending:** exact-head CI/test results must be checked before deployment. Render auto-deploy is off; do not redeploy until checks pass and owner approves/required staging change is scheduled. The live diagnostic still requires the authenticated administrator session.
+- This change does not send email, read/change secrets, or alter staging configuration. PR #1 remains draft/unmerged; `main` remains untouched. Public registration, live payments and production deployment remain disabled.

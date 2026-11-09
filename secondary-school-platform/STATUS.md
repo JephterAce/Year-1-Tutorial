@@ -986,3 +986,27 @@ The staging-health CI check passed after the 17:25 environment deployment. Publi
 - Code commits: `fba9cb98b3d4744f61e61a523b9573d765fd5e8c` (email client), `681c56a564caaf3f013303d745d974ce571b9271` (diagnostic route), `6577e205bd8c90ab0c62bbdacf0563eac4c3168f` (tests).
 - **Verification pending:** exact-head CI/test results must be checked before deployment. Render auto-deploy is off; do not redeploy until checks pass and owner approves/required staging change is scheduled. The live diagnostic still requires the authenticated administrator session.
 - This change does not send email, read/change secrets, or alter staging configuration. PR #1 remains draft/unmerged; `main` remains untouched. Public registration, live payments and production deployment remain disabled.
+
+
+## Brevo failure diagnostics deployed end-to-end — 9 November 2026, 17:16 UTC
+
+### Verified implementation and deployment
+- Development branch head deployed to staging: `7986b4a4cff506bc1d7aef4e39bb67a27e460330`.
+- Render deployment `dep-dbovv70u01pc73frqpag` is **live** on that exact commit. Service auto-deploy remains OFF; this was a one-off manual staging deploy after CI passed. No auto-deploy setting change was made.
+- Exact-head CI run [42662442228](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42662442228) completed successfully. API/security + PostgreSQL lifecycle/restore + authenticated browser acceptance, container build and live staging-health checks all passed.
+- Live read-only browser acceptance [42662430725](https://github.com/JephterAce/Year-1-Tutorial/actions/runs/42662430725) passed on the same commit.
+- Backend now returns only bounded safe diagnostic metadata: phase, failure category, numeric HTTP status, validated Brevo machine code, and missing setting name when applicable. It never returns/logs the API key, sender/recipient, provider message/body, endpoint or message content.
+- Admin Operations now preserves the error payload and displays only those approved fields in a preformatted output. A browser regression test simulates a Brevo HTTP 401 with provider code `unauthorized` and confirms the owner sees both values.
+
+### What the available evidence says about the actual email failure
+- The last historic Render application failure before this code was deployed was 8 November 2026 at 23:24 UTC. It recorded phase `brevo_api_submission` and exception class `RuntimeError`, but did not retain an HTTP status or provider code. That old record cannot distinguish a missing/invalid setting, rejected API key/sender, provider validation error or network problem.
+- The separate historic SMTP timeout is from the legacy SMTP path and is not proof that the current Brevo HTTPS API has the same failure.
+- **The underlying provider cause is still unconfirmed.** Render's connected tools do not expose secret environment-variable values and cannot act inside the owner's authenticated browser session/CSRF context. Do not guess or rotate credentials without the new diagnostic evidence.
+
+### One required owner action — run once, then share only safe output
+1. Open [Think Tank Operations](https://learnwise-staging-api.onrender.com/admin/operations) and sign in as the owner.
+2. Under **Staging email delivery test**, click **Send test email to my admin address** once.
+3. Copy only the displayed `diagnostic` object (phase, failure_category, http_status, provider_error_code, missing_setting) into the continuation chat. Never share API keys, passwords, sender/recipient addresses, cookies or screenshots that reveal secrets.
+4. If the request is accepted, confirm whether the message actually arrived. A Brevo `messageId` / HTTP acceptance is not proof of inbox delivery.
+
+Do not run a second test until the first safe result has been interpreted. Do not create another key unless the returned status/code shows that key replacement is warranted. Keep public registration, live payments, synthetic QA issuance and production deployment gated. PR #1 remains draft/open/unmerged; `main` is untouched. No credentials were read or changed by this work.

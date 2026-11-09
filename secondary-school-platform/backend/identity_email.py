@@ -10,17 +10,53 @@ from urllib.parse import urlencode
 BREVO_SEND_URL = "https://api.brevo.com/v3/smtp/email"
 
 
+class BrevoConfigurationError(RuntimeError):
+    """Safe configuration failure; contains only the missing/invalid setting name."""
+    def __init__(self, setting, category="configuration_error"):
+        self.setting = setting
+        self.category = category
+        super().__init__(category)
+
+
+class BrevoDeliveryError(RuntimeError):
+    """Provider failure with deliberately bounded, non-sensitive diagnostic metadata."""
+    def __init__(self, category, http_status=None, provider_error_code=None):
+        self.category = category
+        self.http_status = http_status if isinstance(http_status, int) and 100 <= http_status <= 599 else None
+        # Provider codes are identifiers, not messages. Accept only short ASCII tokens.
+        safe = provider_error_code if isinstance(provider_error_code, str) else ""
+        import re
+        self.provider_error_code = safe[:64] if re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", safe) else None
+        super().__init__(category)
+
+
+def _safe_provider_code(error):
+    """Extract only Brevo's machine-readable 'code'; never expose its message/body."""
+    try:
+        payload = json.loads(error.read(8192).decode("utf-8"))
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    code = payload.get("code")
+    if isinstance(code, str):
+        import re
+        if re.fullmatch(r"[A-Za-z0-9_.-]{1,64}", code):
+            return code
+    return None
+
+
 def _required(name):
     value = os.environ.get(name, "").strip()
     if not value:
-        raise RuntimeError(f"{name} is not configured")
+        raise BrevoConfigurationError(name, "missing_configuration")
     return value
 
 
 def _sender():
     email = _required("BREVO_SENDER_EMAIL")
     if parseaddr(email)[1] != email:
-        raise RuntimeError("Brevo sender email is invalid")
+        raise BrevoConfigurationError("BREVO_SENDER_EMAIL", "invalid_configuration")
     name = os.environ.get("BREVO_SENDER_NAME", "Think Tank").strip()[:70]
     return {"email": email, "name": name}
 
@@ -52,17 +88,17 @@ def _send(recipient, subject, body):
             response_body = response.read(8192)
     except HTTPError as exc:
         # Do not surface provider response bodies; they can contain recipient or account data.
-        raise RuntimeError(f"Brevo API rejected the message (HTTP {int(exc.code)}).") from None
+        raise BrevoDeliveryError("provider_rejected_request", int(exc.code), _safe_provider_code(exc)) from None
     except (URLError, TimeoutError, OSError):
-        raise RuntimeError("Brevo API connection failed.") from None
+        raise BrevoDeliveryError("connection_error") from None
     if status not in (200, 201, 202):
-        raise RuntimeError(f"Brevo API returned unexpected HTTP {status}.")
+        raise BrevoDeliveryError("unexpected_http_status", status)
     try:
         result = json.loads(response_body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError):
-        raise RuntimeError("Brevo API returned an invalid response.") from None
+        raise BrevoDeliveryError("invalid_provider_response", status) from None
     if not isinstance(result, dict) or not isinstance(result.get("messageId"), str):
-        raise RuntimeError("Brevo did not acknowledge the transactional message.")
+        raise BrevoDeliveryError("missing_message_acknowledgement", status)
     return result["messageId"]
 
 

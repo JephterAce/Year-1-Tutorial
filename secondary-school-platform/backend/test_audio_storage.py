@@ -16,6 +16,26 @@ class PrivateAudioStorageTests(unittest.TestCase):
             "AUDIO_STORAGE_BUCKET": "learnwise-private-audio",
         }
 
+    def test_storage_diagnostics_report_precedence_without_exposing_credentials(self):
+        env = {
+            "AUDIO_STORAGE_ACCESS_KEY_ID": "new-access",
+            "AUDIO_STORAGE_SECRET_ACCESS_KEY": "new-secret",
+            "AUDIO_STORAGE_ENDPOINT_URL_S3": "https://account123.r2.cloudflarestorage.com",
+            "AUDIO_STORAGE_BUCKET": "learnwise-private-audio",
+            "AWS_ACCESS_KEY_ID": "old-access",
+            "AWS_SECRET_ACCESS_KEY": "old-secret",
+            "AWS_ENDPOINT_URL_S3": "https://old-account.r2.cloudflarestorage.com",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            diagnostic = audio_storage.storage_config_diagnostics()
+        self.assertEqual(diagnostic["access_key_source"], "AUDIO_STORAGE_ACCESS_KEY_ID")
+        self.assertEqual(diagnostic["secret_key_source"], "AUDIO_STORAGE_SECRET_ACCESS_KEY")
+        self.assertEqual(diagnostic["endpoint_account_id"], "account123")
+        self.assertTrue(diagnostic["access_key_aliases_conflict"])
+        self.assertTrue(diagnostic["secret_key_aliases_conflict"])
+        self.assertNotIn("new-access", str(diagnostic))
+        self.assertNotIn("new-secret", str(diagnostic))
+
     def test_r2_endpoint_always_uses_auto_region_even_with_legacy_aws_region(self):
         env = {
             "AUDIO_STORAGE_ACCESS_KEY_ID": "audio-access",

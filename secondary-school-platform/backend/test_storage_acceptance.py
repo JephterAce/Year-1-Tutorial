@@ -88,7 +88,7 @@ class StorageProbeUnitTests(unittest.TestCase):
             {"Error": {"Code": "404"}, "ResponseMetadata": {"HTTPStatusCode": 404}},
             "HeadObject",
         )
-        with patch("storage_acceptance._unsigned_denied", return_value=True):
+        with patch("storage_acceptance._unsigned_http_denied", return_value=True):
             result = _probe_s3(client, "https://storage.example.test", "auto",
                                "private-bucket", "qa-acceptance/test.wav", payload)
         self.assertTrue(result["upload"])
@@ -230,6 +230,65 @@ class ExportStorageConfigurationDiagnosticsTests(unittest.TestCase):
         self.assertEqual(result["endpoint_account_id"], "b8d5a16d7a33f342f0b790bdf8717e07")
         self.assertEqual(result["region"], "auto")
         self.assertNotIn("active-export-secret", str(result))
+
+
+class R2RawUnsignedHttpProbeTests(unittest.TestCase):
+    def test_bare_http_probe_accepts_only_401_or_403_as_denial(self):
+        import io
+        from urllib.error import HTTPError
+        from storage_acceptance import _unsigned_http_denied
+
+        for status in (401, 403):
+            error = HTTPError(
+                "https://account.r2.cloudflarestorage.com/private/key",
+                status,
+                "Denied",
+                {},
+                io.BytesIO(b"<Error><Code>AccessDenied</Code></Error>"),
+            )
+            with patch("urllib.request.urlopen", side_effect=error):
+                self.assertTrue(_unsigned_http_denied(
+                    "https://account.r2.cloudflarestorage.com", "private", "key"
+                ))
+
+    def test_bare_http_probe_preserves_unexpected_provider_error(self):
+        import io
+        from urllib.error import HTTPError
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _unsigned_http_denied
+
+        error = HTTPError(
+            "https://account.r2.cloudflarestorage.com/private/key",
+            400,
+            "Bad Request",
+            {"x-amz-request-id": "request-123"},
+            io.BytesIO(b"<Error><Code>InvalidArgument</Code><Message>Authorization</Message></Error>"),
+        )
+        with patch("urllib.request.urlopen", side_effect=error) as opened:
+            with self.assertRaises(ClientError) as caught:
+                _unsigned_http_denied(
+                    "https://account.r2.cloudflarestorage.com", "private", "key"
+                )
+        self.assertEqual(caught.exception.response["Error"]["Code"], "InvalidArgument")
+        self.assertEqual(caught.exception.response["Error"]["Message"], "Authorization")
+        self.assertEqual(caught.exception.response["ResponseMetadata"]["HTTPStatusCode"], 400)
+        self.assertEqual(caught.exception.response["ResponseMetadata"]["RequestId"], "request-123")
+        request = opened.call_args.args[0]
+        self.assertNotIn("Authorization", request.headers)
+
+    def test_bare_http_probe_rejects_successful_anonymous_read(self):
+        from unittest.mock import Mock
+        from storage_acceptance import _unsigned_http_denied, StorageAcceptanceError
+
+        response = Mock()
+        response.status = 200
+        response.__enter__ = lambda value: value
+        response.__exit__ = Mock(return_value=False)
+        with patch("urllib.request.urlopen", return_value=response):
+            with self.assertRaises(StorageAcceptanceError):
+                _unsigned_http_denied(
+                    "https://account.r2.cloudflarestorage.com", "private", "key"
+                )
 
 
 class UnsignedProbeRegressionTests(unittest.TestCase):

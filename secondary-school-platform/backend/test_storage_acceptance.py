@@ -203,6 +203,33 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertNotIn("private provider detail", str(safe))
 
 
+class ExportStorageConfigurationDiagnosticsTests(unittest.TestCase):
+    def test_diagnostics_identify_selected_r2_alias_without_exposing_secrets(self):
+        from storage_acceptance import _export_storage_config_diagnostics
+        env = {
+            "R2_ACCESS_KEY_ID": "old-export-key-xyz1",
+            "R2_SECRET_ACCESS_KEY": "old-export-secret",
+            "R2_ENDPOINT_URL": "https://wrong-account.r2.cloudflarestorage.com",
+            "R2_BUCKET_NAME": "think-tank-private-exports",
+            "R2_REGION": "eu-central-1",
+            "DATA_EXPORT_AWS_ACCESS_KEY_ID": "active-export-key-b206",
+            "DATA_EXPORT_AWS_SECRET_ACCESS_KEY": "active-export-secret",
+            "DATA_EXPORT_AWS_ENDPOINT_URL_S3": "https://b8d5a16d7a33f342f0b790bdf8717e07.r2.cloudflarestorage.com",
+            "DATA_EXPORT_STORAGE_BUCKET": "think-tank-private-exports",
+            "DATA_EXPORT_AWS_REGION": "eu-central-1",
+        }
+        with patch.dict(os.environ, env, clear=True):
+            result = _export_storage_config_diagnostics()
+        self.assertEqual(result["diagnostic_version"], 2)
+        self.assertEqual(result["access_key_source"], "DATA_EXPORT_AWS_ACCESS_KEY_ID")
+        self.assertEqual(result["access_key_id_suffix"], "b206")
+        self.assertTrue(result["access_key_aliases_conflict"])
+        self.assertTrue(result["secret_key_aliases_conflict"])
+        self.assertEqual(result["endpoint_account_id"], "b8d5a16d7a33f342f0b790bdf8717e07")
+        self.assertEqual(result["region"], "auto")
+        self.assertNotIn("active-export-secret", str(result))
+
+
 class UnsignedProbeRegressionTests(unittest.TestCase):
     def test_unsigned_probe_uses_botocore_unsigned_constant(self):
         """A plain "unsigned" string raises UnknownSignatureVersionError; botocore.UNSIGNED is required."""

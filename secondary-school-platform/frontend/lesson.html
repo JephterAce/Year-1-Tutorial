@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Think Tank lesson</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#172033;font:15px/1.55 system-ui,sans-serif}.wrap{max-width:850px;margin:35px auto;padding:18px}.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:22px;margin-bottom:14px}h1{font-size:27px;margin:0 0 6px}.muted{color:#68758b}.btn{border:0;border-radius:9px;padding:11px 15px;background:#172746;color:white;font-weight:700;cursor:pointer}.btn:disabled{opacity:.5}audio{width:100%;margin-top:12px}.asset{padding:12px 0;border-top:1px solid #e8edf4}.msg{min-height:22px;color:#58677d}</style><link rel="stylesheet" href="learnwise-ui.css"><meta name="theme-color" content="#101b35"></head><body><main class="wrap">
+<a href="/index.html">← Back to lessons</a><section class="card"><div class="muted" id="subject">Think Tank lesson</div><h1 id="title">Loading lesson…</h1><p id="summary" class="muted"></p><div id="objectives"></div><p id="status" class="msg" aria-live="polite"></p><button id="buy" class="btn" hidden>Purchase lesson</button></section>
+<section class="card"><h2>Lesson notes</h2><div id="lessonNotes" class="muted">Loading reviewed notes…</div><div id="lessonPractice"></div><button id="completeLesson" class="btn" hidden>Mark lesson complete</button><p id="lessonProgressMsg" class="msg" aria-live="polite"></p></section>
+<section class="card"><h2>Listen and learn</h2><p class="muted">Audio is delivered only to signed-in students with an active lesson entitlement.</p><div id="media"></div><audio id="player" controls preload="none"></audio><p id="playerMsg" class="msg" aria-live="polite"></p></section>
+<script>
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search),topicId=params.get('topic');
+function cookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}
+async function api(path,body,method='GET'){const headers={'Accept':'application/json'};if(body!==undefined){headers['Content-Type']='application/json';headers['X-CSRF-Token']=cookie('learnwise_csrf')}const r=await fetch(path,{method,credentials:'same-origin',headers,body:body===undefined?undefined:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+async function load(){if(!topicId){$('title').textContent='Lesson not found';return}try{const d=await api('/api/v1/topics/'+encodeURIComponent(topicId));const t=d.topic;$('title').textContent=t.title;$('subject').textContent=t.subject+' · '+t.class_level;$('summary').textContent=t.summary||'';$('objectives').textContent=Array.isArray(t.learning_objectives)?t.learning_objectives.join(' · '):'';if(!t.has_access){$('status').textContent='Purchase is required to access lesson notes and audio.';$('buy').hidden=false;$('buy').onclick=buy;return}await loadLessonContent();if(!t.assets.length){$('status').textContent='No approved audio assets have been published for this lesson yet.';return}t.assets.filter(a=>a.asset_type==='teacher_audio'||a.asset_type==='podcast_audio').forEach(a=>{const row=document.createElement('div');row.className='asset';const label=document.createElement('span');label.textContent=a.asset_type.replaceAll('_',' ')+(a.duration_seconds?' · '+Math.ceil(a.duration_seconds/60)+' min':'');const b=document.createElement('button');b.className='btn';b.textContent='Play';b.onclick=()=>play(a.id);row.append(label,document.createTextNode(' '),b);$('media').append(row)})}catch(e){$('title').textContent='Unable to load lesson';$('status').textContent='Sign in to your student account and try again.'}}
+
+function addText(parent,tag,text,className){const node=document.createElement(tag);node.textContent=text||'';if(className)node.className=className;parent.append(node);return node}
+async function loadLessonContent(){
+ const notes=$('lessonNotes'),practice=$('lessonPractice'),complete=$('completeLesson');
+ try{
+  const data=await api('/api/v1/topics/'+encodeURIComponent(topicId)+'/lesson-content');
+  const content=data.content||{};
+  notes.replaceChildren();
+  if(content.intro)addText(notes,'p',content.intro);
+  (content.sections||[]).forEach(section=>{addText(notes,'h3',section.heading);addText(notes,'p',section.body)});
+  if((content.key_terms||[]).length){addText(notes,'h3','Key terms');(content.key_terms||[]).forEach(term=>{const p=document.createElement('p');const b=document.createElement('strong');b.textContent=(term.term||'')+': ';p.append(b,document.createTextNode(term.definition||''));notes.append(p)})}
+  (content.worked_examples||[]).forEach(example=>{const box=document.createElement('article');box.style.cssText='padding:12px;margin:10px 0;background:#f6f8fc;border-radius:10px';addText(box,'h3',example.title||'Worked example');addText(box,'p',example.problem||'');(example.steps||[]).forEach((step,i)=>addText(box,'p',(i+1)+'. '+step));if(example.answer)addText(box,'p','Answer: '+example.answer);notes.append(box)});
+  if(!notes.children.length)addText(notes,'p','Reviewed lesson notes are not available yet.');
+  practice.replaceChildren();
+  (data.practice||[]).forEach((q,index)=>{
+   const box=document.createElement('fieldset');box.style.cssText='border:1px solid #e2e8f0;border-radius:10px;padding:13px;margin:12px 0';
+   addText(box,'legend',(index+1)+'. '+q.prompt);
+   let control;
+   if(q.type==='single_choice'){
+    control=document.createElement('select');control.style.cssText='width:100%;padding:10px;border:1px solid #d8deea;border-radius:8px';
+    const empty=document.createElement('option');empty.value='';empty.textContent='Choose an answer';control.append(empty);
+    (q.options||[]).forEach(option=>{const o=document.createElement('option');o.value=option.id;o.textContent=option.text;control.append(o)});
+   }else{
+    control=document.createElement('input');control.type=q.type==='numeric'?'number':'text';control.placeholder=q.type==='true_false'?'Enter true or false':'Your answer';control.style.cssText='width:100%;padding:10px;border:1px solid #d8deea;border-radius:8px';
+   }
+   const feedback=document.createElement('p');feedback.className='msg';
+   const submit=document.createElement('button');submit.className='btn';submit.type='button';submit.textContent='Check answer';
+   submit.addEventListener('click',async()=>{submit.disabled=true;try{const value=control.value.trim();if(!value)throw Error('Choose or enter an answer first.');const result=await api('/api/v1/topics/'+encodeURIComponent(topicId)+'/practice/'+encodeURIComponent(q.id),{answer:q.type==='numeric'?Number(value):value},'POST');feedback.textContent=(result.correct?'Correct. ':'Not quite. ')+result.explanation}catch(e){feedback.textContent=e.message}finally{submit.disabled=false}});
+   box.append(control,document.createTextNode(' '),submit,feedback);practice.append(box);
+  });
+  complete.hidden=false;
+  complete.onclick=async()=>{complete.disabled=true;try{await api('/api/v1/topics/'+encodeURIComponent(topicId)+'/progress/complete',{},'POST');$('lessonProgressMsg').textContent='Lesson marked complete. Your dashboard progress has been updated.';complete.textContent='Completed'}catch(e){$('lessonProgressMsg').textContent=e.message;complete.disabled=false}};
+ }catch(e){notes.textContent=e.message}
+}
+async function play(assetId){$('playerMsg').textContent='Authorising private audio…';try{const d=await api('/api/v1/topics/'+encodeURIComponent(topicId)+'/audio/'+encodeURIComponent(assetId)+'/access',{},'POST');$('player').src=d.audio_url;$('player').load();await $('player').play();$('playerMsg').textContent='Audio is ready.'}catch(e){$('playerMsg').textContent='Audio could not be opened: '+e.message}}
+async function buy(){try{const d=await api('/api/v1/topics/'+encodeURIComponent(topicId)+'/checkout',{},'POST');location.assign(d.authorization_url)}catch(e){$('status').textContent='Checkout unavailable: '+e.message}}
+load();
+</script></main></body></html>

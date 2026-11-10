@@ -67,7 +67,7 @@ def _safe_failure(exc, phase):
             # and long token-like values. Never expose raw SDK exceptions.
             safe_message = re.sub(r"https?://\S+", "[url]", message)
             safe_message = re.sub(r"\b[A-Za-z0-9_+/=-]{24,}\b", "[redacted]", safe_message)
-            safe_message = re.sub(r"[^A-Za-z0-9 .,;:_()'\-]", "", safe_message)
+            safe_message = re.sub(r"[^A-Za-z0-9 .,;:_()'\-\[\]]", "", safe_message)
             safe_message = safe_message.strip()[:180]
             if safe_message:
                 error["provider_message"] = safe_message

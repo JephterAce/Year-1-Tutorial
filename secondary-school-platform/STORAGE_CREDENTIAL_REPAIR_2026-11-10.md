@@ -52,13 +52,50 @@ Environment variable values are never stored in this document.
 - The older `learnwise-render-staging-storage` credential remains active but is no longer configured in Render. Keep it until the new storage acceptance test passes; then revoke it if no other staging consumer uses it.
 - Do not revoke the active `learnwise-render-staging-storage-v2` credential or roll the Cloudflare export token again unless a new diagnostic proves a need.
 
-## Required final acceptance
+## Latest post-repair acceptance evidence
 
-The owner-protected staging diagnostic must now be run once by an authenticated owner in the Operations page:
+The newest owner-triggered staging run is recorded in Neon `audit_events` as event `159`, at **2026-11-10 13:24:07 UTC (14:24:07 WAT)**. This supersedes the older failing JSON payload that showed the pre-repair upload errors.
+
+### Audio result: PASS
+
+The audit record confirms all five audio checks were true:
+
+- upload;
+- authenticated retrieval;
+- checksum match;
+- unsigned access denied;
+- deletion verified.
+
+The selected credential fingerprint ended in `5cdc`, matching the active Neon v2 credential. No Neon key rotation is required.
+
+### R2 result: INCOMPLETE — anonymous-access probe
+
+The newest R2 failure is at `r2_unsigned_access`, with provider code `InvalidArgument` and HTTP `400`. It is no longer failing at `r2_upload` with `SignatureDoesNotMatch`.
+
+The code's R2 probe order is authenticated upload, authenticated retrieval, checksum validation, unsigned retrieval, then deletion in a `finally` block. The audit event does not retain intermediate success flags when an exception occurs, so it does not independently record the first three booleans. A subsequent Cloudflare listing showed **zero objects** under the synthetic `qa-acceptance/` prefix.
+
+The Cloudflare control plane was checked read-only after this run:
+
+- R2 managed `r2.dev` access: `enabled=false`.
+- Custom domains attached to this bucket: none.
+- Bucket: `think-tank-private-exports`, jurisdiction `default`.
+- Active export token remains scoped to this bucket with `Workers R2 Storage Bucket Item Write` permission.
+
+Cloudflare's current R2 error-code reference documents missing/invalid S3 credentials as `401 Unauthorized` and insufficient permissions as `403 AccessDenied`. It does **not** document `400 InvalidArgument` as an authentication-denial result:
+https://developers.cloudflare.com/r2/api/error-codes/
+
+Cloudflare documents that R2 buckets are private by default and that public access requires explicitly enabling either a managed `r2.dev` URL or a custom domain:
+https://developers.cloudflare.com/r2/buckets/public-buckets/
+
+The control-plane settings currently verify that this bucket has no configured public route. Nevertheless, do **not** treat the unexplained `400 InvalidArgument` as a successful runtime unsigned-access check. Keep the R2 acceptance gate open until the unsigned probe's behavior is understood and the owner-triggered diagnostic records all five R2 checks as true. Do not rotate the R2 token on this evidence.
+
+## Next action
+
+Investigate why the anonymous S3 `GetObject` probe returns `400 InvalidArgument` for the R2 endpoint. Preserve the current working R2 credential pair and keep the independent Cloudflare public-access settings private. After a code/configuration correction is independently verified, run the owner-protected diagnostic again at:
 
 https://learnwise-staging-api.onrender.com/admin/operations
 
-The previous run's database-backed rate-limit window began at 2026-11-10 13:05:35 UTC. Wait until after **2026-11-10 13:20:35 UTC (14:20:35 WAT)** before running again.
+The latest audit event was recorded at 13:24:07 UTC; the 15-minute diagnostic cooldown therefore expires after **2026-11-10 13:39:07 UTC (14:39:07 WAT)**. Do not repeatedly run the diagnostic during the cooldown.
 
 A complete pass requires, independently for audio and exports:
 
@@ -68,7 +105,7 @@ A complete pass requires, independently for audio and exports:
 - unsigned access is denied;
 - object deletion succeeds.
 
-Do not mark storage complete from deployment health alone. The latest post-fix PUT/GET/checksum/unsigned-denial/DELETE acceptance has not yet been run. After the owner runs it, inspect the new audit event and confirm every check above before revoking the old Neon credential.
+Do not mark storage complete from deployment health or control-plane privacy settings alone.
 
 ## Safety boundaries
 

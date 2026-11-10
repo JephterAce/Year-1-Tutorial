@@ -31,17 +31,22 @@ class ExportWorkerError(RuntimeError):
 
 
 def _storage():
+    # Match the staging acceptance probe: canonical DATA_EXPORT_* settings win,
+    # with the documented R2_* aliases as a fallback for existing deployments.
     cfg = {
-        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", ""),
-        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", ""),
-        "endpoint_url": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3", ""),
-        "region": os.environ.get("DATA_EXPORT_AWS_REGION", ""),
-        "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET", ""),
+        "access_key_id": os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID") or os.environ.get("R2_ACCESS_KEY_ID", ""),
+        "secret_access_key": os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY") or os.environ.get("R2_SECRET_ACCESS_KEY", ""),
+        "endpoint_url": os.environ.get("DATA_EXPORT_AWS_ENDPOINT_URL_S3") or os.environ.get("R2_ENDPOINT_URL", ""),
+        "region": os.environ.get("DATA_EXPORT_AWS_REGION") or os.environ.get("R2_REGION", "auto"),
+        "bucket": os.environ.get("DATA_EXPORT_STORAGE_BUCKET") or os.environ.get("R2_BUCKET_NAME", ""),
     }
     if not all(isinstance(v, str) and v.strip() for v in cfg.values()):
         raise ExportWorkerError("private_export_storage_not_configured")
     if not cfg["endpoint_url"].startswith("https://"):
         raise ExportWorkerError("private_export_storage_requires_https")
+    # Cloudflare R2 requires SigV4 region "auto", regardless of legacy AWS_REGION values.
+    if ".r2.cloudflarestorage.com" in cfg["endpoint_url"].lower():
+        cfg["region"] = "auto"
     audio_bucket = os.environ.get("AUDIO_STORAGE_BUCKET", "").strip()
     if audio_bucket and cfg["bucket"] == audio_bucket:
         raise ExportWorkerError("export_bucket_must_be_separate_from_audio")

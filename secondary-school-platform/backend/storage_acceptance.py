@@ -128,12 +128,14 @@ def _probe_s3(client, endpoint, region, bucket, key, payload):
         if uploaded:
             _step("r2_deletion", lambda: client.delete_object(Bucket=bucket, Key=key))
             try:
-                _step("r2_deletion_verify", lambda: client.head_object(Bucket=bucket, Key=key))
+                client.head_object(Bucket=bucket, Key=key)
             except ClientError as exc:
                 if _status_code(exc) == 404 or exc.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
                     result["deletion"] = True
                 else:
-                    raise StorageAcceptanceError("Deleted object could not be verified absent.") from None
+                    raise StorageProbeStepError("r2_deletion_verify") from exc
+            except Exception as exc:
+                raise StorageProbeStepError("r2_deletion_verify") from exc
             else:
                 raise StorageAcceptanceError("Synthetic object still exists after deletion.")
     return result
@@ -168,12 +170,14 @@ def _probe_audio(cfg, client, key, payload):
         if uploaded:
             _step("audio_deletion", lambda: delete_private_audio_object(key))
             try:
-                _step("audio_deletion_verify", lambda: client.head_object(Bucket=cfg["bucket"], Key=key))
+                client.head_object(Bucket=cfg["bucket"], Key=key)
             except ClientError as exc:
                 if _status_code(exc) == 404 or exc.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
                     result["deletion"] = True
                 else:
-                    raise StorageAcceptanceError("Deleted audio object could not be verified absent.") from None
+                    raise StorageProbeStepError("audio_deletion_verify") from exc
+            except Exception as exc:
+                raise StorageProbeStepError("audio_deletion_verify") from exc
             else:
                 raise StorageAcceptanceError("Synthetic audio object still exists after deletion.")
     return result

@@ -194,15 +194,22 @@ def run_private_storage_acceptance():
     results = {}
 
     try:
-        from audio_storage import storage_config, _s3_client
+        from audio_storage import storage_config, storage_config_diagnostics, _s3_client
+        audio_configuration = storage_config_diagnostics()
         cfg = storage_config()
     except Exception as exc:
         results["audio"] = _safe_failure(exc, "audio_storage_configuration")
         results["audio"]["configured"] = False
+        try:
+            from audio_storage import storage_config_diagnostics
+            results["audio"]["configuration"] = storage_config_diagnostics()
+        except Exception:
+            pass
     else:
         try:
             key = f"qa-acceptance/audio-{key_suffix}.wav"
             results["audio"] = _probe_audio(cfg, _s3_client(cfg), key, payload)
+            results["audio"]["configuration"] = audio_configuration
         except Exception as exc:
             results["audio"] = _safe_failure(exc, getattr(exc, "failure_phase", "audio_storage_transfer"))
 

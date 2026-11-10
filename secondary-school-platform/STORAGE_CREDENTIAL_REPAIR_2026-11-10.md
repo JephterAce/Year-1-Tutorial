@@ -195,3 +195,39 @@ The operator-submitted JSON showing audio `InvalidAccessKeyId` and R2 `Signature
 Do not weaken the acceptance rule: only HTTP 401 or 403 counts as a successful unsigned-access denial. Do not rotate the active Neon or Cloudflare credentials, change R2 bucket permissions, enable a public route, or use a presigned URL as a substitute for this test. Keep the R2 acceptance gate open while investigating why an unsigned S3 `GetObject` is being rejected as HTTP 400 `InvalidArgument` with message `Authorization`.
 
 The latest deployed diagnostic remains staging-only; Render auto-deploy is OFF, production is untouched, and PR #1 remains draft/open/unmerged.
+
+
+## Raw unsigned R2 request probe — CI and staging deployment
+
+To distinguish SDK-specific request handling from the R2 endpoint's treatment of an anonymous request, the staging diagnostic now uses a plain Python HTTPS GET for the R2 unsigned-access step. It sends no `Authorization` header and does not use SigV4. The response parser reads at most 4 KB of XML and retains only the bounded safe provider code, message, request ID and operation.
+
+The rule remains strict:
+
+- HTTP 401 or 403: anonymous access denied (pass);
+- HTTP 2xx: private object exposed (fail);
+- all other HTTP responses, including 400: fail with safe diagnostic details.
+
+The audio test path is unchanged. R2 credentials, permissions, endpoint, bucket settings and public-access configuration are unchanged.
+
+### Verification
+
+- Full GitHub Actions PR workflow on branch head `d1fc658479cd49dc5b96312c6a9f4539bce99c17`: **success** (run 42830156978).
+  - unit and security tests: success;
+  - Python/frontend/script syntax checks: success;
+  - PostgreSQL migrations and guarded backup/restore rehearsals: success;
+  - PostgreSQL schema, synthetic identity, payment end-to-end and student-journey tests: success;
+  - anonymous and authenticated browser acceptance against disposable PostgreSQL fixtures: success;
+  - container build: success;
+  - staging health check: success.
+- Separate read-only browser acceptance workflow: success (run 42830144711).
+- Render staging deployment `dep-dbpiae8n74is73e2627g`: **LIVE**, deployed commit `d1fc658479cd49dc5b96312c6a9f4539bce99c17`, finished `2026-11-10 14:08:23.993 UTC`.
+- Render service is still on `secondary-school-platform-foundation`; auto-deploy remains OFF.
+- PR #1 remains open, draft and unmerged.
+
+### Next owner action
+
+The latest previous storage audit event 166 was recorded at 13:50:07.678 UTC (14:50:07.678 WAT). Its 15-minute cooldown elapsed at 14:05:07.678 UTC (15:05:07.678 WAT). The new diagnostic is now live, so the owner may run **one** fresh storage acceptance at:
+
+https://learnwise-staging-api.onrender.com/admin/operations
+
+Share the full safe JSON result. For R2, check the latest `r2_exports` result's `failure_phase`, `provider_code`, `provider_message`, `provider_request_id`, and `http_status`. Audit the latest `audit_events` entry after the run and verify the `qa-acceptance/` prefix is empty. The R2 gate remains open unless all five checks pass, including a 401/403 result from this raw unsigned request.

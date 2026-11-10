@@ -16,6 +16,21 @@ class StorageAcceptanceError(RuntimeError):
     pass
 
 
+class StorageProbeStepError(RuntimeError):
+    """Safe operation label for a failed synthetic storage probe step."""
+
+    def __init__(self, failure_phase):
+        self.failure_phase = failure_phase
+        super().__init__("Private storage acceptance step failed.")
+
+
+def _step(failure_phase, operation):
+    try:
+        return operation()
+    except Exception as exc:
+        raise StorageProbeStepError(failure_phase) from exc
+
+
 
 def _safe_failure(exc, phase):
     """Return bounded diagnostic metadata only; never expose provider messages or credentials."""
@@ -90,14 +105,14 @@ def _probe_s3(client, endpoint, region, bucket, key, payload):
     }
     uploaded = False
     try:
-        client.put_object(
+        _step("r2_upload", lambda: client.put_object(
             Bucket=bucket, Key=key, Body=payload,
             ContentType="audio/wav" if key.endswith(".wav") else "text/plain",
             Metadata={"purpose": "synthetic-staging-acceptance"},
-        )
+        ))
         uploaded = True
         result["upload"] = True
-        retrieved = client.get_object(Bucket=bucket, Key=key)
+        retrieved = _step("r2_retrieval", lambda: client.get_object(Bucket=bucket, Key=key))
         body = retrieved["Body"].read()
         try:
             retrieved["Body"].close()
@@ -107,13 +122,13 @@ def _probe_s3(client, endpoint, region, bucket, key, payload):
         result["checksum_match"] = hashlib.sha256(body).hexdigest() == digest
         if not result["checksum_match"]:
             raise StorageAcceptanceError("Retrieved object checksum did not match.")
-        _unsigned_denied(endpoint, region, bucket, key)
+        _step("r2_unsigned_access", lambda: _unsigned_denied(endpoint, region, bucket, key))
         result["unsigned_access_denied"] = True
     finally:
         if uploaded:
-            client.delete_object(Bucket=bucket, Key=key)
+            _step("r2_deletion", lambda: client.delete_object(Bucket=bucket, Key=key))
             try:
-                client.head_object(Bucket=bucket, Key=key)
+                _step("r2_deletion_verify", lambda: client.head_object(Bucket=bucket, Key=key))
             except ClientError as exc:
                 if _status_code(exc) == 404 or exc.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
                     result["deletion"] = True
@@ -134,10 +149,10 @@ def _probe_audio(cfg, client, key, payload):
     }
     uploaded = False
     try:
-        put_private_audio_object(key, io.BytesIO(payload), "audio/wav", len(payload))
+        _step("audio_upload", lambda: put_private_audio_object(key, io.BytesIO(payload), "audio/wav", len(payload)))
         uploaded = True
         result["upload"] = True
-        stored = get_private_audio_object(key)
+        stored = _step("audio_retrieval", lambda: get_private_audio_object(key))
         body = stored["Body"].read()
         try:
             stored["Body"].close()
@@ -147,13 +162,13 @@ def _probe_audio(cfg, client, key, payload):
         result["checksum_match"] = hashlib.sha256(body).hexdigest() == digest
         if not result["checksum_match"]:
             raise StorageAcceptanceError("Retrieved audio checksum did not match.")
-        _unsigned_denied(cfg["endpoint_url"], cfg["region"], cfg["bucket"], key)
+        _step("audio_unsigned_access", lambda: _unsigned_denied(cfg["endpoint_url"], cfg["region"], cfg["bucket"], key))
         result["unsigned_access_denied"] = True
     finally:
         if uploaded:
-            delete_private_audio_object(key)
+            _step("audio_deletion", lambda: delete_private_audio_object(key))
             try:
-                client.head_object(Bucket=cfg["bucket"], Key=key)
+                _step("audio_deletion_verify", lambda: client.head_object(Bucket=cfg["bucket"], Key=key))
             except ClientError as exc:
                 if _status_code(exc) == 404 or exc.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
                     result["deletion"] = True
@@ -184,7 +199,7 @@ def run_private_storage_acceptance():
             key = f"qa-acceptance/audio-{key_suffix}.wav"
             results["audio"] = _probe_audio(cfg, _s3_client(cfg), key, payload)
         except Exception as exc:
-            results["audio"] = _safe_failure(exc, "audio_storage_transfer")
+            results["audio"] = _safe_failure(exc, getattr(exc, "failure_phase", "audio_storage_transfer"))
 
     # Canonical DATA_EXPORT_* settings are preferred. R2_* aliases support
     # existing Render deployments without ever reusing the separate audio bucket.
@@ -241,7 +256,7 @@ def run_private_storage_acceptance():
                     client, required["endpoint"], required["region"], required["bucket"], key, payload
                 )
             except Exception as exc:
-                results["r2_exports"] = _safe_failure(exc, "r2_storage_transfer")
+                results["r2_exports"] = _safe_failure(exc, getattr(exc, "failure_phase", "r2_storage_transfer"))
 
     for value in results.values():
         value["passed"] = all(

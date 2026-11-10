@@ -62,8 +62,8 @@ Privately confirm these non-secret values:
 | Variable | Expected value |
 |---|---|
 | AUDIO_STORAGE_BACKEND | neon_s3 |
-| AWS_ENDPOINT_URL_S3 | https://br-still-cherry-baz7g5hk.storage.c-8.eu-central-1.aws.neon.tech |
-| AWS_REGION | eu-central-1 |
+| AUDIO_STORAGE_ENDPOINT_URL_S3 | https://<CLOUDFLARE_ACCOUNT_ID>.r2.cloudflarestorage.com |
+| AUDIO_STORAGE_REGION | auto |
 | AUDIO_STORAGE_BUCKET | learnwise-private-audio |
 
 Also confirm the dedicated Cloudflare R2 audio credentials are present:

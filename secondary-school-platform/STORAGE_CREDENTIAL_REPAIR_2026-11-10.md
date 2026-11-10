@@ -113,3 +113,30 @@ Do not mark storage complete from deployment health or control-plane privacy set
 - Keep PR #1 draft/open/unmerged.
 - Keep Render auto-deploy OFF.
 - Never paste, print, commit or place any credential secret in chat or source control.
+
+
+## Follow-up diagnostic instrumentation — 2026-11-10
+
+To identify the exact reason for the R2 anonymous `GetObject` rejection without changing the acceptance criteria or credentials, the staging diagnostic now retains a small, sanitized set of provider error details:
+
+- provider operation name (for example, `GetObject`);
+- provider request ID, when returned;
+- bounded provider error message, with URLs and long token-like values redacted;
+- existing provider error code and HTTP status.
+
+The error message is no longer discarded, but the raw exception, request headers, credentials, signed URLs and object payloads are never exposed. The test suite was updated to check redaction of long token-like values and preservation of a safe provider message.
+
+Application commit: `e5b2a83aa95681a41ff67762c808e39bec9087bf`  
+Test commit / branch head: `25d32f21b9ab57773a279268e92a286395b8294e`
+
+Render staging deployment: `dep-dbpi0aom7kps73b0d770` — **LIVE**. The service booted successfully. Render auto-deploy remains `off`. No environment variables, Neon credentials, Cloudflare credentials, bucket policies or public-access settings were changed.
+
+The GitHub workflow-run and combined-status queries returned no CI runs/statuses for this commit; therefore this deployment is **not** represented as CI-tested. The diagnostic code is limited to safe error reporting and leaves the strict acceptance rule unchanged: only HTTP 401/403 counts as a successful unsigned-access denial. A 400 remains a failure.
+
+### Next owner action
+
+The 15-minute cooldown from audit event 159 elapsed at 13:39:07 UTC (14:39:07 WAT). The owner may now run **one** fresh test at:
+
+https://learnwise-staging-api.onrender.com/admin/operations
+
+Please return the full safe JSON result. The new `provider_message`, `provider_operation`, and `provider_request_id` fields should tell us whether R2 is rejecting the anonymous request due to unsupported auth semantics, a malformed URL/path, or another specific request parameter. Do not rotate credentials or alter public bucket settings.

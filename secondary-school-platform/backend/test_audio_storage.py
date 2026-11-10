@@ -16,6 +16,25 @@ class PrivateAudioStorageTests(unittest.TestCase):
             "AUDIO_STORAGE_BUCKET": "learnwise-private-audio",
         }
 
+    def test_r2_endpoint_always_uses_auto_region_even_with_legacy_aws_region(self):
+        env = {
+            "AUDIO_STORAGE_ACCESS_KEY_ID": "audio-access",
+            "AUDIO_STORAGE_SECRET_ACCESS_KEY": "audio-secret",
+            "AUDIO_STORAGE_ENDPOINT_URL_S3": "https://account.r2.cloudflarestorage.com",
+            "AUDIO_STORAGE_REGION": "eu-central-1",
+            "AUDIO_STORAGE_BUCKET": "learnwise-private-audio",
+            "AWS_REGION": "us-east-1",
+        }
+        with patch.dict("os.environ", env, clear=True):
+            cfg = audio_storage.storage_config()
+        self.assertEqual(cfg["region"], "auto")
+        self.assertEqual(cfg["bucket"], "learnwise-private-audio")
+
+    def test_non_r2_provider_keeps_its_configured_region(self):
+        with patch.dict("os.environ", self.env, clear=True):
+            cfg = audio_storage.storage_config()
+        self.assertEqual(cfg["region"], "eu-central-1")
+
     def test_upload_rejects_unsupported_type_and_oversize(self):
         with patch.dict("os.environ", self.env, clear=True):
             with self.assertRaises(AudioStorageError):

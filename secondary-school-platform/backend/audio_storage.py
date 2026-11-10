@@ -52,6 +52,9 @@ def storage_config_diagnostics():
     legacy_secret = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
     return {
         "access_key_source": access_source,
+        # Last four characters allow an owner to match the selected Access Key ID
+        # to the active Cloudflare token list without exposing the full identifier.
+        "access_key_id_suffix": os.environ.get(access_source, "")[-4:] if access_source else None,
         "secret_key_source": secret_source,
         "endpoint_source": endpoint_source,
         "credential_sources_mixed": bool(access_source and secret_source and

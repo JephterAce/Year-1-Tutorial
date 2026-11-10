@@ -28,7 +28,7 @@ The browser suite checks:
 - Successful student login requires a designated staging-only test account. Do not use a real learner account.
 - Full assessment completion requires an approved, published staging assessment and a designated test student.
 - Lesson/audio playback requires a published approved lesson asset, a test entitlement and working private-storage credentials. The staging bucket was empty at the last audit.
-- Admin page access and administrator API authentication are checked anonymously. A successful administrator sign-in and capability test still requires the owner bootstrap and an owner-approved staging administrator.
+- Admin page access and administrator API authentication are checked anonymously. The staging database already contains the active owner account `emmanuelbjephter@gmail.com` (role `owner`, created 2026-11-06); no bootstrap is required. A successful live administrator sign-in and capability test still requires an owner-authenticated browser session. The CI authenticated browser suite uses a separate disposable CI-only owner account and does not sign in to the live staging owner account.
 - The admin workspace remains a non-connected preview shell; protecting its route does not mean that CMS, finance or publishing operations are complete.
 
 A successful workflow run is evidence only for the exact deployed staging target and commit tested. The app's existing Render deployment is behind the current development branch. Do not interpret a browser run against the old live SHA as validation of code that has not been deployed.
@@ -82,22 +82,29 @@ Do not reveal or copy secret values. Do not use public-read access. Do not uploa
 
 Record only a checklist outcome (match/mismatch/not checked), not values or secrets. If any item mismatches, stop and obtain owner approval before changing it. The Render environment-variable mutation tool is not a read-only inspection mechanism; do not use it to guess or overwrite unknown values. Any approved environment change must be coordinated with a reviewed deploy because environment updates may cause a restart/redeploy.
 
-## 3. Owner administrator bootstrap
+## 3. Existing owner administrator — verified staging state
 
-The staging database had zero administrator accounts at the last count-only audit. The one-time script is backend/bootstrap_admin.py; it has not been executed.
+The one-time owner bootstrap was already completed on 2026-11-06. A read-only count-and-identity audit on 2026-11-10 confirmed:
 
-**Owner decision required:** select the exact email address that will own the first Think Tank administrator account. Do not use a shared mailbox unless the owner confirms it is controlled and secured.
+- Exactly one administrator account exists.
+- `emmanuelbjephter@gmail.com` is the active account with role `owner`.
+- The `admin.bootstrap.created` audit event exists for that account.
+- The account has the full owner capability set, including `settings.manage`.
+- One unrevoked, unexpired administrator session existed at the time of the audit; the session secret is not retrievable from the database.
 
-After the owner chooses the address:
+**Do not rerun `backend/bootstrap_admin.py`, create a duplicate administrator, reset the owner's password, or revoke existing sessions as part of routine staging acceptance.** The bootstrap script is now a historical recovery mechanism only and refuses to run when any administrator already exists.
 
-1. Confirm privately that the Render service's DATABASE_URL points to Neon branch br-still-cherry-baz7g5hk, database learnwise, and the least-privilege application role learnwise_app. Do not replace the service runtime role with an owner credential.
-2. Confirm there is still no administrator account, using a count-only query.
-3. Generate a unique password of at least 12 characters in a password manager. Do not send it through chat or commit it.
-4. Run the script once from a trusted one-time operator environment using a separate staging-only bootstrap connection with the required INSERT privileges (the verified staging owner role learnwise_owner, or a narrowly scoped temporary bootstrap role). That connection must target branch br-still-cherry-baz7g5hk and database learnwise; do not change the Render service's DATABASE_URL. Set LEARNWISE_ADMIN_EMAIL, LEARNWISE_ADMIN_PASSWORD, and LEARNWISE_BOOTSTRAP_CONFIRM=CREATE_OWNER_ADMIN only in that ephemeral environment.
-5. Confirm exactly one administrator was created and that the audit event exists. Remove bootstrap variables immediately and discard the temporary connection environment.
-6. Test administrator login, session expiry/logout, CSRF enforcement and role/capability checks in the browser suite or a controlled manual session.
+The live private-storage acceptance endpoint requires:
+1. The existing owner to sign in through `/admin/login`.
+2. A valid owner session and CSRF token.
+3. The staging-only `STAGING_STORAGE_DIAGNOSTICS_ENABLED` feature flag.
+4. The owner capability `settings.manage`.
 
-The script is guarded by explicit confirmation, a transaction-scoped advisory lock and an any-existing-admin refusal. Never run it against production or an unverified database. Do not execute it until the owner email is selected and the target is verified.
+The diagnostic runs only synthetic object probes (upload, retrieval, checksum, unsigned-access denial and deletion) independently against the private audio and export buckets. It does not use learner data. It is rate-limited to one run per owner per 15 minutes and writes an audit event.
+
+The CI authenticated browser tests use disposable local PostgreSQL fixtures and a fake `ci-owner@thinktank.invalid` account. They validate admin authentication, CSRF and capability-gated workflows in isolation; they do not authenticate to the live staging owner account or prove live R2 credentials.
+
+Never bypass administrator authentication or create a session directly in SQL. If the owner cannot sign in, use a separately reviewed, email-verified recovery process; do not change the existing password without the owner's explicit approval.
 
 ## 4. Render health-check configuration
 
@@ -111,9 +118,9 @@ Render considers an HTTP health check healthy when the endpoint returns a 2xx or
 
 - Registration and real SMTP verification remain blocked.
 - No staging test student has been provisioned.
-- No owner administrator has been selected or bootstrapped.
+- The owner administrator exists and is verified; live authenticated acceptance remains pending an owner-authenticated session.
 - No approved lesson/audio content or test entitlement exists.
 - Render secret values remain privately unverified.
-- Browser acceptance is now automatable, but the manual workflow has not yet been run against the live service.
+- Anonymous browser acceptance and CI authenticated browser acceptance have passed; the live owner-authenticated storage diagnostic has not yet been run.
 - Render health-check path remains unset until the live /health test passes.
 - No migrations, production deploys, live payments, public audio changes, legacy Telegram bot changes or resource deletions are authorized by this runbook.

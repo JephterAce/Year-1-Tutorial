@@ -154,6 +154,27 @@ class BulkExportWorkerTests(unittest.TestCase):
             with self.assertRaises(ExportWorkerError):
                 _storage()
 
+    def test_storage_uses_r2_aliases_and_forces_auto_region(self):
+        values = {
+            "R2_ACCESS_KEY_ID": "r2-test-key",
+            "R2_SECRET_ACCESS_KEY": "r2-test-secret",
+            "R2_ENDPOINT_URL": "https://account.r2.cloudflarestorage.com",
+            "R2_REGION": "eu-central-1",
+            "R2_BUCKET_NAME": "private-export-bucket",
+        }
+        client = type("BucketClient", (), {
+            "get_bucket_versioning": lambda self, **kwargs: {}
+        })()
+        with patch.dict(os.environ, values, clear=True), \
+             patch("student_bulk_export.boto3.client", return_value=client) as factory:
+            actual_client, bucket = _storage()
+        self.assertIs(actual_client, client)
+        self.assertEqual(bucket, "private-export-bucket")
+        self.assertEqual(factory.call_args.kwargs["aws_access_key_id"], "r2-test-key")
+        self.assertEqual(factory.call_args.kwargs["aws_secret_access_key"], "r2-test-secret")
+        self.assertEqual(factory.call_args.kwargs["region_name"], "auto")
+        self.assertEqual(factory.call_args.kwargs["endpoint_url"], values["R2_ENDPOINT_URL"])
+
     def test_export_bucket_versioning_must_be_disabled(self):
         class VersionedBucket:
             def get_bucket_versioning(self, **kwargs):

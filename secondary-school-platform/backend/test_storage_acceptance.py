@@ -162,10 +162,11 @@ class StorageProbeUnitTests(unittest.TestCase):
 
 
     def test_r2_upload_failure_reports_exact_safe_operation_phase(self):
+        from unittest.mock import Mock
         from botocore.exceptions import ClientError
         from storage_acceptance import _probe_s3, _safe_failure, StorageProbeStepError
 
-        client = __import__("unittest").mock.Mock()
+        client = Mock()
         client.put_object.side_effect = ClientError(
             {"Error": {"Code": "AccessDenied", "Message": "private provider detail"},
              "ResponseMetadata": {"HTTPStatusCode": 403}},

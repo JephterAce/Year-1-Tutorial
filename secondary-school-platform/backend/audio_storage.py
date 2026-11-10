@@ -35,6 +35,36 @@ def storage_config():
         required["region"] = "auto"
     return required
 
+def storage_config_diagnostics():
+    """Expose only non-secret provenance to help diagnose rejected storage credentials."""
+    def selected(primary, fallback):
+        return primary if os.environ.get(primary, "").strip() else fallback if os.environ.get(fallback, "").strip() else None
+
+    access_source = selected("AUDIO_STORAGE_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID")
+    secret_source = selected("AUDIO_STORAGE_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY")
+    endpoint_source = selected("AUDIO_STORAGE_ENDPOINT_URL_S3", "AWS_ENDPOINT_URL_S3")
+    endpoint = os.environ.get(endpoint_source, "") if endpoint_source else ""
+    host = endpoint.removeprefix("https://").split("/", 1)[0].split(":", 1)[0].lower()
+    account_id = host[:-len(".r2.cloudflarestorage.com")] if host.endswith(".r2.cloudflarestorage.com") else None
+    dedicated_access = os.environ.get("AUDIO_STORAGE_ACCESS_KEY_ID", "")
+    legacy_access = os.environ.get("AWS_ACCESS_KEY_ID", "")
+    dedicated_secret = os.environ.get("AUDIO_STORAGE_SECRET_ACCESS_KEY", "")
+    legacy_secret = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+    return {
+        "access_key_source": access_source,
+        "secret_key_source": secret_source,
+        "endpoint_source": endpoint_source,
+        "credential_sources_mixed": bool(access_source and secret_source and
+            access_source.startswith("AUDIO_") != secret_source.startswith("AUDIO_")),
+        "dedicated_and_legacy_keys_both_present": bool(dedicated_access and legacy_access and dedicated_secret and legacy_secret),
+        "access_key_aliases_conflict": bool(dedicated_access and legacy_access and dedicated_access != legacy_access),
+        "secret_key_aliases_conflict": bool(dedicated_secret and legacy_secret and dedicated_secret != legacy_secret),
+        "endpoint_account_id": account_id,
+        "bucket": os.environ.get("AUDIO_STORAGE_BUCKET") or None,
+        "region": "auto" if account_id else (os.environ.get("AUDIO_STORAGE_REGION") or os.environ.get("AWS_REGION") or None),
+    }
+
+
 def _s3_client(cfg):
     import boto3
     from botocore.config import Config

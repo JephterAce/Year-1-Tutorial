@@ -202,5 +202,20 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertEqual(safe["http_status"], 403)
         self.assertNotIn("private provider detail", str(safe))
 
+
+class UnsignedProbeRegressionTests(unittest.TestCase):
+    def test_unsigned_probe_uses_botocore_unsigned_constant(self):
+        """A plain "unsigned" string raises UnknownSignatureVersionError; botocore.UNSIGNED is required."""
+        import storage_acceptance
+        from botocore import UNSIGNED
+        from botocore.exceptions import ClientError
+        denied = ClientError(
+            {"Error": {"Code": "AccessDenied"}, "ResponseMetadata": {"HTTPStatusCode": 403}}, "GetObject")
+        with patch("boto3.client") as factory:
+            factory.return_value.get_object.side_effect = denied
+            self.assertTrue(storage_acceptance._unsigned_denied("https://s3.example.test", "eu-central-1", "bucket", "key"))
+        self.assertIs(factory.call_args.kwargs["config"].signature_version, UNSIGNED)
+
+
 if __name__ == "__main__":
     unittest.main()

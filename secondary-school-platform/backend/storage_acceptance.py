@@ -8,6 +8,7 @@ import re
 import uuid
 import wave
 
+from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
@@ -81,7 +82,7 @@ def _unsigned_denied(endpoint, region, bucket, key):
         "s3",
         endpoint_url=endpoint,
         region_name=region,
-        config=Config(signature_version="unsigned", s3={"addressing_style": "path"}),
+        config=Config(signature_version=UNSIGNED, s3={"addressing_style": "path"}),
     )
     try:
         unsigned.get_object(Bucket=bucket, Key=key)

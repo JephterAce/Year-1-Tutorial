@@ -78,6 +78,16 @@ The expected dedicated audio settings are:
 
 The access key and secret must come from the separate R2 token scoped to the learnwise-private-audio bucket. Do not reuse the think-tank-private-exports token. The legacy AWS_* variables are fallback aliases only; do not overwrite them as part of this check.
 
+For Cloudflare R2 endpoints, the application now forces the S3 signing region to `auto`, even if a stale `AWS_REGION` or `AUDIO_STORAGE_REGION` fallback contains an AWS region. Non-R2 S3 providers retain their configured region. This matches Cloudflare's documented R2 S3 API requirement.
+
+### Interpreting failed acceptance results
+
+- Audio `InvalidRegionName` (HTTP 400) is handled in application code by forcing region `auto` for the R2 endpoint. After the reviewed staging deployment, rerun the diagnostic to verify the upload path.
+- Export `Unauthorized` (HTTP 401) means R2 did not accept the supplied S3 API credentials. Verify privately that `DATA_EXPORT_AWS_ACCESS_KEY_ID` and `DATA_EXPORT_AWS_SECRET_ACCESS_KEY` are the Access Key ID and Secret Access Key from the dedicated `think-tank-private-exports` R2 API token, and that the token is active and scoped to that exact bucket with Object Read & Write. These must be S3 credentials, not the Cloudflare REST API token value or bearer token. Do not reuse the audio token. Do not paste either credential into chat.
+- R2 documents HTTP 401 `Unauthorized` as missing or invalid authentication credentials; HTTP 403 `AccessDenied` is a distinct permissions failure. See https://developers.cloudflare.com/r2/api/error-codes/ and https://developers.cloudflare.com/r2/api/tokens/.
+
+The Render environment mutation tool is not a read-only inspection mechanism. Do not overwrite the export credentials unless their provenance has been privately confirmed.
+
 Do not reveal or copy secret values. Do not use public-read access. Do not upload/delete/rename objects as part of this manual configuration check. The authenticated synthetic storage acceptance diagnostic performs its own temporary upload, retrieval, unsigned-access denial and deletion checks.
 
 Record only a checklist outcome (match/mismatch/not checked), not values or secrets. If any item mismatches, stop and obtain owner approval before changing it. The Render environment-variable mutation tool is not a read-only inspection mechanism; do not use it to guess or overwrite unknown values. Any approved environment change must be coordinated with a reviewed deploy because environment updates may cause a restart/redeploy.

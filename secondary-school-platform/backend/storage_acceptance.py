@@ -212,6 +212,10 @@ def run_private_storage_acceptance():
             results["audio"]["configuration"] = audio_configuration
         except Exception as exc:
             results["audio"] = _safe_failure(exc, getattr(exc, "failure_phase", "audio_storage_transfer"))
+            # Keep non-secret configuration provenance even when the transfer fails.
+            # Without this, the exact diagnostic needed to investigate rejected keys
+            # disappears on the failure path.
+            results["audio"]["configuration"] = audio_configuration
 
     # Canonical DATA_EXPORT_* settings are preferred. R2_* aliases support
     # existing Render deployments without ever reusing the separate audio bucket.

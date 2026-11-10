@@ -75,6 +75,62 @@ def _safe_failure(exc, phase):
         error["retryable"] = True
     return error
 
+def _unsigned_http_denied(endpoint, bucket, key):
+    """Check R2 anonymous access with a bare HTTPS GET, independent of SDK signing."""
+    from urllib.error import HTTPError
+    from urllib.parse import quote
+    from urllib.request import Request, urlopen
+    import xml.etree.ElementTree as ET
+
+    url = f"{endpoint.rstrip('/')}/{quote(bucket, safe='')}/{quote(key, safe='/')}"
+    request = Request(url, headers={"Accept": "application/xml"}, method="GET")
+
+    def raise_provider_error(status, headers, body):
+        values = {}
+        try:
+            root = ET.fromstring(body[:4096])
+            for node in root.iter():
+                name = node.tag.rsplit("}", 1)[-1]
+                if name in {"Code", "Message", "RequestId", "HostId"} and node.text:
+                    values[name] = node.text.strip()
+        except Exception:
+            pass
+        request_id = headers.get("x-amz-request-id") or values.get("RequestId")
+        host_id = headers.get("x-amz-id-2") or values.get("HostId")
+        metadata = {"HTTPStatusCode": status, "HTTPHeaders": {}, "RetryAttempts": 0}
+        if request_id:
+            metadata["RequestId"] = request_id
+        if host_id:
+            metadata["HostId"] = host_id
+        response = {
+            "Error": {
+                "Code": values.get("Code") or "HTTPError",
+                "Message": values.get("Message") or f"Anonymous GetObject returned HTTP {status}.",
+            },
+            "ResponseMetadata": metadata,
+        }
+        raise ClientError(response, "GetObject")
+
+    try:
+        response = urlopen(request, timeout=20)
+    except HTTPError as exc:
+        body = exc.read(4096)
+        if exc.code in (401, 403):
+            return True
+        raise_provider_error(exc.code, exc.headers or {}, body) from exc
+
+    with response:
+        status = getattr(response, "status", response.getcode())
+        if status in (401, 403):
+            return True
+        if 200 <= status < 300:
+            # Read only a small amount before closing; the QA object is synthetic.
+            response.read(512)
+            raise StorageAcceptanceError("Private R2 object was readable without credentials.")
+        body = response.read(4096)
+        raise_provider_error(status, response.headers or {}, body)
+
+
 def _synthetic_wav():
     output = io.BytesIO()
     with wave.open(output, "wb") as audio:
@@ -139,7 +195,7 @@ def _probe_s3(client, endpoint, region, bucket, key, payload):
         result["checksum_match"] = hashlib.sha256(body).hexdigest() == digest
         if not result["checksum_match"]:
             raise StorageAcceptanceError("Retrieved object checksum did not match.")
-        _step("r2_unsigned_access", lambda: _unsigned_denied(endpoint, region, bucket, key))
+        _step("r2_unsigned_access", lambda: _unsigned_http_denied(endpoint, bucket, key))
         result["unsigned_access_denied"] = True
     finally:
         if uploaded:

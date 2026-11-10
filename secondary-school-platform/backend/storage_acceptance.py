@@ -114,10 +114,15 @@ def _unsigned_http_denied(endpoint, bucket, key):
     try:
         response = urlopen(request, timeout=20)
     except HTTPError as exc:
-        body = exc.read(4096)
+        try:
+            body = exc.read(4096)
+        finally:
+            exc.close()
         if exc.code in (401, 403):
             return True
-        raise_provider_error(exc.code, exc.headers or {}, body) from exc
+        # Do not chain the HTTPError: the synthetic ClientError carries the
+        # bounded S3 response metadata consumed by _safe_failure.
+        raise_provider_error(exc.code, exc.headers or {}, body)
 
     with response:
         status = getattr(response, "status", response.getcode())

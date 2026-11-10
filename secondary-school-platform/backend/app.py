@@ -913,10 +913,17 @@ def admin_private_storage_diagnostic():
         require(session.get("principal"), "settings.manage")
     except PermissionError:
         return jsonify({"error": "forbidden"}), 403
-    from admin_auth import reserve_admin_storage_diagnostic, record_admin_audit
+    from admin_auth import AdminAuthError, reserve_admin_storage_diagnostic, record_admin_audit
     phase = "rate_limit_reservation"
     try:
         reserve_admin_storage_diagnostic(session["email"])
+    except AdminAuthError:
+        # The one-run-per-15-minute guard is intentional. Report it as a
+        # rate limit rather than disguising it as a storage-service outage.
+        app.logger.info("Private storage diagnostic rate-limited")
+        return jsonify({"error": "storage_diagnostic_rate_limited",
+                        "message": "Please retry after the diagnostic cooldown."}), 429
+    try:
         phase = "storage_probe"
         from storage_acceptance import run_private_storage_acceptance
         result = run_private_storage_acceptance()

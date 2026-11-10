@@ -140,3 +140,58 @@ The 15-minute cooldown from audit event 159 elapsed at 13:39:07 UTC (14:39:07 WA
 https://learnwise-staging-api.onrender.com/admin/operations
 
 Please return the full safe JSON result. The new `provider_message`, `provider_operation`, and `provider_request_id` fields should tell us whether R2 is rejecting the anonymous request due to unsupported auth semantics, a malformed URL/path, or another specific request parameter. Do not rotate credentials or alter public bucket settings.
+
+## Latest verified staging run — 2026-11-10 audit event 166
+
+The latest server-side audit event is **166**, created at **2026-11-10 13:50:07.678 UTC (14:50:07.678 WAT)**. This is newer than event 159 and newer than the diagnostic-instrumentation deployment.
+
+### Audio storage: PASS
+
+The latest audit confirms all five audio checks passed:
+
+- upload: true;
+- authenticated retrieval: true;
+- checksum match: true;
+- unsigned access denied: true;
+- deletion: true.
+
+The selected Neon access-key suffix is `5cdc`, matching the active `learnwise-render-staging-storage-v2` credential. Neon v2 remains active with `storage:read` and `storage:write` scopes. No Neon credential rotation is needed.
+
+### Cloudflare R2: authenticated path advances; anonymous check remains unresolved
+
+The latest audit reaches `r2_unsigned_access` and returns:
+
+- operation: `GetObject`;
+- HTTP status: `400`;
+- provider code: `InvalidArgument`;
+- provider message: `Authorization`;
+- provider request ID: not returned in the audit record.
+
+The acceptance code executes authenticated upload, authenticated retrieval, checksum validation, then the unsigned read. Therefore, the run has passed the authenticated R2 upload/retrieval/checksum stages before it fails at the anonymous read. Its `finally` cleanup executes; an independent control-plane listing confirms the `qa-acceptance/` prefix is empty.
+
+The selected R2 access-key suffix remains `b206`, endpoint account ID and bucket match the intended export configuration, and region is `auto`. This is not evidence that the R2 access key or secret needs rotation.
+
+### Independent Cloudflare control-plane verification
+
+Read-only checks on the same bucket confirm:
+
+- bucket: `think-tank-private-exports`;
+- managed `r2.dev` public access: `enabled=false`;
+- custom domains: none configured;
+- `qa-acceptance/` object count: zero.
+
+No credentials, bucket permissions, public-access settings, or production resources were changed.
+
+Cloudflare's current R2 error-code reference lists missing/invalid credentials as HTTP 401 `Unauthorized`, insufficient permissions as HTTP 403 `AccessDenied`, and signature mismatch as HTTP 403 `SignatureDoesNotMatch`. It does not document this HTTP 400 `InvalidArgument` / `Authorization` response as an authentication-denial result:
+https://developers.cloudflare.com/r2/api/error-codes/
+
+Cloudflare recommends presigned URLs when granting anonymous users access to private objects:
+https://developers.cloudflare.com/r2/examples/authenticate-r2-auth-tokens/
+
+### Reconciliation and next diagnostic
+
+The operator-submitted JSON showing audio `InvalidAccessKeyId` and R2 `SignatureDoesNotMatch` does not match audit event 166 or the deployed diagnostic-v2 fields. Treat that JSON as an earlier/stale result. Use audit event 166 as the current server-side evidence.
+
+Do not weaken the acceptance rule: only HTTP 401 or 403 counts as a successful unsigned-access denial. Do not rotate the active Neon or Cloudflare credentials, change R2 bucket permissions, enable a public route, or use a presigned URL as a substitute for this test. Keep the R2 acceptance gate open while investigating why an unsigned S3 `GetObject` is being rejected as HTTP 400 `InvalidArgument` with message `Authorization`.
+
+The latest deployed diagnostic remains staging-only; Render auto-deploy is OFF, production is untouched, and PR #1 remains draft/open/unmerged.

@@ -254,8 +254,7 @@ class R2RawUnsignedHttpProbeTests(unittest.TestCase):
     def test_bare_http_probe_preserves_unexpected_provider_error(self):
         import io
         from urllib.error import HTTPError
-        from botocore.exceptions import ClientError
-        from storage_acceptance import _unsigned_http_denied
+        from storage_acceptance import _unsigned_http_denied, _step, _safe_failure, StorageProbeStepError
 
         error = HTTPError(
             "https://account.r2.cloudflarestorage.com/private/key",
@@ -265,14 +264,16 @@ class R2RawUnsignedHttpProbeTests(unittest.TestCase):
             io.BytesIO(b"<Error><Code>InvalidArgument</Code><Message>Authorization</Message></Error>"),
         )
         with patch("urllib.request.urlopen", side_effect=error) as opened:
-            with self.assertRaises(ClientError) as caught:
-                _unsigned_http_denied(
+            with self.assertRaises(StorageProbeStepError) as caught:
+                _step("r2_unsigned_access", lambda: _unsigned_http_denied(
                     "https://account.r2.cloudflarestorage.com", "private", "key"
-                )
-        self.assertEqual(caught.exception.response["Error"]["Code"], "InvalidArgument")
-        self.assertEqual(caught.exception.response["Error"]["Message"], "Authorization")
-        self.assertEqual(caught.exception.response["ResponseMetadata"]["HTTPStatusCode"], 400)
-        self.assertEqual(caught.exception.response["ResponseMetadata"]["RequestId"], "request-123")
+                ))
+        safe = _safe_failure(caught.exception, "r2_unsigned_access")
+        self.assertEqual(safe["provider_code"], "InvalidArgument")
+        self.assertEqual(safe["provider_message"], "Authorization")
+        self.assertEqual(safe["provider_operation"], "GetObject")
+        self.assertEqual(safe["http_status"], 400)
+        self.assertEqual(safe["provider_request_id"], "request-123")
         request = opened.call_args.args[0]
         self.assertNotIn("Authorization", request.headers)
 

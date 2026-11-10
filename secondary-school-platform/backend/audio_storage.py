@@ -28,6 +28,11 @@ def storage_config():
         raise AudioStorageError("Private object storage is not configured.")
     if not required["endpoint_url"].startswith("https://"):
         raise AudioStorageError("Private object storage endpoint must use HTTPS.")
+    # Cloudflare R2's S3-compatible API requires SigV4 region "auto".
+    # Do not allow a stale AWS_REGION fallback to sign R2 requests for an
+    # unrelated AWS region; retain configured regions for non-R2 providers.
+    if ".r2.cloudflarestorage.com" in required["endpoint_url"].lower():
+        required["region"] = "auto"
     return required
 
 def _s3_client(cfg):

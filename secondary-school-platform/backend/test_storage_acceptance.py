@@ -124,7 +124,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         delete.assert_called_once_with("qa-acceptance/audio.wav")
 
 
-    def test_safe_failure_includes_provider_code_and_status_but_not_message(self):
+    def test_safe_failure_includes_bounded_provider_context_and_redacts_long_values(self):
         from botocore.exceptions import ClientError
         from storage_acceptance import _safe_failure
 
@@ -137,6 +137,8 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertEqual(result["provider_code"], "AccessDenied")
         self.assertEqual(result["http_status"], 403)
         self.assertFalse(result["retryable"])
+        self.assertEqual(result["provider_operation"], "PutObject")
+        self.assertEqual(result["provider_message"], "[redacted]")
         self.assertNotIn("SECRET_VALUE_DO_NOT_EXPOSE", str(result))
 
     def test_r2_config_accepts_documented_r2_aliases(self):

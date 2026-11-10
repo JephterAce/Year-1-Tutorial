@@ -184,6 +184,46 @@ def _probe_audio(cfg, client, key, payload):
     return result
 
 
+def _export_storage_config_diagnostics():
+    """Report safe credential provenance for the export R2 client, never secret values."""
+    def selected(primary, fallback):
+        return primary if os.environ.get(primary, "").strip() else fallback if os.environ.get(fallback, "").strip() else None
+
+    access_source = selected("DATA_EXPORT_AWS_ACCESS_KEY_ID", "R2_ACCESS_KEY_ID")
+    secret_source = selected("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY")
+    endpoint_source = selected("DATA_EXPORT_AWS_ENDPOINT_URL_S3", "R2_ENDPOINT_URL")
+    bucket_source = selected("DATA_EXPORT_STORAGE_BUCKET", "R2_BUCKET_NAME")
+    region_source = selected("DATA_EXPORT_AWS_REGION", "R2_REGION")
+    endpoint = os.environ.get(endpoint_source, "") if endpoint_source else ""
+    host = endpoint.removeprefix("https://").split("/", 1)[0].split(":", 1)[0].lower()
+    account_id = host[:-len(".r2.cloudflarestorage.com")] if host.endswith(".r2.cloudflarestorage.com") else None
+    access_primary = os.environ.get("DATA_EXPORT_AWS_ACCESS_KEY_ID", "")
+    access_alias = os.environ.get("R2_ACCESS_KEY_ID", "")
+    secret_primary = os.environ.get("DATA_EXPORT_AWS_SECRET_ACCESS_KEY", "")
+    secret_alias = os.environ.get("R2_SECRET_ACCESS_KEY", "")
+    region = os.environ.get(region_source, "") if region_source else ""
+    if ".r2.cloudflarestorage.com" in endpoint.lower():
+        region = "auto"
+    return {
+        "diagnostic_version": 2,
+        "access_key_source": access_source,
+        "access_key_id_suffix": os.environ.get(access_source, "")[-4:] if access_source else None,
+        "secret_key_source": secret_source,
+        "endpoint_source": endpoint_source,
+        "bucket_source": bucket_source,
+        "region_source": region_source,
+        "credential_sources_mixed": bool(access_source and secret_source and
+            access_source.startswith("DATA_EXPORT_") != secret_source.startswith("DATA_EXPORT_")),
+        "dedicated_and_alias_keys_both_present": bool(access_primary and access_alias and secret_primary and secret_alias),
+        "access_key_aliases_conflict": bool(access_primary and access_alias and access_primary != access_alias),
+        "secret_key_aliases_conflict": bool(secret_primary and secret_alias and secret_primary != secret_alias),
+        "endpoint_account_id": account_id,
+        "endpoint_host": host or None,
+        "bucket": os.environ.get(bucket_source, "") if bucket_source else None,
+        "region": region or None,
+    }
+
+
 def run_private_storage_acceptance():
     """Probe the configured private audio bucket and R2 export bucket independently."""
     if os.environ.get("APP_ENV", "").strip().lower() != "staging":
@@ -273,6 +313,11 @@ def run_private_storage_acceptance():
                 )
             except Exception as exc:
                 results["r2_exports"] = _safe_failure(exc, getattr(exc, "failure_phase", "r2_storage_transfer"))
+
+    if "audio" in results and "configuration" in results["audio"]:
+        results["audio"]["configuration"]["diagnostic_version"] = 2
+    if "r2_exports" in results:
+        results["r2_exports"]["configuration"] = _export_storage_config_diagnostics()
 
     for value in results.values():
         value["passed"] = all(

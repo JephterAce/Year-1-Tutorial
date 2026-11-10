@@ -160,5 +160,46 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertTrue(result["results"]["r2_exports"]["passed"])
         probe.assert_called_once()
 
+
+    def test_r2_upload_failure_reports_exact_safe_operation_phase(self):
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _probe_s3, _safe_failure, StorageProbeStepError
+
+        client = __import__("unittest").mock.Mock()
+        client.put_object.side_effect = ClientError(
+            {"Error": {"Code": "AccessDenied", "Message": "private provider detail"},
+             "ResponseMetadata": {"HTTPStatusCode": 403}},
+            "PutObject",
+        )
+        with self.assertRaises(StorageProbeStepError) as caught:
+            _probe_s3(client, "https://storage.example.test", "auto",
+                      "private-bucket", "qa-acceptance/test.wav", b"synthetic")
+        self.assertEqual(caught.exception.failure_phase, "r2_upload")
+        safe = _safe_failure(caught.exception, caught.exception.failure_phase)
+        self.assertEqual(safe["provider_code"], "AccessDenied")
+        self.assertEqual(safe["http_status"], 403)
+        self.assertNotIn("private provider detail", str(safe))
+
+    def test_audio_upload_failure_reports_exact_safe_operation_phase(self):
+        import io
+        from unittest.mock import Mock, patch
+        from botocore.exceptions import ClientError
+        from storage_acceptance import _probe_audio, _safe_failure, StorageProbeStepError
+
+        provider_error = ClientError(
+            {"Error": {"Code": "AccessDenied", "Message": "private provider detail"},
+             "ResponseMetadata": {"HTTPStatusCode": 403}},
+            "PutObject",
+        )
+        cfg = {"endpoint_url": "https://storage.example.test", "region": "auto", "bucket": "private-audio"}
+        with patch("audio_storage.put_private_audio_object", side_effect=provider_error):
+            with self.assertRaises(StorageProbeStepError) as caught:
+                _probe_audio(cfg, Mock(), "qa-acceptance/audio.wav", b"synthetic")
+        self.assertEqual(caught.exception.failure_phase, "audio_upload")
+        safe = _safe_failure(caught.exception, caught.exception.failure_phase)
+        self.assertEqual(safe["provider_code"], "AccessDenied")
+        self.assertEqual(safe["http_status"], 403)
+        self.assertNotIn("private provider detail", str(safe))
+
 if __name__ == "__main__":
     unittest.main()

@@ -181,7 +181,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         safe = _safe_failure(caught.exception, caught.exception.failure_phase)
         self.assertEqual(safe["provider_code"], "AccessDenied")
         self.assertEqual(safe["http_status"], 403)
-        self.assertNotIn("private provider detail", str(safe))
+        self.assertEqual(safe["provider_message"], "private provider detail")
 
     def test_audio_upload_failure_reports_exact_safe_operation_phase(self):
         import io
@@ -202,7 +202,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         safe = _safe_failure(caught.exception, caught.exception.failure_phase)
         self.assertEqual(safe["provider_code"], "AccessDenied")
         self.assertEqual(safe["http_status"], 403)
-        self.assertNotIn("private provider detail", str(safe))
+        self.assertEqual(safe["provider_message"], "private provider detail")
 
 
 class ExportStorageConfigurationDiagnosticsTests(unittest.TestCase):

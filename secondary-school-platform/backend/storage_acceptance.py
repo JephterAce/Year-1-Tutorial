@@ -55,6 +55,22 @@ def _safe_failure(exc, phase):
         if isinstance(status, int) and 100 <= status <= 599:
             error["http_status"] = status
             error["retryable"] = status == 429 or status >= 500
+        operation = getattr(cause, "operation_name", None)
+        if isinstance(operation, str) and re.fullmatch(r"[A-Za-z0-9]{1,48}", operation):
+            error["provider_operation"] = operation
+        request_id = metadata.get("RequestId") or metadata.get("HostId")
+        if isinstance(request_id, str) and re.fullmatch(r"[A-Za-z0-9+/=_-]{1,96}", request_id):
+            error["provider_request_id"] = request_id
+        message = details.get("Message") if isinstance(details, dict) else None
+        if isinstance(message, str):
+            # Keep the provider's useful error explanation while stripping URLs
+            # and long token-like values. Never expose raw SDK exceptions.
+            safe_message = re.sub(r"https?://\\S+", "[url]", message)
+            safe_message = re.sub(r"\\b[A-Za-z0-9_+/=-]{24,}\\b", "[redacted]", safe_message)
+            safe_message = re.sub(r"[^A-Za-z0-9 .,;:_()'\\-]", "", safe_message)
+            safe_message = safe_message.strip()[:180]
+            if safe_message:
+                error["provider_message"] = safe_message
     if type(cause).__name__ in {"EndpointConnectionError", "ConnectTimeoutError", "ReadTimeoutError", "TimeoutError"}:
         error["retryable"] = True
     return error

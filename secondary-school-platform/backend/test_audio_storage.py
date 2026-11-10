@@ -29,6 +29,7 @@ class PrivateAudioStorageTests(unittest.TestCase):
         with patch.dict("os.environ", env, clear=True):
             diagnostic = audio_storage.storage_config_diagnostics()
         self.assertEqual(diagnostic["access_key_source"], "AUDIO_STORAGE_ACCESS_KEY_ID")
+        self.assertEqual(diagnostic["access_key_id_suffix"], "cess")
         self.assertEqual(diagnostic["secret_key_source"], "AUDIO_STORAGE_SECRET_ACCESS_KEY")
         self.assertEqual(diagnostic["endpoint_account_id"], "account123")
         self.assertTrue(diagnostic["access_key_aliases_conflict"])

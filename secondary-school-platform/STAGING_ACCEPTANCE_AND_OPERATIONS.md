@@ -66,7 +66,19 @@ Privately confirm these non-secret values:
 | AWS_REGION | eu-central-1 |
 | AUDIO_STORAGE_BUCKET | learnwise-private-audio |
 
-Also confirm AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are present and are scoped to the intended staging branch/bucket. Do not reveal or copy their values. Do not use public-read access. Do not upload/delete/rename objects as part of this check.
+Also confirm the dedicated Cloudflare R2 audio credentials are present:
+- AUDIO_STORAGE_ACCESS_KEY_ID
+- AUDIO_STORAGE_SECRET_ACCESS_KEY
+
+The expected dedicated audio settings are:
+- AUDIO_STORAGE_ENDPOINT_URL_S3: https://<CLOUDFLARE_ACCOUNT_ID>.r2.cloudflarestorage.com
+- AUDIO_STORAGE_REGION: auto
+- AUDIO_STORAGE_BUCKET: learnwise-private-audio
+- AUDIO_STORAGE_BACKEND: neon_s3 (the current application adapter name; it uses the configured S3-compatible endpoint)
+
+The access key and secret must come from the separate R2 token scoped to the learnwise-private-audio bucket. Do not reuse the think-tank-private-exports token. The legacy AWS_* variables are fallback aliases only; do not overwrite them as part of this check.
+
+Do not reveal or copy secret values. Do not use public-read access. Do not upload/delete/rename objects as part of this manual configuration check. The authenticated synthetic storage acceptance diagnostic performs its own temporary upload, retrieval, unsigned-access denial and deletion checks.
 
 Record only a checklist outcome (match/mismatch/not checked), not values or secrets. If any item mismatches, stop and obtain owner approval before changing it. The Render environment-variable mutation tool is not a read-only inspection mechanism; do not use it to guess or overwrite unknown values. Any approved environment change must be coordinated with a reviewed deploy because environment updates may cause a restart/redeploy.
 

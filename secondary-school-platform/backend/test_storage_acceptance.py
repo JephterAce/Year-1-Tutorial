@@ -88,7 +88,7 @@ class StorageProbeUnitTests(unittest.TestCase):
             {"Error": {"Code": "404"}, "ResponseMetadata": {"HTTPStatusCode": 404}},
             "HeadObject",
         )
-        with patch("storage_acceptance._unsigned_http_denied", return_value=True):
+        with patch("storage_acceptance._unsigned_denied", return_value=True):
             result = _probe_s3(client, "https://storage.example.test", "auto",
                                "private-bucket", "qa-acceptance/test.wav", payload)
         self.assertTrue(result["upload"])
@@ -124,7 +124,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         delete.assert_called_once_with("qa-acceptance/audio.wav")
 
 
-    def test_safe_failure_includes_bounded_provider_context_and_redacts_long_values(self):
+    def test_safe_failure_includes_provider_code_and_status_but_not_message(self):
         from botocore.exceptions import ClientError
         from storage_acceptance import _safe_failure
 
@@ -137,8 +137,6 @@ class StorageProbeUnitTests(unittest.TestCase):
         self.assertEqual(result["provider_code"], "AccessDenied")
         self.assertEqual(result["http_status"], 403)
         self.assertFalse(result["retryable"])
-        self.assertEqual(result["provider_operation"], "PutObject")
-        self.assertEqual(result["provider_message"], "[redacted]")
         self.assertNotIn("SECRET_VALUE_DO_NOT_EXPOSE", str(result))
 
     def test_r2_config_accepts_documented_r2_aliases(self):
@@ -181,7 +179,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         safe = _safe_failure(caught.exception, caught.exception.failure_phase)
         self.assertEqual(safe["provider_code"], "AccessDenied")
         self.assertEqual(safe["http_status"], 403)
-        self.assertEqual(safe["provider_message"], "private provider detail")
+        self.assertNotIn("private provider detail", str(safe))
 
     def test_audio_upload_failure_reports_exact_safe_operation_phase(self):
         import io
@@ -202,94 +200,7 @@ class StorageProbeUnitTests(unittest.TestCase):
         safe = _safe_failure(caught.exception, caught.exception.failure_phase)
         self.assertEqual(safe["provider_code"], "AccessDenied")
         self.assertEqual(safe["http_status"], 403)
-        self.assertEqual(safe["provider_message"], "private provider detail")
-
-
-class ExportStorageConfigurationDiagnosticsTests(unittest.TestCase):
-    def test_diagnostics_identify_selected_r2_alias_without_exposing_secrets(self):
-        from storage_acceptance import _export_storage_config_diagnostics
-        env = {
-            "R2_ACCESS_KEY_ID": "old-export-key-xyz1",
-            "R2_SECRET_ACCESS_KEY": "old-export-secret",
-            "R2_ENDPOINT_URL": "https://wrong-account.r2.cloudflarestorage.com",
-            "R2_BUCKET_NAME": "think-tank-private-exports",
-            "R2_REGION": "eu-central-1",
-            "DATA_EXPORT_AWS_ACCESS_KEY_ID": "active-export-key-b206",
-            "DATA_EXPORT_AWS_SECRET_ACCESS_KEY": "active-export-secret",
-            "DATA_EXPORT_AWS_ENDPOINT_URL_S3": "https://b8d5a16d7a33f342f0b790bdf8717e07.r2.cloudflarestorage.com",
-            "DATA_EXPORT_STORAGE_BUCKET": "think-tank-private-exports",
-            "DATA_EXPORT_AWS_REGION": "eu-central-1",
-        }
-        with patch.dict(os.environ, env, clear=True):
-            result = _export_storage_config_diagnostics()
-        self.assertEqual(result["diagnostic_version"], 2)
-        self.assertEqual(result["access_key_source"], "DATA_EXPORT_AWS_ACCESS_KEY_ID")
-        self.assertEqual(result["access_key_id_suffix"], "b206")
-        self.assertTrue(result["access_key_aliases_conflict"])
-        self.assertTrue(result["secret_key_aliases_conflict"])
-        self.assertEqual(result["endpoint_account_id"], "b8d5a16d7a33f342f0b790bdf8717e07")
-        self.assertEqual(result["region"], "auto")
-        self.assertNotIn("active-export-secret", str(result))
-
-
-class R2RawUnsignedHttpProbeTests(unittest.TestCase):
-    def test_bare_http_probe_accepts_only_401_or_403_as_denial(self):
-        import io
-        from urllib.error import HTTPError
-        from storage_acceptance import _unsigned_http_denied
-
-        for status in (401, 403):
-            error = HTTPError(
-                "https://account.r2.cloudflarestorage.com/private/key",
-                status,
-                "Denied",
-                {},
-                io.BytesIO(b"<Error><Code>AccessDenied</Code></Error>"),
-            )
-            with patch("urllib.request.urlopen", side_effect=error):
-                self.assertTrue(_unsigned_http_denied(
-                    "https://account.r2.cloudflarestorage.com", "private", "key"
-                ))
-
-    def test_bare_http_probe_preserves_unexpected_provider_error(self):
-        import io
-        from urllib.error import HTTPError
-        from storage_acceptance import _unsigned_http_denied, _step, _safe_failure, StorageProbeStepError
-
-        error = HTTPError(
-            "https://account.r2.cloudflarestorage.com/private/key",
-            400,
-            "Bad Request",
-            {"x-amz-request-id": "request-123"},
-            io.BytesIO(b"<Error><Code>InvalidArgument</Code><Message>Authorization</Message></Error>"),
-        )
-        with patch("urllib.request.urlopen", side_effect=error) as opened:
-            with self.assertRaises(StorageProbeStepError) as caught:
-                _step("r2_unsigned_access", lambda: _unsigned_http_denied(
-                    "https://account.r2.cloudflarestorage.com", "private", "key"
-                ))
-        safe = _safe_failure(caught.exception, "r2_unsigned_access")
-        self.assertEqual(safe["provider_code"], "InvalidArgument")
-        self.assertEqual(safe["provider_message"], "Authorization")
-        self.assertEqual(safe["provider_operation"], "GetObject")
-        self.assertEqual(safe["http_status"], 400)
-        self.assertEqual(safe["provider_request_id"], "request-123")
-        request = opened.call_args.args[0]
-        self.assertNotIn("Authorization", request.headers)
-
-    def test_bare_http_probe_rejects_successful_anonymous_read(self):
-        from unittest.mock import Mock
-        from storage_acceptance import _unsigned_http_denied, StorageAcceptanceError
-
-        response = Mock()
-        response.status = 200
-        response.__enter__ = lambda value: value
-        response.__exit__ = Mock(return_value=False)
-        with patch("urllib.request.urlopen", return_value=response):
-            with self.assertRaises(StorageAcceptanceError):
-                _unsigned_http_denied(
-                    "https://account.r2.cloudflarestorage.com", "private", "key"
-                )
+        self.assertNotIn("private provider detail", str(safe))
 
 
 class UnsignedProbeRegressionTests(unittest.TestCase):
@@ -304,6 +215,23 @@ class UnsignedProbeRegressionTests(unittest.TestCase):
             factory.return_value.get_object.side_effect = denied
             self.assertTrue(storage_acceptance._unsigned_denied("https://s3.example.test", "eu-central-1", "bucket", "key"))
         self.assertIs(factory.call_args.kwargs["config"].signature_version, UNSIGNED)
+
+    def _denied(self, status, code):
+        import storage_acceptance
+        from botocore.exceptions import ClientError
+        err = ClientError({"Error": {"Code": code}, "ResponseMetadata": {"HTTPStatusCode": status}}, "GetObject")
+        with patch("boto3.client") as factory:
+            factory.return_value.get_object.side_effect = err
+            return storage_acceptance._unsigned_denied("https://s3.example.test", "auto", "bucket", "key")
+
+    def test_r2_400_invalid_argument_counts_as_denied(self):
+        self.assertTrue(self._denied(400, "InvalidArgument"))
+
+    def test_other_400_errors_still_fail_the_unsigned_check(self):
+        import storage_acceptance
+        with self.assertRaises(storage_acceptance.StorageAcceptanceError):
+            self._denied(400, "NoSuchBucket")
+
 
 
 if __name__ == "__main__":

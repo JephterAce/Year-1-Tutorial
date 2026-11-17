@@ -95,6 +95,12 @@ jobs:
         env:
           LEARNWISE_REHEARSAL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/learnwise_rehearsal
         run: python rehearse_migrations.py
+      - name: Use PostgreSQL 16 client tools to match the database service
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+          /usr/lib/postgresql/16/bin/pg_dump --version
       - name: Rehearse guarded backup and restore to a disposable local database
         env:
           PGPASSWORD: postgres

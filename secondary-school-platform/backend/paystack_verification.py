@@ -28,6 +28,7 @@ def verify_paystack_transaction(reference, expected_amount_kobo, secret=None, op
     request = Request(url, headers={
         "Authorization": "Bearer " + secret.strip(),
         "Accept": "application/json",
+        "User-Agent": "ThinkTank-Learnwise/1.0",
     })
     try:
         with opener(request, timeout=10) as response:

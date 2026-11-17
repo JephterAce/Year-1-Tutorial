@@ -23,10 +23,11 @@ def _provider_failure_detail(exc):
     if isinstance(exc, HTTPError):
         detail += " http=%s" % exc.code
         try:
-            body = json.loads(exc.read().decode("utf-8", "replace"))
-            message = body.get("message") if isinstance(body, dict) else None
-            if isinstance(message, str):
-                detail += " message=%r" % message[:160]
+            ctype = exc.headers.get("Content-Type", "")[:60]
+            server = exc.headers.get("Server", "")[:40]
+            detail += " server=%r content_type=%r" % (server, ctype)
+            raw = exc.read().decode("utf-8", "replace")
+            detail += " body=%r" % " ".join(raw.split())[:300]
         except Exception:
             pass
     elif isinstance(exc, URLError):
@@ -47,7 +48,7 @@ def _initialise_with_paystack(email, reference, amount_kobo, callback_url, secre
         "https://api.paystack.co/transaction/initialize",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Authorization": "Bearer " + secret, "Content-Type": "application/json",
-                 "Accept": "application/json"},
+                 "Accept": "application/json", "User-Agent": "ThinkTank-Learnwise/1.0"},
         method="POST",
     )
     try:

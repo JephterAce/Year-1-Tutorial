@@ -1,5 +1,6 @@
 """Server-priced Paystack checkout initialisation; never accepts a client-supplied amount."""
 import json
+import logging
 import os
 import re
 from urllib.error import HTTPError, URLError
@@ -14,6 +15,23 @@ class PaymentOrderError(ValueError):
     def __init__(self, code, message, status=400):
         super().__init__(message)
         self.code, self.status = code, status
+
+
+def _provider_failure_detail(exc):
+    """Short, secret-free description of why the provider call failed (for server logs only)."""
+    detail = type(exc).__name__
+    if isinstance(exc, HTTPError):
+        detail += " http=%s" % exc.code
+        try:
+            body = json.loads(exc.read().decode("utf-8", "replace"))
+            message = body.get("message") if isinstance(body, dict) else None
+            if isinstance(message, str):
+                detail += " message=%r" % message[:160]
+        except Exception:
+            pass
+    elif isinstance(exc, URLError):
+        detail += " reason=%s" % type(getattr(exc, "reason", None)).__name__
+    return detail
 
 
 def _initialise_with_paystack(email, reference, amount_kobo, callback_url, secret, opener=urlopen):
@@ -36,6 +54,7 @@ def _initialise_with_paystack(email, reference, amount_kobo, callback_url, secre
         with opener(request, timeout=12) as response:
             result = json.loads(response.read().decode("utf-8"))
     except (HTTPError, URLError, TimeoutError, OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        logging.getLogger(__name__).error("Paystack initialise failed: %s", _provider_failure_detail(exc))
         raise PaymentOrderError("provider_unavailable", "Checkout is temporarily unavailable.", 503) from exc
     data = result.get("data") if isinstance(result, dict) else None
     if result.get("status") is not True or not isinstance(data, dict):

@@ -1095,18 +1095,23 @@ def get_student_topic(topic_id):
     student = _current_student()
     if not student:
         return jsonify({"error": "unauthenticated"}), 401
+    # Staging-only: a "[QA TEST]" fixture topic may be shown so the Paystack sandbox
+    # purchase can be exercised. It is never honoured outside APP_ENV=staging.
+    qa_fixture_allowed = (os.environ.get("APP_ENV", "").strip().lower() == "staging"
+                          and _feature_enabled("STAGING_QA_TOPIC_ENABLED"))
     try:
         with connection() as conn:
             topic = conn.execute(
                 """SELECT t.id,t.class_level,t.title,t.summary,t.learning_objectives,
                           t.price_kobo,t.currency,s.name AS subject
                    FROM topics t JOIN subjects s ON s.id=t.subject_id
-                   JOIN curriculum_versions cv ON cv.id=t.curriculum_version_id
-                   JOIN curriculum_source_records csr ON csr.id=t.curriculum_source_record_id
+                   LEFT JOIN curriculum_versions cv ON cv.id=t.curriculum_version_id
+                   LEFT JOIN curriculum_source_records csr ON csr.id=t.curriculum_source_record_id
                    WHERE t.id=%s AND t.status='published' AND t.curriculum_status='published'
-                     AND cv.version_code='nerdc_ssec_2025'
-                     AND csr.verification_status='approved'""",
-                (topic_id,),
+                     AND ((cv.version_code='nerdc_ssec_2025'
+                           AND csr.verification_status='approved')
+                          OR (%s AND t.title LIKE %s))""",
+                (topic_id, qa_fixture_allowed, "[QA TEST]%"),
             ).fetchone()
             if not topic:
                 return jsonify({"error": "topic_not_found"}), 404

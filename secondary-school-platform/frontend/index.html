@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b35"><meta name="description" content="A smarter way to learn, listen and practise for senior secondary school.">
+<title>Think Tank — Senior Secondary Learning</title>
+<style>
+:root{--navy:#101b35;--navy2:#172746;--ink:#172033;--muted:#68758b;--line:#e7ebf2;--paper:#f6f8fc;--white:#fff;--blue:#4263eb;--mint:#dff7ed;--gold:#f4c66a;--shadow:0 12px 35px #15264a12}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select{font:inherit}button{cursor:pointer}.shell{min-height:100vh}.sidebar{position:fixed;inset:0 auto 0 0;width:248px;background:var(--navy);color:#dce5f7;padding:25px 17px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:800;letter-spacing:-.5px;padding:0 10px 35px;color:#fff}.brandmark{width:34px;height:34px;border-radius:11px;background:#6ee7bd;color:#10213a;display:grid;place-items:center;font-weight:900}.navlabel{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#8291ad;padding:0 12px;margin:15px 0 8px}.nav{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;color:#aebbd2;text-decoration:none;margin:2px 0;font-weight:550}.nav.active,.nav:hover{background:#243657;color:white}.nav .ico{width:19px;text-align:center;font-size:17px}.sidebottom{margin-top:auto;border-top:1px solid #2b3a57;padding:17px 8px 0;font-size:12px;color:#9cabc4}.main{margin-left:248px;min-height:100vh}.topbar{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 38px;position:sticky;top:0;z-index:4}.crumb{color:var(--muted);font-size:13px}.crumb b{color:var(--ink)}.topright{display:flex;align-items:center;gap:17px}.search{border:1px solid var(--line);background:#f9fafc;border-radius:10px;padding:10px 13px;width:220px;outline:none}.avatar{width:36px;height:36px;border-radius:50%;background:#e6edff;color:#3854c9;display:grid;place-items:center;font-weight:800}.content{max-width:1320px;margin:auto;padding:34px 38px 70px}.welcome{background:linear-gradient(115deg,#142342,#243f6c);color:white;border-radius:20px;padding:31px 34px;display:flex;justify-content:space-between;align-items:center;overflow:hidden;position:relative;box-shadow:var(--shadow)}.welcome:after{content:"";position:absolute;width:260px;height:260px;border:1px solid #ffffff18;border-radius:50%;right:7%;top:-130px;box-shadow:0 0 0 35px #ffffff08,0 0 0 70px #ffffff06}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9debd0;font-weight:800}.welcome h1{font-size:29px;line-height:1.18;letter-spacing:-.8px;margin:10px 0 9px}.welcome p{color:#c6d2e6;margin:0;max-width:540px}.welcome .cta{position:relative;z-index:1;background:#75e2bd;color:#11213a;border:0;border-radius:10px;padding:12px 17px;font-weight:800;white-space:nowrap}.sectionhead{display:flex;justify-content:space-between;align-items:end;margin:30px 0 15px}.sectionhead h2{font-size:19px;margin:0;letter-spacing:-.3px}.sectionhead p{margin:3px 0 0;color:var(--muted);font-size:13px}.link{border:0;background:none;color:var(--blue);font-weight:700}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}.stat,.panel,.subject,.lesson{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px #14234406}.stat{padding:17px 18px}.stat small{color:var(--muted);font-size:12px}.stat strong{display:block;font-size:24px;margin:4px 0 1px;letter-spacing:-.5px}.stat span{font-size:11px;color:#23865e}.subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.subject{padding:17px;transition:.18s;cursor:pointer}.subject:hover,.lesson:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#cdd7f7}.subicon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:21px;margin-bottom:13px}.subject h3{font-size:14px;margin:0 0 3px}.subject p{margin:0;color:var(--muted);font-size:11px}.progress{height:5px;border-radius:10px;background:#edf0f6;margin-top:13px;overflow:hidden}.progress i{display:block;height:100%;background:#5fcaa1;border-radius:10px}.lower{display:grid;grid-template-columns:1.45fr 1fr;gap:17px;margin-top:22px}.panel{padding:20px}.panel h3{font-size:15px;margin:0}.panelhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.lessonlist{display:grid;gap:10px}.lesson{display:flex;align-items:center;gap:12px;padding:12px;box-shadow:none}.play{width:39px;height:39px;border-radius:11px;background:#edf2ff;color:#4562dc;display:grid;place-items:center}.lessoninfo{flex:1;min-width:0}.lessoninfo b{display:block;font-size:13px}.lessoninfo small{color:var(--muted);font-size:11px}.tag{font-size:10px;padding:5px 8px;border-radius:20px;background:#e5f7ef;color:#217b58;font-weight:800}.tag.lock{background:#fff4df;color:#94611a}.termrow{display:flex;gap:7px;margin:15px 0}.term{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;color:var(--muted);font-size:12px}.term.active{background:var(--navy);border-color:var(--navy);color:#fff}.tip{background:#f0f7ff;border:1px solid #dceaff;border-radius:12px;padding:14px;margin-top:14px;color:#42577b;font-size:12px}.footer{color:#8a94a6;font-size:11px;text-align:center;margin-top:35px}.page{display:none}.page.active{display:block}.catalogfilters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.catalogfilters select,.catalogfilters input{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 12px;color:var(--ink)}.cataloggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.catalogcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px}.catalogcard h3{font-size:14px;margin:7px 0}.catalogcard p{font-size:12px;color:var(--muted);min-height:36px}.catalogcard button,.primary{border:0;border-radius:9px;background:var(--navy);color:white;padding:10px 13px;font-weight:700}.price{font-weight:800;font-size:14px}.notice{background:#fff8e9;border:1px solid #f4e4c1;color:#76551d;border-radius:10px;padding:12px;font-size:12px;margin:14px 0}.mobilemenu{display:none}.profilelayout{display:grid;grid-template-columns:240px 1fr;gap:16px}.profilecard{text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}.profileavatar{width:104px;height:104px;border-radius:50%;background:#e8edff;color:#405fd4;display:grid;place-items:center;font-size:36px;font-weight:850;margin:10px auto 15px;overflow:hidden;background-size:cover;background-position:center}.uploadlabel{display:inline-block;padding:10px 13px;border-radius:9px;font-weight:750;cursor:pointer}.privacytag{font-size:10px;background:#e7f7ef;color:#217b58;padding:6px 9px;border-radius:20px;margin-top:8px}.profilefields{display:grid;grid-template-columns:1fr 1fr;gap:13px}.profilefields label{display:grid;gap:6px;font-size:12px;font-weight:750}.profilefields input,.profilefields select,.profilefields textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;color:var(--ink)}.profilefields textarea{min-height:88px;resize:vertical}.profilefields .full{grid-column:1/-1}.profilefields small{font-weight:400;color:var(--muted)}.actions{display:flex;gap:12px;align-items:center;margin-top:16px}.consentrow{display:flex;align-items:flex-start;gap:8px;font-size:12px}
+@media(max-width:1050px){.subjects{grid-template-columns:repeat(3,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.sidebar{width:72px;padding:18px 9px}.brand{padding:0 9px 27px}.brandname,.navlabel,.nav span:not(.ico),.sidebottom{display:none}.nav{justify-content:center;padding:12px 8px}.main{margin-left:72px}.topbar{padding:0 16px;height:64px}.search{width:145px}.content{padding:22px 15px 50px}.welcome{padding:23px 20px;display:block}.welcome h1{font-size:24px}.welcome .cta{margin-top:18px}.subjects{grid-template-columns:repeat(2,1fr);gap:9px}.subject{padding:13px}.lower{grid-template-columns:1fr}.cataloggrid{grid-template-columns:1fr}.stats{gap:9px}.stat{padding:13px}.stat strong{font-size:21px}}
+@media(max-width:390px){.search{width:112px}.crumb{font-size:11px}.subjects{grid-template-columns:1fr 1fr}}
+</style>
+<link rel="stylesheet" href="learnwise-ui.css"><meta name="theme-color" content="#101b35"></head>
+<body>
+<div class="shell">
+<aside class="sidebar">
+ <div class="brand"><div class="brandmark">T</div><span class="brandname">Think Tank</span></div>
+ <div class="navlabel">Learning space</div>
+ <a class="nav active" href="#home" data-page="home"><span class="ico">⌂</span><span>Overview</span></a>
+ <a class="nav" href="#catalog" data-page="catalog"><span class="ico">▦</span><span>Explore lessons</span></a>
+ <a class="nav" href="#subjects" data-page="subjects"><span class="ico">▤</span><span>My subjects</span></a>
+ <a class="nav" href="#progress" data-page="progress"><span class="ico">◷</span><span>My progress</span></a>
+ <div class="navlabel">Your account</div>
+ <a class="nav" href="#saved" data-page="saved"><span class="ico">♡</span><span>Saved lessons</span></a>
+ <a class="nav" href="#podcasts" data-page="podcasts"><span class="ico">♫</span><span>Podcast library</span></a>
+ <a class="nav" href="#assessments" data-page="assessments"><span class="ico">✓</span><span>My assessments</span></a>
+ <a class="nav" href="#profile" data-page="profile"><span class="ico">◉</span><span>My profile</span></a>
+ <a class="nav" href="account.html"><span class="ico">↪</span><span>Sign in / Register</span></a>
+ <a class="nav" href="#help" data-page="help"><span class="ico">?</span><span>Help & support</span></a>
+ <div class="sidebottom">Think Tank<br>Student learning space · 2026</div>
+</aside>
+<main class="main">
+ <header class="topbar"><div class="crumb">Learning space&nbsp; / &nbsp;<b id="crumb">Overview</b></div><div class="topright"><input class="search" id="globalSearch" placeholder="⌕  Search topics..."><a class="primary" href="account.html" style="text-decoration:none">Account</a><div class="avatar">S</div></div></header>
+ <div class="content">
+ <section class="page active" id="home">
+  <div class="welcome"><div><div class="eyebrow">Your next chapter starts here</div><h1 id="welcomeTitle">Small steps. Strong results.</h1><p id="welcomeSubtitle">Explore clear audio lessons, expert explanations and practice designed for your senior secondary journey.</p></div><button class="cta" onclick="showPage('catalog')">Explore lessons&nbsp; →</button></div>
+  <div class="panel" style="margin-top:18px">
+   <div class="panelhead"><div><h3>Ask your AI teacher</h3><small style="color:var(--muted)">A guided explanation for your class level. AI assistance can make mistakes.</small></div><span class="tag lock">Preview · gated</span></div>
+   <label for="tutorQuestion" style="display:block;font-weight:700;font-size:13px;margin-bottom:7px">What would you like help understanding?</label>
+   <textarea id="tutorQuestion" maxlength="2000" rows="3" placeholder="Example: Explain how ionic bonding forms, step by step." style="width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical"></textarea>
+   <label for="tutorTopicId" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional published lesson ID (to ground the answer in your unlocked lesson)</label>
+   <input id="tutorTopicId" placeholder="Paste topic ID from an unlocked lesson" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
+   <label for="tutorContext" style="display:block;font-weight:700;font-size:12px;margin:10px 0 6px">Optional additional context</label>
+   <input id="tutorContext" maxlength="1200" placeholder="e.g. Which step in the example is confusing?" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:11px">
+   <div class="actions"><button class="primary" id="askTutorButton" onclick="askThinkTankTutor()">Ask Think Tank</button><button class="link" type="button" onclick="clearTutorConversation()">Clear conversation</button><small id="tutorStatus" aria-live="polite" style="color:var(--muted)">Sign in required. AI service remains disabled until budget controls and provider settings are approved.</small></div>
+   <div id="tutorAnswer" hidden style="margin-top:14px;padding:14px;background:#f6f8fc;border-radius:10px;white-space:pre-wrap"></div>
+  </div>
+  <div class="stats">
+   <div class="stat"><small>Completed lessons</small><strong id="dashCompleted">—</strong><span id="dashCompletedNote">Sign in to load progress</span></div>
+   <div class="stat"><small>Subjects available</small><strong id="dashSubjects">—</strong><span>Published for your class</span></div>
+   <div class="stat"><small>Practice attempts</small><strong id="dashPractice">—</strong><span>Saved lesson practice checks</span></div>
+   <div class="stat"><small>Assessment attempts</small><strong id="dashAttempts">—</strong><span id="dashAttemptsNote">Your saved results</span></div>
+   <div class="stat"><small>Assessments passed</small><strong id="dashPassed">—</strong><span>Based on recorded results</span></div>
+   <div class="stat"><small>Your class</small><strong id="dashClass">—</strong><span id="dashName">Sign in to view your profile</span></div>
+  </div>
+  <div class="sectionhead"><div><h2>Explore your subjects</h2><p>Choose a subject to discover its lessons</p></div><button class="link" onclick="showPage('catalog')">View catalogue →</button></div>
+  <div class="subjects" id="subjectTiles">
+   <article class="subject" onclick="filterSubject('English Language')"><div class="subicon" style="background:#fff0f4">📖</div><h3>English Language</h3><p>Comprehension, grammar, writing & oral English</p><div class="progress"><i style="width:0%"></i></div></article>
+    <article class="subject" onclick="filterSubject('General Mathematics')"><div class="subicon" style="background:#edf1ff">📐</div><h3>General Mathematics</h3><p>Core mathematical knowledge & practice</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Further Mathematics')"><div class="subicon" style="background:#f2edff">∑</div><h3>Further Mathematics</h3><p>Advanced mathematical thinking</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Biology')"><div class="subicon" style="background:#e8f8ef">🧬</div><h3>Biology</h3><p>Life, systems & organisms</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Chemistry')"><div class="subicon" style="background:#fff3e5">⚗️</div><h3>Chemistry</h3><p>Matter, reactions & energy</p><div class="progress"><i style="width:0%"></i></div></article>
+   <article class="subject" onclick="filterSubject('Physics')"><div class="subicon" style="background:#e7f6fb">⚛️</div><h3>Physics</h3><p>Understand how the world works</p><div class="progress"><i style="width:0%"></i></div></article>
+  </div>
+  <div class="lower">
+   <div class="panel"><div class="panelhead"><h3>Continue learning</h3><button class="link" onclick="showPage('catalog')">Find a lesson</button></div><div class="lessonlist"><div class="lesson"><div class="play">▶</div><div class="lessoninfo"><b>Your learning journey is ready</b><small>Choose a topic to begin your first lesson</small></div><span class="tag">Start</span></div></div></div>
+   <div class="panel"><div class="panelhead"><h3>Choose your class</h3></div><div class="termrow"><button class="term" onclick="setClass('SS1',this)">SS1</button><button class="term active" onclick="setClass('SS2',this)">SS2</button><button class="term" onclick="setClass('SS3',this)">SS3</button></div><p style="font-size:12px;color:var(--muted);margin:0">Your class selection helps organise your subject catalogue.</p><div class="tip">✦ Learn at your pace with teacher-led audio, podcast-style discussions and practice resources.</div></div>
+  </div>
+ </section>
+ <section class="page" id="catalog">
+  <div class="sectionhead" style="margin-top:0"><div><div class="eyebrow" style="color:#4563d7">The lesson library</div><h2 style="font-size:25px;margin-top:5px">Find your next lesson</h2><p>Explore subjects, terms and topics for your class.</p></div></div>
+  <div class="notice">Preview catalogue only. Sample topics are illustrative and are not yet verified. Class mapping pending; no sample topic is assigned to a specific SS1, SS2 or SS3 curriculum sequence or term. Term allocation is pending verification. Payments and lesson access are not enabled in this prototype.</div>
+  <div class="catalogfilters"><select id="classFilter" onchange="renderCatalog()"><option>SS1</option><option selected>SS2</option><option>SS3</option></select><select id="subjectFilter" onchange="renderCatalog()"><option value="All">All subjects</option><option>English Language</option><option>General Mathematics</option><option>Further Mathematics</option><option>Biology</option><option>Chemistry</option><option>Physics</option></select><select id="termFilter" onchange="renderCatalog()"><option value="All">All term statuses</option><option value="Term allocation pending">Term allocation pending</option></select><input id="topicSearch" placeholder="Search topic..." oninput="renderCatalog()"></div>
+  <div class="cataloggrid" id="catalogGrid"></div>
+ </section>
+ <section class="page" id="subjects"><div class="sectionhead" style="margin-top:0"><div><h2>My subjects</h2><p>Your selected learning areas will appear here.</p></div></div><div class="panel">You haven't enrolled in any subjects yet. Explore the catalogue to find topics for your class.</div></section>
+ <section class="page" id="progress">
+  <div class="sectionhead" style="margin-top:0"><div><h2>My progress</h2><p>A private view of your completed lessons, practice and assessment results.</p></div><button class="link" type="button" onclick="loadDashboard()">Refresh progress</button></div>
+  <div class="stats">
+   <div class="stat"><small>Lessons completed</small><strong id="progressCompleted">—</strong><span>Published lessons only</span></div>
+   <div class="stat"><small>Practice attempts</small><strong id="progressPractice">—</strong><span>Answers checked</span></div>
+   <div class="stat"><small>Assessment attempts</small><strong id="progressAttempts">—</strong><span>Started assessments</span></div>
+   <div class="stat"><small>Average assessment score</small><strong id="progressAverage">—</strong><span>Graded attempts only</span></div>
+  </div>
+  <div class="lower">
+   <section class="panel"><div class="panelhead"><h3>Progress by subject</h3></div><div id="progressSubjects" aria-live="polite">Sign in to view your progress.</div></section>
+   <section class="panel"><div class="panelhead"><h3>Recent lesson activity</h3></div><div id="progressRecent" aria-live="polite">Sign in to view your activity.</div></section>
+  </div>
+  <p class="tip">Progress is based on saved learning records. Listening time is not yet measured, so no listening-time estimate is shown.</p>
+ </section>
+ <section class="page" id="saved"><div class="sectionhead" style="margin-top:0"><div><h2>Saved lessons</h2><p>Your private bookmarks for published Think Tank lessons.</p></div><button class="link" type="button" onclick="loadSavedLessons()">Refresh saved lessons</button></div><div class="panel"><div id="savedLessons" aria-live="polite">Sign in to view your saved lessons.</div></div></section>
+ <section class="page" id="podcasts">
+  <div class="sectionhead" style="margin-top:0"><div><h2>Podcast library</h2><p>Listen to approved two-presenter episodes attached to lessons you have unlocked.</p></div><button class="link" type="button" onclick="loadPodcastLibrary()">Refresh library</button></div>
+  <div class="panel"><div id="podcastList" aria-live="polite">Sign in to view your podcast library.</div><audio id="podcastPlayer" controls preload="none" style="width:100%;margin-top:16px"></audio><p id="podcastStatus" aria-live="polite" style="font-size:12px;color:var(--muted)"></p></div>
+ </section>
+ <section class="page" id="assessments"><div class="sectionhead" style="margin-top:0"><div><h2>My assessments</h2><p>Your practice attempts, automatically calculated scores and feedback.</p></div><a class="primary" href="assessment.html" style="text-decoration:none">Open assessments</a></div><div class="notice">Published objective assessments are designed to be graded automatically by the server. Your score and explanations will appear here after submission; no manual marking is needed for supported question types.</div><div class="stats"><div class="stat"><small>Assessment attempts</small><strong id="assessmentCount">0</strong><span>Updates automatically</span></div><div class="stat"><small>Average score</small><strong id="assessmentAverage">—</strong><span>After your first attempt</span></div><div class="stat"><small>Passed</small><strong id="assessmentPassed">0</strong><span>Based on published pass marks</span></div><div class="stat"><small>Pending results</small><strong id="assessmentPending">0</strong><span>Immediate release where configured</span></div></div><div class="panel" style="margin-top:16px"><h3>Assessment history</h3><div id="assessmentHistory" aria-live="polite">Sign in to view your attempts.</div></div></section>
+ <section class="page" id="profile"><div class="sectionhead" style="margin-top:0"><div><h2>Your learner profile</h2><p>Personalise your learning space and manage your account details.</p></div></div><div class="notice">Your profile is private by default. Display name, username and bio are saved to your signed-in account. Photo storage and visibility changes are not enabled.</div><div class="profilelayout"><div class="panel profilecard"><div class="profileavatar" id="profileAvatar">S</div><label class="primary uploadlabel" for="profilePhoto">Choose profile photo</label><input id="profilePhoto" type="file" accept="image/png,image/jpeg,image/webp" hidden onchange="previewProfilePhoto(event)"><p style="font-size:11px;color:var(--muted)">Use a clear, appropriate image. Avoid uploading sensitive documents.</p><div class="privacytag">🔒 Private profile by default</div></div><div class="panel"><div class="profilefields"><label>Display name<input id="profileName" maxlength="60" placeholder="How should we address you?"></label><label>Username<input id="profileUsername" maxlength="24" placeholder="Choose a username"></label><label>Email address<input type="email" id="profileEmail" placeholder="Your email address" readonly></label><label>Class<select id="profileClass" disabled><option>SS1</option><option selected>SS2</option><option>SS3</option></select></label><label class="full">Short bio<textarea id="profileBio" maxlength="240" placeholder="Tell us a little about your learning goals (optional)"></textarea><small>Maximum 240 characters. Avoid sharing your phone number, home address or other private details.</small></label><label class="full">Profile visibility<select id="profileVisibility"><option value="private">Private — only you</option><option value="classmates">Classmates (only if safeguarding settings allow)</option></select></label></div><div class="actions"><button class="primary" onclick="saveStudentProfile()">Save profile</button><button class="link" onclick="clearProfilePreview()">Clear preview</button></div><p id="profilePreviewMessage" aria-live="polite" style="font-size:12px;color:var(--muted)"></p></div></div><div class="panel" style="margin-top:16px"><h3>Privacy and data choices</h3><p style="font-size:12px;color:var(--muted)">Your learning account data is used to provide lessons, payments, assessments and support. Optional marketing or reuse for unrelated services requires separate permission and is off by default.</p><label class="consentrow"><input type="checkbox" id="marketingConsent"> I separately agree to receive optional learning and product updates by email.</label></div></section>
+ <section class="page" id="help"><div class="sectionhead" style="margin-top:0"><div><h2>Help & support</h2><p>We're building a simple way to get learning and account support.</p></div></div><div class="panel"><b>Need help?</b><p style="color:var(--muted)">Support contact details will be published before launch. Never send payment PINs, passwords or card details to support.</p></div></section>
+ <div class="footer">Think Tank · Student experience prototype · Secure learning is our priority</div>
+ </div>
+</main>
+</div>
+<script>
+const topics=[
+["English Language","Reading comprehension and inference","Practise identifying main ideas, supporting details and implied meaning.","Term allocation pending",1000,"📖"],
+["General Mathematics","Algebraic expressions and identities","Illustrative sample topic; confirm exact SSS class mapping before publication.","Term allocation pending",1000,"📐"],
+["General Mathematics","Quadratic equations","Illustrative sample topic; confirm exact SSS class mapping before publication.","Term allocation pending",1200,"📐"],
+["General Mathematics","Trigonometry and applications","Illustrative sample topic; confirm exact SSS class mapping before publication.","Term allocation pending",1000,"📐"],
+["Further Mathematics","Functions and mappings","Understand domain, range and function notation.","Term allocation pending",1500,"∑"],
+["Further Mathematics","Differentiation basics","Explore rates of change and introductory derivatives.","Term allocation pending",1500,"∑"],
+["Biology","Cell structure and organisation","Explore cell components and their functions.","Term allocation pending",1000,"🧬"],
+["Biology","Nutrition and digestion","Understand nutrients and digestion in living organisms.","Term allocation pending",1000,"🧬"],
+["Chemistry","Atomic structure","Explore protons, neutrons, electrons and electronic arrangement.","Term allocation pending",1000,"⚗️"],
+["Chemistry","Chemical bonding","Understand ionic, covalent and metallic bonding.","Term allocation pending",1200,"⚗️"],
+["Physics","Motion and linear kinematics","Interpret distance, displacement, speed and acceleration.","Term allocation pending",1000,"⚛️"],
+["Physics","Work, energy and power","Connect force, work, energy transfer and power.","Term allocation pending",1000,"⚛️"],
+["Physics","Waves and sound","Explore wave properties and sound behaviour.","Term allocation pending",1000,"⚛️"]
+];
+async function loadSavedLessons(){
+ const target=document.getElementById('savedLessons');
+ target.textContent='Loading your saved lessons…';
+ try{
+  const data=await studentApi('/api/v1/student/saved-lessons');
+  const items=data.items||[];target.replaceChildren();
+  if(!items.length){target.textContent='No saved lessons yet. Explore the catalogue and choose “Save lesson” on a published topic.';return}
+  items.forEach(item=>{
+   const row=document.createElement('article');row.style.cssText='display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #e7ebf2';
+   const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+   const link=document.createElement('a');link.href='/lesson.html?topic='+encodeURIComponent(item.topic_id);link.textContent=item.title;link.style.cssText='font-weight:700;color:#3456c8;text-decoration:none';
+   const detail=document.createElement('p');detail.style.cssText='margin:4px 0;color:#68758b;font-size:11px';detail.textContent=(item.subject||'Lesson')+' · '+item.class_level;
+   info.append(link,detail);
+   const remove=document.createElement('button');remove.className='link';remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>removeSavedLesson(item.topic_id,remove));
+   row.append(info,remove);target.append(row);
+  });
+ }catch(e){target.textContent=e.message||'Unable to load saved lessons.'}
+}
+async function saveTopic(topic,button){
+ if(button)button.disabled=true;
+ try{
+  const result=await studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topic.id),{},'POST');
+  if(button)button.textContent='Saved';
+  await loadSavedLessons();
+ }catch(e){if(button)button.textContent='Save failed';alert(e.message||'Unable to save this lesson.')}
+ finally{if(button)button.disabled=false}
+}
+async function removeSavedLesson(topicId,button){
+ if(button)button.disabled=true;
+ try{
+  await studentApi('/api/v1/student/saved-lessons/'+encodeURIComponent(topicId),{},'DELETE');
+  await loadSavedLessons();
+ }catch(e){alert(e.message||'Unable to remove this saved lesson.')}
+ finally{if(button)button.disabled=false}
+}
+async function loadPodcastLibrary(){
+ const target=document.getElementById('podcastList'),status=document.getElementById('podcastStatus');
+ target.textContent='Loading approved podcasts…';status.textContent='';
+ try{
+  const data=await studentApi('/api/v1/student/podcasts');
+  const items=data.items||[];target.replaceChildren();
+  if(!items.length){target.textContent='No approved podcasts are available for your account yet. Episodes appear here after their lesson, script and private audio have all passed review.';return}
+  items.forEach(item=>{
+   const row=document.createElement('article');row.style.cssText='display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid #e7ebf2';
+   const icon=document.createElement('div');icon.textContent='♫';icon.setAttribute('aria-hidden','true');icon.style.cssText='width:42px;height:42px;border-radius:12px;background:#edf2ff;color:#4562dc;display:grid;place-items:center;font-size:21px';
+   const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+   const title=document.createElement('strong');title.textContent=item.title||item.topic_title;
+   const detail=document.createElement('p');detail.style.cssText='margin:3px 0;color:#68758b;font-size:11px';
+   const duration=item.duration_seconds?Math.ceil(Number(item.duration_seconds)/60)+' min':'Duration not supplied';
+   detail.textContent=(item.subject||'Lesson')+' · '+item.class_level+' · '+duration;
+   const button=document.createElement('button');button.className='primary';button.type='button';button.textContent='Listen';
+   button.addEventListener('click',()=>playPodcast(item,button));
+   info.append(title,detail);row.append(icon,info,button);target.append(row);
+  });
+ }catch(e){target.textContent=e.message||'Unable to load your podcast library.'}
+}
+async function playPodcast(item,button){
+ const player=document.getElementById('podcastPlayer'),status=document.getElementById('podcastStatus');
+ if(button)button.disabled=true;
+ status.textContent='Checking your lesson access…';
+ try{
+  const data=await studentApi('/api/v1/topics/'+encodeURIComponent(item.topic_id)+'/audio/'+encodeURIComponent(item.asset_id)+'/access',{},'POST');
+  player.src=data.audio_url;player.load();await player.play();
+  status.textContent='Now playing: '+(item.title||item.topic_title);
+ }catch(e){status.textContent=e.message||'This podcast could not be played.'}
+ finally{if(button)button.disabled=false}
+}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));document.getElementById('crumb').textContent=({home:'Overview',catalog:'Explore lessons',subjects:'My subjects',progress:'My progress',saved:'Saved lessons',assessments:'My assessments',profile:'My profile',help:'Help & support',podcasts:'Podcast library'})[id]||'Overview';if(id==='catalog')renderCatalog();if(id==='saved')loadSavedLessons();if(id==='profile')loadStudentProfile();if(id==='progress')loadDashboard();if(id==='podcasts')loadPodcastLibrary();if(id==='assessments')loadAssessmentHistory();window.scrollTo(0,0)}
+document.querySelectorAll('.nav').forEach(n=>n.addEventListener('click',e=>{e.preventDefault();showPage(n.dataset.page)}));
+function previewProfilePhoto(event){const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>2*1024*1024){alert('Choose a JPG, PNG or WebP image under 2 MB.');event.target.value='';return}const reader=new FileReader();reader.onload=()=>{document.getElementById('profileAvatar').style.backgroundImage='url('+reader.result+')';document.getElementById('profileAvatar').textContent=''};reader.readAsDataURL(file)}
+function studentCookie(name){const item=document.cookie.split('; ').find(x=>x.startsWith(name+'='));return item?decodeURIComponent(item.slice(name.length+1)):''}
+async function studentApi(path,body,method='GET'){const headers={'Accept':'application/json'};if(body!==undefined){headers['Content-Type']='application/json';headers['X-CSRF-Token']=studentCookie('learnwise_csrf')}const response=await fetch(path,{method,credentials:'same-origin',headers,body:body===undefined?undefined:JSON.stringify(body)});const data=await response.json().catch(()=>({}));if(!response.ok)throw Error(data.message||data.error||'Sign in to manage your profile.');return data}
+async function loadStudentProfile(){try{const data=await studentApi('/api/v1/student/profile');const p=data.profile;document.getElementById('profileName').value=p.display_name||'';document.getElementById('profileUsername').value=p.username||'';document.getElementById('profileEmail').value=p.email||'';document.getElementById('profileClass').value=p.class_level||'SS1';document.getElementById('profileBio').value=p.bio||'';document.getElementById('profileVisibility').value=p.profile_visibility||'private';document.getElementById('profilePreviewMessage').textContent='Profile loaded from your private account.';document.getElementById('profileAvatar').textContent=(p.display_name||'S').slice(0,1).toUpperCase()}catch(e){document.getElementById('profilePreviewMessage').textContent=e.message}}
+async function saveStudentProfile(){const changes={display_name:document.getElementById('profileName').value.trim(),username:document.getElementById('profileUsername').value.trim(),bio:document.getElementById('profileBio').value};try{const data=await studentApi('/api/v1/student/profile',changes,'PATCH');document.getElementById('profilePreviewMessage').textContent='Profile saved successfully. Your email and class remain account-controlled.';document.getElementById('profileName').value=data.profile.display_name;document.getElementById('profileUsername').value=data.profile.username||''}catch(e){document.getElementById('profilePreviewMessage').textContent=e.message}}
+async function loadAssessmentHistory(){
+ const target=document.getElementById('assessmentHistory');
+ target.textContent='Loading your assessment history…';
+ try{
+  const data=await studentApi('/api/v1/student/assessment-history');
+  const items=data.items||[];
+  const scored=items.filter(x=>x.percentage!==null);
+  const average=scored.length?scored.reduce((sum,x)=>sum+Number(x.percentage),0)/scored.length:null;
+  document.getElementById('assessmentCount').textContent=items.length;
+  document.getElementById('assessmentAverage').textContent=average===null?'—':average.toFixed(1)+'%';
+  document.getElementById('assessmentPassed').textContent=items.filter(x=>x.passed===true).length;
+  document.getElementById('assessmentPending').textContent=items.filter(x=>['in_progress','under_review'].includes(x.status)).length;
+  target.replaceChildren();
+  if(!items.length){target.textContent='No assessment attempts yet. Open assessments to begin.';return}
+  items.forEach(item=>{
+   const row=document.createElement('article');row.style.cssText='padding:13px 0;border-top:1px solid #e7ebf2';
+   const title=document.createElement('strong');title.textContent=item.title+' · '+item.subject+' · '+item.class_level;
+   const detail=document.createElement('p');detail.style.cssText='margin:5px 0;color:#68758b;font-size:12px';
+   const parts=['Status: '+String(item.status||'unknown').replaceAll('_',' ')];
+   if(item.score!==null&&item.maximum_score!==null)parts.push('Score: '+item.score+' / '+item.maximum_score);
+   if(item.question_count)parts.push(item.question_count+' questions');
+   if(item.percentage===null)parts.push('Result pending');else parts.push(item.percentage+'%');
+   if(item.passed===true)parts.push('Passed');else if(item.passed===false)parts.push('Not passed');
+   if(item.integrity_review_required)parts.push('Human review requested');
+   const timestamp=item.submitted_at||item.started_at;
+   if(timestamp){const date=new Date(timestamp);if(!Number.isNaN(date.getTime()))parts.push((item.submitted_at?'Submitted ':'Started ')+date.toLocaleString())}
+   detail.textContent=parts.join(' · ');
+   row.append(title,detail);target.append(row);
+  });
+ }catch(e){target.textContent=e.message||'Unable to load assessment history.'}
+}
+
+
+function renderStudentProgress(data){
+ const summary=data.summary||{};
+ document.getElementById('progressCompleted').textContent=summary.completed_lessons??0;
+ document.getElementById('progressPractice').textContent=summary.practice_attempts??0;
+ document.getElementById('progressAttempts').textContent=summary.assessment_attempts??0;
+ document.getElementById('progressAverage').textContent=summary.average_score===null||summary.average_score===undefined?'—':summary.average_score+'%';
+ const subjects=document.getElementById('progressSubjects');
+ subjects.replaceChildren();
+ const subjectItems=data.subjects||[];
+ if(!subjectItems.length){subjects.textContent='No subject progress is available yet.'}
+ subjectItems.forEach(item=>{
+  const row=document.createElement('div');row.style.cssText='padding:11px 0;border-top:1px solid #e7ebf2';
+  const heading=document.createElement('div');heading.style.cssText='display:flex;justify-content:space-between;gap:10px;font-size:12px';
+  const name=document.createElement('strong');name.textContent=item.name;
+  const count=document.createElement('span');count.textContent=Number(item.completed_lessons||0)+' / '+Number(item.published_lessons||0);
+  heading.append(name,count);
+  const bar=document.createElement('div');bar.className='progress';bar.setAttribute('role','progressbar');
+  bar.setAttribute('aria-label',item.name+' lesson completion');bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax','100');
+  const fill=document.createElement('i');const total=Number(item.published_lessons||0),done=Number(item.completed_lessons||0);
+  const percent=total?Math.max(0,Math.min(100,Math.round(done/total*100))):0;
+  fill.style.width=percent+'%';bar.setAttribute('aria-valuenow',String(percent));bar.append(fill);
+  row.append(heading,bar);subjects.append(row);
+ });
+ const recent=document.getElementById('progressRecent');recent.replaceChildren();
+ const recentItems=data.recent_lessons||[];
+ if(!recentItems.length){recent.textContent='No lesson activity recorded yet. Explore the lesson catalogue to get started.';return}
+ recentItems.forEach(item=>{
+  const row=document.createElement('div');row.style.cssText='padding:11px 0;border-top:1px solid #e7ebf2';
+  const link=document.createElement('a');link.href='/lesson?topic='+encodeURIComponent(item.id);link.textContent=item.title;link.style.cssText='font-weight:700;color:#3456c8;text-decoration:none';
+  const detail=document.createElement('p');detail.style.cssText='margin:4px 0;color:#68758b;font-size:11px';
+  const date=item.updated_at?new Date(item.updated_at):null;
+  detail.textContent=(item.subject||'Lesson')+(date&&!Number.isNaN(date.getTime())?' · '+date.toLocaleDateString():'');
+  row.append(link,detail);recent.append(row);
+ });
+}
+async function loadDashboard(){
+ try{
+  const data=await studentApi('/api/v1/student/dashboard');
+  renderStudentProgress(data);
+  const s=data.summary||{};
+  document.getElementById('welcomeTitle').textContent='Welcome back, '+(data.student.display_name||'student')+'.';
+  document.getElementById('welcomeSubtitle').textContent='Your '+data.student.class_level+' learning space is connected to your saved lessons and assessment records.';
+  document.getElementById('dashCompleted').textContent=s.completed_lessons;
+  document.getElementById('dashSubjects').textContent=(data.subjects||[]).filter(x=>x.published_lessons>0).length;
+  document.getElementById('dashCompletedNote').textContent='Completed lessons recorded';
+  document.getElementById('dashPractice').textContent=s.practice_attempts;
+  document.getElementById('dashAttempts').textContent=s.assessment_attempts;
+  document.getElementById('dashAttemptsNote').textContent=s.average_score===null?'No graded attempts yet':'Average score: '+s.average_score+'%';
+  document.getElementById('dashPassed').textContent=s.assessments_passed;
+  document.getElementById('dashClass').textContent=data.student.class_level;
+  document.getElementById('dashName').textContent='Your private student account';
+  const bySlug=new Map((data.subjects||[]).map(x=>[x.slug,x]));
+  document.querySelectorAll('#subjectTiles .subject').forEach(card=>{
+   const title=card.querySelector('h3')?.textContent||'';
+   const slug=title.toLowerCase().replaceAll(' ','-');
+   const item=bySlug.get(slug);
+   if(!item)return;
+   const p=card.querySelector('p');
+   if(p)p.textContent=item.completed_lessons+' of '+item.published_lessons+' published lessons completed';
+   const bar=card.querySelector('.progress i');
+   if(bar)bar.style.width=(item.published_lessons?Math.round(100*item.completed_lessons/item.published_lessons):0)+'%';
+  });
+  const classFilter=document.getElementById('classFilter');
+  if(classFilter)classFilter.value=data.student.class_level;
+ }catch(e){
+  document.getElementById('dashCompletedNote').textContent=e.message;
+  document.getElementById('dashAttemptsNote').textContent='Sign in to load private progress';
+  ['progressSubjects','progressRecent'].forEach(id=>{const node=document.getElementById(id);if(node)node.textContent='Sign in to load your private learning records.'});
+  ['progressCompleted','progressPractice','progressAttempts','progressAverage'].forEach(id=>{const node=document.getElementById(id);if(node)node.textContent='—'});
+ }
+}
+let tutorHistory=[];let tutorTopicId='';
+function clearTutorConversation(){tutorHistory=[];document.getElementById("tutorAnswer").replaceChildren();document.getElementById("tutorAnswer").hidden=true;document.getElementById("tutorStatus").textContent="Conversation cleared from this page."}
+async function askThinkTankTutor(){
+ const question=document.getElementById('tutorQuestion').value.trim();
+ const context=document.getElementById('tutorContext').value.trim();
+ const topicId=document.getElementById('tutorTopicId').value.trim();
+ if(topicId!==tutorTopicId){tutorHistory=[];tutorTopicId=topicId}
+ const status=document.getElementById('tutorStatus');
+ const answer=document.getElementById('tutorAnswer');
+ const button=document.getElementById('askTutorButton');
+ if(!question){status.textContent='Write a question first.';return}
+ button.disabled=true;status.textContent='Checking your account and AI availability…';answer.hidden=true;
+ try{
+  const data=await studentApi('/api/v1/tutor/answer',{question,topic_context:context,topic_id:topicId||null,history:tutorHistory.slice(-8)},'POST');
+  tutorHistory.push({role:'user',content:question},{role:'assistant',content:data.answer});tutorHistory=tutorHistory.slice(-8);
+  answer.textContent=tutorHistory.map(item=>(item.role==='user'?'You: ':'Think Tank: ')+item.content).join('\n\n');answer.hidden=false;status.textContent='AI explanation. Check important facts against your lesson notes or teacher.';
+ }catch(e){status.textContent=e.message}
+ finally{button.disabled=false}
+}
+
+function clearProfilePreview(){['profileName','profileUsername','profileEmail','profileBio'].forEach(id=>document.getElementById(id).value='');document.getElementById('profilePhoto').value='';document.getElementById('profileAvatar').style.backgroundImage='';document.getElementById('profileAvatar').textContent='S';document.getElementById('profilePreviewMessage').textContent=''}
+function filterSubject(s){showPage('catalog');document.getElementById('subjectFilter').value=s;renderCatalog()}
+function setClass(c,b){document.querySelectorAll('.term').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('classFilter').value=c}
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+let catalogueApiItems=[];
+let catalogueRequest=0;
+async function renderCatalog(){
+ const requestId=++catalogueRequest;
+ const classLevel=document.getElementById('classFilter').value;
+ const subject=document.getElementById('subjectFilter').value;
+ const query=document.getElementById('topicSearch').value.trim();
+ const params=new URLSearchParams({class:classLevel});
+ if(subject!=='All')params.set('subject',subject.toLowerCase().replaceAll(' ','-'));
+ if(query)params.set('q',query);
+ const grid=document.getElementById('catalogGrid');
+ grid.textContent='Loading verified catalogue…';
+ try{
+  const response=await fetch('/api/v1/catalogue?'+params.toString(),{credentials:'same-origin',headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error('Catalogue API unavailable');
+  const payload=await response.json();
+  if(requestId!==catalogueRequest)return;
+  catalogueApiItems=Array.isArray(payload.items)?payload.items:[];
+  if(!catalogueApiItems.length){
+   grid.textContent=payload.is_demo?'No matching sample topics. The live catalogue is not connected yet.':'No approved lessons are currently published for these filters.';
+   return;
+  }
+  grid.replaceChildren();
+  catalogueApiItems.forEach((topic,index)=>{
+   const card=document.createElement('article');card.className='catalogcard';
+   const meta=document.createElement('small');meta.style.color='#66748a';
+   meta.textContent=(topic.subject||'Subject')+' · '+(topic.class_level||classLevel)+' · '+(topic.term||'Term allocation pending');
+   const title=document.createElement('h3');title.textContent=topic.title||'Untitled lesson';
+   const summary=document.createElement('p');summary.textContent=topic.summary||'Open this lesson to view its learning objectives.';
+   const footer=document.createElement('div');footer.style.cssText='display:flex;justify-content:space-between;align-items:center';
+   const price=document.createElement('span');price.className='price';
+   price.textContent=Number(topic.price_kobo||0)>0?'₦'+(Number(topic.price_kobo)/100).toLocaleString('en-NG'):'Price to be confirmed';
+   const button=document.createElement('button');button.textContent='View lesson';button.addEventListener('click',()=>previewTopic(index));
+   const saveButton=document.createElement('button');saveButton.className='link';saveButton.type='button';saveButton.textContent='Save lesson';saveButton.addEventListener('click',()=>saveTopic(topic,saveButton));footer.append(price,button,saveButton);card.append(meta,title,summary,footer);grid.append(card);
+  });
+ }catch(error){
+  if(requestId!==catalogueRequest)return;
+  grid.innerHTML='';
+  const fallback=topics.filter(x=>(subject==='All'||x[0]===subject)&&(x[1]+' '+x[2]).toLowerCase().includes(query.toLowerCase()));
+  if(!fallback.length){grid.textContent='Catalogue is temporarily unavailable.';return;}
+  fallback.forEach(x=>{
+   const card=document.createElement('article');card.className='catalogcard';
+   const meta=document.createElement('small');meta.textContent=x[0]+' · '+classLevel+' · Preview only';
+   const title=document.createElement('h3');title.textContent=x[1];
+   const summary=document.createElement('p');summary.textContent=x[2];
+   const footer=document.createElement('div');footer.style.cssText='display:flex;justify-content:space-between;align-items:center';
+   const price=document.createElement('span');price.className='price';price.textContent='Sample price ₦'+Number(x[4]).toLocaleString('en-NG');
+   const button=document.createElement('button');button.textContent='View preview';button.addEventListener('click',()=>alert(x[1]+'\\n\\nPreview only. Live catalogue is unavailable.'));
+   footer.append(price,button);card.append(meta,title,summary,footer);grid.append(card);
+  });
+ }
+}
+function previewTopic(index){
+ const topic=catalogueApiItems[index];
+ if(topic&&topic.id){location.assign('/lesson.html?topic='+encodeURIComponent(topic.id));return;}
+ if(topic){alert((topic.title||'Sample lesson')+'\\n\\nThis is illustrative demo data, not an approved lesson.');return;}
+}
+document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){showPage('catalog');document.getElementById('topicSearch').value=e.target.value;renderCatalog()}});
+renderCatalog();
+loadDashboard();
+</script>
+</body></html>

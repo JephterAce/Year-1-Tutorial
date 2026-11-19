@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#101b35">
+<title>Think Tank administrator sign in</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f7fb;color:#172033;font:15px/1.5 system-ui,sans-serif}.card{width:min(440px,calc(100% - 28px));padding:28px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 12px 35px #15264a12}.brand{font-size:21px;font-weight:850;color:#172746}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:#65738a;font-weight:800;margin-top:5px}h1{font-size:25px;margin:22px 0 5px}p{color:#65738a;font-size:13px}form{display:grid;gap:12px;margin-top:22px}label{font-size:12px;font-weight:750}input{width:100%;padding:12px;border:1px solid #dce3ed;border-radius:9px;font:inherit;margin-top:5px}button{padding:12px;border:0;border-radius:9px;background:#172746;color:#fff;font:inherit;font-weight:800;cursor:pointer}button:disabled{opacity:.55}.msg{min-height:22px;font-size:13px;color:#9a3b35}a{color:#405bd1}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="brand">Think Tank</div>
+  <div class="eyebrow">Administrator workspace</div>
+  <h1>Sign in securely</h1>
+  <p>This area is restricted to authorised Think Tank administrators. Student accounts cannot be used here.</p>
+  <form id="adminLogin">
+    <label>Email address<input name="email" type="email" autocomplete="username" maxlength="254" required></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">Sign in</button>
+  </form>
+  <p class="msg" id="message" role="status" aria-live="polite"></p>
+  <p><a href="/">Return to student learning</a></p>
+</main>
+<script>
+const form=document.getElementById("adminLogin");
+const message=document.getElementById("message");
+form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const button=form.querySelector("button");
+  button.disabled=true;
+  message.textContent="Signing in…";
+  try{
+    const data=Object.fromEntries(new FormData(form).entries());
+    const response=await fetch("/api/v1/admin/auth/login",{
+      method:"POST",credentials:"same-origin",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(data)
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(result.error==="invalid_credentials"?"Email or password is incorrect.": "Administrator sign-in is temporarily unavailable.");
+    location.assign("/admin");
+  }catch(error){message.textContent=error.message;}
+  finally{button.disabled=false;}
+});
+</script>
+</body>
+</html>

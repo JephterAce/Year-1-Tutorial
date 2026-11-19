@@ -1,0 +1,138 @@
+{
+  "metadata": {
+    "subject": "English Language",
+    "class_level": "SS1",
+    "topic": "Debate",
+    "curriculum_source": "New Revised Senior Secondary School Curriculum: English Language SSS 1",
+    "curriculum_source_url": "https://lmis.nerdcportals.com.ng/sss_1/necurrdc/1.pdf",
+    "source_section": "Listening and Speaking; printed page 1",
+    "term_mapping_status": "not_assigned",
+    "content_status": "draft_teacher_review_required",
+    "rights_note": "Original explanation, examples and questions. The NERDC curriculum is used as a topic reference; its lesson text is not reproduced."
+  },
+  "content": {
+    "intro": "A debate is a structured discussion in which speakers present opposing views on a motion and support their positions with reasons and evidence. Debating helps learners organise ideas, speak clearly, listen actively, evaluate evidence and disagree respectfully.",
+    "learning_objectives": [
+      "Define a debate and explain at least three purposes of debating.",
+      "Identify the motion, affirmative team, opposing team, chairperson and audience.",
+      "Organise an argument using a clear claim, reason, evidence and explanation.",
+      "Use respectful language, appropriate voice and logical sequencing when speaking.",
+      "Respond to an opposing argument without insulting the speaker."
+    ],
+    "sections": [
+      {
+        "heading": "1. Meaning and purpose of a debate",
+        "body": "A debate is a formal discussion of a motion by speakers who support different sides. The affirmative team supports the motion; the opposing team argues against it. A debate is not a quarrel. Its purpose is to examine an issue carefully, persuade an audience through sound reasoning, develop confidence in public speaking and practise active listening."
+      },
+      {
+        "heading": "2. Important debate terms and roles",
+        "body": "The motion is the statement being debated. The affirmative team supports it, while the opposing team rejects it. The chairperson or moderator introduces the motion, recognises speakers and keeps the discussion orderly. Speakers present arguments and rebuttals. The audience listens and may ask questions if the rules permit. A timekeeper helps speakers observe the agreed time limit."
+      },
+      {
+        "heading": "3. Structure of a school debate",
+        "body": "A school debate commonly begins with the chairperson's introduction and reading of the motion. The first affirmative speaker defines important terms and presents the team's position. The opposing team then presents its position. Further speakers develop arguments, answer points raised by the other side and provide relevant examples. The debate ends with brief summaries or closing statements. The teacher or adjudicator evaluates the performance using the announced criteria."
+      },
+      {
+        "heading": "4. Building a convincing argument",
+        "body": "A strong argument contains a clear claim, a reason that supports the claim, relevant evidence or a realistic example, and an explanation showing how the evidence supports the motion. Avoid unsupported generalisations. For example, if the motion concerns social media and students, distinguish between responsible educational use and harmful or distracting use. Do not invent statistics; use verifiable information or clearly labelled examples."
+      },
+      {
+        "heading": "5. Rebuttal and respectful language",
+        "body": "A rebuttal responds directly to an argument made by the other team. Listen carefully, identify the exact point, explain why it is incomplete or unconvincing, and support your response with a reason or evidence. Address the argument, not the speaker. Useful expressions include: 'I respectfully disagree because…', 'The previous speaker has not considered…', and 'The example does not establish that…'."
+      },
+      {
+        "heading": "6. Delivery and debate etiquette",
+        "body": "Speak audibly and at a controlled pace. Pronounce words clearly, maintain suitable eye contact, organise points logically and observe the time limit. Do not interrupt, shout, mock an opponent or use abusive language. Listen while others speak and acknowledge a valid point when appropriate. Confidence is valuable, but accuracy and respect are more important than speaking loudly."
+      },
+      {
+        "heading": "7. Worked school example",
+        "body": "Motion: 'Social media does more good than harm to secondary school students.' The affirmative team might argue that responsible use supports learning, communication and access to educational resources. The opposing team might argue that excessive or unsafe use can distract learners, expose them to misinformation and create privacy risks. Both teams should define 'responsible use' or 'excessive use', explain their reasoning and use credible examples. The motion is an exercise in argument, not a claim that one side is automatically correct."
+      }
+    ],
+    "key_terms": [
+      {"term": "Motion", "definition": "The statement or proposition that a debate examines."},
+      {"term": "Affirmative", "definition": "The team or speaker supporting the motion."},
+      {"term": "Opposition", "definition": "The team or speaker arguing against the motion."},
+      {"term": "Rebuttal", "definition": "A reasoned response that challenges or qualifies an argument made by the other side."},
+      {"term": "Adjudicator", "definition": "A person who evaluates a debate using announced criteria."},
+      {"term": "Evidence", "definition": "Information or examples used to support a claim."}
+    ],
+    "worked_examples": [
+      {
+        "title": "Developing an argument",
+        "problem": "A speaker claims: 'School libraries are important.' Turn this into a developed debate argument.",
+        "steps": [
+          "Claim: School libraries are important to students.",
+          "Reason: They provide organised access to books and reference materials.",
+          "Example: A learner preparing a Biology assignment can consult approved textbooks and reference works.",
+          "Explanation: Access to reliable sources can improve research and help learners compare information."
+        ],
+        "answer": "A developed argument links a clear claim to a reason, a relevant example and an explanation."
+      },
+      {
+        "title": "Responding to an opposing point",
+        "problem": "The opposing speaker says that all social media use harms learning. Prepare a respectful rebuttal.",
+        "steps": [
+          "Acknowledge the concern about distraction and unsafe use.",
+          "Point out that the word 'all' is too broad unless supported by evidence.",
+          "Explain that supervised educational use can support communication and access to learning materials.",
+          "Conclude that the debate should distinguish responsible use from excessive or unsafe use."
+        ],
+        "answer": "A fair rebuttal challenges the overgeneralisation and explains the distinction without attacking the speaker."
+      }
+    ]
+  },
+  "practice_questions": [
+    {
+      "question_type": "single_choice",
+      "prompt": "What is the statement being discussed in a debate called?",
+      "options": [
+        {"id": "a", "text": "A rebuttal"},
+        {"id": "b", "text": "A motion"},
+        {"id": "c", "text": "A conclusion"},
+        {"id": "d", "text": "An audience"}
+      ],
+      "answer_key": {"value": "b"},
+      "explanation": "The motion is the proposition that the teams are asked to support or oppose."
+    },
+    {
+      "question_type": "single_choice",
+      "prompt": "Which of the following is the best example of a rebuttal?",
+      "options": [
+        {"id": "a", "text": "You are wrong because you cannot speak well."},
+        {"id": "b", "text": "I disagree with the speaker as a person."},
+        {"id": "c", "text": "That point overlooks the evidence that supervised use can support learning."},
+        {"id": "d", "text": "I will ignore the previous argument."}
+      ],
+      "answer_key": {"value": "c"},
+      "explanation": "A rebuttal responds to the argument with a reason; it does not insult the speaker."
+    },
+    {
+      "question_type": "true_false",
+      "prompt": "The affirmative team supports the motion.",
+      "options": null,
+      "answer_key": {"value": "true"},
+      "explanation": "The affirmative side argues in favour of the motion."
+    },
+    {
+      "question_type": "single_choice",
+      "prompt": "Which sequence best develops a convincing argument?",
+      "options": [
+        {"id": "a", "text": "Insult, claim, interruption, conclusion"},
+        {"id": "b", "text": "Claim, reason, evidence or example, explanation"},
+        {"id": "c", "text": "Conclusion, unrelated story, claim, shout"},
+        {"id": "d", "text": "Opinion only, repeated several times"}
+      ],
+      "answer_key": {"value": "b"},
+      "explanation": "A strong argument states a position, explains why it is reasonable, supports it and links the support to the claim."
+    }
+  ],
+  "teacher_answer_key": {"1":"b","2":"c","3":"true","4":"b"},
+  "review_checklist": [
+    "Confirm the topic and learning outcomes against the official English Language SSS1 curriculum.",
+    "Check debate terminology, argument structure and language examples.",
+    "Check that the social-media example is balanced and age-appropriate.",
+    "Review accessibility, cultural relevance and assessment difficulty.",
+    "Record a qualified English teacher's review before import as approved content."
+  ]
+}

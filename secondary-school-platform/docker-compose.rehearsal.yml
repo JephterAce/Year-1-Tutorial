@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: learnwise_rehearsal
+      POSTGRES_USER: learnwise
+      POSTGRES_PASSWORD: rehearsal_only_change_me
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U learnwise -d learnwise_rehearsal"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - learnwise_rehearsal_data:/var/lib/postgresql/data
+volumes:
+  learnwise_rehearsal_data:

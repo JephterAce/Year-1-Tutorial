@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "subject": "Biology",
+    "class_level": "SS1",
+    "topic": "Laboratory Safety Rules",
+    "curriculum_source": "New Revised Senior Secondary School Curriculum: Biology SSS 1",
+    "curriculum_source_url": "https://lmis.nerdcportals.com.ng/sss_1/necurrdc/6.pdf",
+    "source_section": "Biology and Scientific Enquiry; printed page 1",
+    "term_mapping_status": "not_assigned",
+    "content_status": "draft_teacher_review_required",
+    "rights_note": "Original explanatory content. The NERDC document is used as a curriculum reference; its lesson text and illustrations are not reproduced."
+  },
+  "content": {
+    "intro": "A science laboratory is a controlled learning and investigation space. Good laboratory safety protects learners, teachers, visitors, equipment and the environment. Safety is not a list to memorise only: it is a habit of observing, thinking before acting, following instructions and reporting hazards immediately.",
+    "learning_objectives": [
+      "Explain why safety rules are necessary in a Biology laboratory.",
+      "Identify common laboratory hazards and describe safe responses.",
+      "Select appropriate personal protective equipment for a supervised school practical.",
+      "Demonstrate safe conduct before, during and after an investigation.",
+      "Explain why accidents, spills, breakages and injuries must be reported immediately."
+    ],
+    "sections": [
+      {
+        "heading": "1. Why laboratory safety matters",
+        "body": "Laboratory activities may involve glassware, heat, electricity, biological specimens, liquids and sharp instruments. A careless action can cause injury, contamination, damage or misleading experimental results. Safety rules reduce avoidable risks and help everyone work responsibly. A school laboratory must be used only with the teacher's permission and supervision."
+      },
+      {
+        "heading": "2. Before starting practical work",
+        "body": "Read or listen to the teacher's instructions before touching materials. Know the purpose of the activity, the equipment to be used and the hazards identified by the teacher. Tie back long hair, secure loose clothing, wear the protective equipment required for the activity and keep bags away from walkways. Do not begin an experiment until the teacher has authorised it."
+      },
+      {
+        "heading": "3. Safe conduct during an investigation",
+        "body": "Walk rather than run. Keep the work area tidy. Handle glassware and instruments carefully and use equipment only for its intended purpose. Never taste laboratory substances. Never eat or drink in the laboratory. Do not smell an unknown substance directly or mix materials unless the teacher's instructions specifically require it. Keep hands away from the face and wash them after practical work. Follow the teacher's procedure and never improvise."
+      },
+      {
+        "heading": "4. Personal protective equipment",
+        "body": "Personal protective equipment (PPE) is worn to reduce exposure to hazards. Depending on the activity, a teacher may require a laboratory coat or apron, suitable gloves, eye protection and closed footwear. PPE does not make careless behaviour safe: it must be correctly selected, worn and used together with the laboratory rules."
+      },
+      {
+        "heading": "5. Responding to an accident or hazard",
+        "body": "Stop work and alert the teacher immediately if there is an injury, spill, broken glass, unusual smell, damaged equipment or any unexpected event. Do not hide an accident, attempt an unfamiliar clean-up or touch a spill with bare hands. Follow the teacher's emergency instructions and the school's established safety procedure. Keep other learners away from the affected area."
+      },
+      {
+        "heading": "6. After practical work",
+        "body": "Follow the teacher's instructions for disposing of materials; never pour or discard substances simply because the activity has ended. Return equipment to the designated place, leave the bench clean, switch off equipment only as instructed and wash hands thoroughly. Report missing, damaged or contaminated equipment."
+      },
+      {
+        "heading": "7. Safety is a shared responsibility",
+        "body": "Every learner has a duty to protect classmates as well as themselves. Listen carefully, communicate clearly, cooperate with your group and speak up when a situation appears unsafe. A responsible scientist does not take risks to impress others and does not treat safety instructions as optional."
+      }
+    ],
+    "key_terms": [
+      {"term": "Hazard", "definition": "Anything with the potential to cause harm, injury or damage."},
+      {"term": "Risk", "definition": "The likelihood that a hazard will cause harm and the possible seriousness of that harm."},
+      {"term": "Personal protective equipment (PPE)", "definition": "Protective clothing or equipment selected to reduce exposure to a hazard."},
+      {"term": "Contamination", "definition": "The unwanted introduction or spread of material, organisms or substances."},
+      {"term": "Emergency procedure", "definition": "The approved steps to follow when an accident or dangerous situation occurs."}
+    ],
+    "worked_examples": [
+      {
+        "title": "A broken test tube",
+        "problem": "During a supervised practical, a learner accidentally breaks a test tube on the bench. What should the learner do?",
+        "steps": [
+          "Stop the activity and warn nearby learners not to touch the broken glass.",
+          "Inform the teacher immediately.",
+          "Keep the area clear and follow the teacher's approved glass-disposal procedure.",
+          "Resume only when the teacher confirms that the area is safe."
+        ],
+        "answer": "Do not pick up broken glass with bare hands or conceal the incident. Alert the teacher and follow the school's procedure."
+      },
+      {
+        "title": "Choosing protective equipment",
+        "problem": "A teacher plans a practical that may involve splashes. What should learners do before beginning?",
+        "steps": [
+          "Listen to the teacher's hazard briefing.",
+          "Wear the eye protection and other PPE specified for that practical.",
+          "Check that the equipment fits properly and does not interfere with safe movement."
+        ],
+        "answer": "Use the PPE specified by the teacher. Protective equipment complements safe behaviour; it does not replace supervision or instructions."
+      }
+    ]
+  },
+  "practice_questions": [
+    {
+      "question_type": "single_choice",
+      "prompt": "A learner notices broken glass on the laboratory floor. What is the safest first action?",
+      "options": [
+        {"id": "a", "text": "Pick it up quickly with bare hands."},
+        {"id": "b", "text": "Warn others, keep clear and inform the teacher."},
+        {"id": "c", "text": "Cover it with paper and continue working."},
+        {"id": "d", "text": "Ignore it if nobody is injured."}
+      ],
+      "answer_key": {"value": "b"},
+      "explanation": "Broken glass can cause injury. Keep people away and let the teacher direct the approved clean-up procedure."
+    },
+    {
+      "question_type": "true_false",
+      "prompt": "Wearing a laboratory coat means a learner may ignore other laboratory safety rules.",
+      "options": null,
+      "answer_key": {"value": "false"},
+      "explanation": "PPE reduces exposure to selected hazards, but it does not replace safe conduct, supervision or instructions."
+    },
+    {
+      "question_type": "single_choice",
+      "prompt": "Which action is appropriate before beginning a practical activity?",
+      "options": [
+        {"id": "a", "text": "Start mixing materials before the teacher arrives."},
+        {"id": "b", "text": "Read or listen to the instructions and wait for authorisation."},
+        {"id": "c", "text": "Taste a substance to identify it."},
+        {"id": "d", "text": "Move another group's equipment without asking."}
+      ],
+      "answer_key": {"value": "b"},
+      "explanation": "Learners must understand the procedure and receive the teacher's permission before handling materials."
+    },
+    {
+      "question_type": "true_false",
+      "prompt": "An accident or spill should be reported even when it appears minor.",
+      "options": null,
+      "answer_key": {"value": "true"},
+      "explanation": "Early reporting allows the teacher to assess the situation and prevent further harm."
+    }
+  ],
+  "teacher_answer_key": {
+    "1": "b",
+    "2": "false",
+    "3": "b",
+    "4": "true"
+  },
+  "review_checklist": [
+    "Confirm the topic and learning outcomes against the official Biology SSS1 curriculum.",
+    "Check terminology and all practical-safety statements against current school laboratory rules.",
+    "Confirm accessibility and suitability for the age group.",
+    "Add locally relevant diagrams or approved visuals where useful.",
+    "Record teacher reviewer name and date before importing as approved content."
+  ]
+}

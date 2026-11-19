@@ -1,0 +1,35 @@
+name: Staging owner admin bootstrap (one-time)
+
+on:
+  push:
+    branches: [secondary-school-platform-foundation]
+    paths: ["secondary-school-platform/ops/BOOTSTRAP_OWNER_EMAIL.txt"]
+
+permissions:
+  contents: read
+
+concurrency: owner-admin-bootstrap
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: secondary-school-platform/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements.txt
+      - name: Create the owner administrator
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_OWNER_DATABASE_URL }}
+          LEARNWISE_ADMIN_PASSWORD: ${{ secrets.STAGING_ADMIN_PASSWORD }}
+          LEARNWISE_BOOTSTRAP_CONFIRM: CREATE_OWNER_ADMIN
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$LEARNWISE_ADMIN_PASSWORD" ]; then
+            echo "A required secret is missing."; exit 1
+          fi
+          export LEARNWISE_ADMIN_EMAIL="$(tr -d '[:space:]' < ../ops/BOOTSTRAP_OWNER_EMAIL.txt)"
+          python bootstrap_admin.py

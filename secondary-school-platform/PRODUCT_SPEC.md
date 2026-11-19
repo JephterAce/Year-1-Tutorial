@@ -1,0 +1,49 @@
+# Product specification
+
+## Audience and promise
+A clear, welcoming, low-bandwidth learning environment for Nigerian senior secondary learners in SS1–SS3. A learner should be able to find a topic, understand what is included, pay safely, listen, practise and continue later.
+
+## Catalogue
+Class × subject × term × topic. Initial subjects are English Language, General Mathematics, Further Mathematics, Biology, Chemistry and Physics. The 54 class/subject/term combinations are catalogue containers, not a claim that every school follows the same topic order.
+
+### Revised NERDC subject structure
+- Core/compulsory subjects included here: English Language and General Mathematics.
+- Science-field subjects included here: Biology, Chemistry, Physics and Further Mathematics.
+- The revised national senior-secondary structure retains 8–9 subjects, including five core/compulsory subjects. This six-subject platform scope is not a complete school timetable: it does not include the other core subjects (one trade subject, Citizenship and Heritage Studies and Digital Technologies) or every optional field.
+- Use separate revised SSS1, SSS2 and SSS3 curriculum sources. Never copy topic sequences between classes.
+- Verify each topic against the revised NERDC curriculum. Term placement must be supported by a current school scheme or explicit official term allocation; otherwise mark it pending.
+
+## Student journey
+1. Select class and create an account.
+2. Browse/search subjects, terms and topics.
+3. Preview objectives, formats, duration and sample.
+4. Buy a topic or clearly described bundle.
+5. Verify payment server-side with Paystack.
+6. Grant the exact topic entitlement only after verified payment.
+7. Listen in an authenticated player; resume progress and access included notes/quizzes.
+8. Receive automatically graded objective assessment results, explanations and in-app/email notifications without waiting for owner marking.
+9. Review progress, quiz attempts, results and receipts.
+10. Manage a personal learner profile with display name, username, verified email, class, optional profile photo and short bio. Profile is private by default.
+11. Telegram is a broadcast-only Channel for announcements and lesson releases; no student bot or group is in scope.
+
+## Content model
+Each topic may include teacher narration, two-presenter podcast, transcript, notes, worked examples, worksheet and quiz. Workflow: source material → learning objectives → script → subject review → voice production → technical pronunciation QA → mastering → approval → publication. Maths/science QA must cover equations, units, symbols, chemical notation and factual accuracy. Generate once and reuse; do not regenerate audio per playback.
+
+## Pricing and payments
+Configurable topic prices with ₦1,000 minimum. Store NGN amounts as integer kobo. Never trust browser-supplied prices. Unique payment reference tied to student and product; verify status, reference, amount and currency directly with Paystack; validate webhook signatures; process events idempotently; handle failed, pending, refunded and reversed payments. Browser redirect alone never unlocks content.
+
+## UX requirements
+Mobile-first, responsive, accessible, fast and low-bandwidth friendly. Search and class/subject/term filters; clear free-preview, locked, purchased and completed states; continue-learning area; player speed/seek/resume; transcript/notes; accessible labels; loading, empty, offline, pending, failed and error states. No fabricated testimonials, ratings, counters or payment-success states.
+
+## Admin
+Role-based content editor, curriculum/topic management, script/audio/notes uploads, version history, review/approve/publish, pricing and bundles, payment/refund/entitlement ledger, audited support overrides, analytics and MFA.
+
+## Privacy and safeguarding
+Learners may be minors. Minimise collected data; define retention/deletion, guardian contact approach, staff access controls and incident response; review applicable Nigerian privacy and child-data requirements before public launch.
+
+## Launch gates
+Curriculum reviewed; subject experts approve scripts/audio; payment duplicate/underpayment/refund tests pass; student entitlement isolation passes; audio storage remains private; backup/restore tested; accessibility/mobile/low-bandwidth QA passes; privacy notice, terms, refund policy and support contact are published.
+
+
+## Student profiles and independent assessment
+See [AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md](AUTOMATED_ASSESSMENT_AND_STUDENT_PROFILES.md) for the detailed account, privacy, automated grading, notification, integrity and acceptance requirements. Objective question types are graded server-side and results are released automatically. Long-form/essay answers are excluded from automatic high-stakes grading until a separately validated and appealable system exists.
